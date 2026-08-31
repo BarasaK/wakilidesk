@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "wakilidesk"
+version = "0.1.0"
+description = "wakiliDesk multi-tenant legal records management MVP."
+requires-python = ">=3.12"
+dependencies = [
+    "celery>=5.4,<6",
+    "django>=5.1,<5.2",
+    "gunicorn>=23,<24",
+    "pillow>=10.4,<11",
+    "psycopg[binary]>=3.2,<4",
+    "redis>=5.0,<6",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3,<9",
+    "pytest-django>=4.9,<5",
+]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings"
+pythonpath = ["src", "."]
+testpaths = ["tests"]
+addopts = "-q"
