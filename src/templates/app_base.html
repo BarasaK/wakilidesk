@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="app-shell">
+    <aside class="sidebar">
+      <h1 class="brand">wakiliDesk</h1>
+      {% if request.current_firm %}
+        <p class="lede">{{ request.current_firm.display_name }}</p>
+      {% endif %}
+      <nav aria-label="Primary">
+        <a href="{% url 'dashboard' %}">Dashboard</a>
+        <a href="{% url 'admin_users' %}">Users</a>
+        <a href="{% url 'roles_list' %}">Roles</a>
+        <a href="{% url 'firm_profile' %}">Firm Profile</a>
+        <form method="post" action="{% url 'logout' %}">
+          {% csrf_token %}
+          <button class="link-button" type="submit">Sign out</button>
+        </form>
+      </nav>
+    </aside>
+    <main class="main">
+      {% if messages %}
+        <div class="messages">
+          {% for message in messages %}
+            <div class="message">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+      {% block app_content %}{% endblock %}
+    </main>
+  </div>
+{% endblock %}

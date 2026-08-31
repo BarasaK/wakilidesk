@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from firms.models import Firm, FirmMembership, Permission, Role
+from firms.models import Firm, FirmMembership, Permission, Role, UserInvitation
 
 
 @admin.register(Firm)
@@ -29,4 +29,11 @@ class RoleAdmin(admin.ModelAdmin):
 class FirmMembershipAdmin(admin.ModelAdmin):
     list_display = ("user", "firm", "role", "status", "joined_at")
     search_fields = ("user__email", "firm__display_name", "role__name")
+    list_filter = ("status", "role__name")
+
+
+@admin.register(UserInvitation)
+class UserInvitationAdmin(admin.ModelAdmin):
+    list_display = ("email", "firm", "role", "status", "invited_by", "created_at")
+    search_fields = ("email", "firm__display_name", "role__name")
     list_filter = ("status", "role__name")

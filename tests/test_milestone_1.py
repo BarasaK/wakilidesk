@@ -1,0 +1,117 @@
+import pytest
+from django.urls import reverse
+
+from accounts.models import User
+from audit.models import AuditEvent
+from firms.models import Firm, FirmMembership, Role, UserInvitation
+from firms.services import ensure_default_roles_for_firm
+
+
+@pytest.mark.django_db
+def test_signup_then_firm_onboarding_creates_admin_membership(client):
+    signup_response = client.post(
+        reverse("signup"),
+        {
+            "email": "newadmin@example.test",
+            "first_name": "New",
+            "last_name": "Admin",
+            "password1": "StrongPass123!",
+            "password2": "StrongPass123!",
+        },
+    )
+
+    assert signup_response.status_code == 302
+    assert signup_response["Location"] == reverse("firm_onboarding")
+
+    onboarding_response = client.post(
+        reverse("firm_onboarding"),
+        {
+            "name": "New Firm LLP",
+            "display_name": "New Firm",
+            "email": "hello@newfirm.test",
+            "phone": "+254700000000",
+            "address": "Nairobi",
+            "city": "Nairobi",
+            "country": "Kenya",
+            "timezone": "Africa/Nairobi",
+            "currency": "KES",
+            "file_number_pattern": "{PRACTICE_AREA}/{YEAR}/{SEQUENCE}",
+        },
+    )
+
+    assert onboarding_response.status_code == 302
+    assert onboarding_response["Location"] == reverse("dashboard")
+    firm = Firm.objects.get(slug="new-firm")
+    membership = FirmMembership.objects.get(user__email="newadmin@example.test", firm=firm)
+    assert membership.role.name == "Firm Administrator"
+    assert AuditEvent.objects.filter(action="firm_created", firm=firm).exists()
+
+
+@pytest.mark.django_db
+def test_firm_admin_can_create_invitation(client):
+    firm, admin = _firm_with_user("admin@amani.test", "Firm Administrator")
+    role = firm.roles.get(name="Advocate")
+
+    client.force_login(admin)
+    response = client.post(
+        reverse("invite_user"),
+        {"email": "advocate@amani.test", "role": role.id},
+    )
+
+    assert response.status_code == 302
+    invitation = UserInvitation.objects.get(email="advocate@amani.test")
+    assert invitation.firm == firm
+    assert invitation.role == role
+    assert AuditEvent.objects.filter(action="user_invited", firm=firm).exists()
+
+
+@pytest.mark.django_db
+def test_user_without_manage_users_cannot_invite(client):
+    _firm, advocate = _firm_with_user("advocate@amani.test", "Advocate")
+
+    client.force_login(advocate)
+    response = client.get(reverse("invite_user"))
+
+    assert response.status_code == 403
+
+
+@pytest.mark.django_db
+def test_invited_user_can_accept_invitation(client):
+    firm, admin = _firm_with_user("admin@amani.test", "Firm Administrator")
+    role = firm.roles.get(name="Secretary")
+    invitation = UserInvitation.objects.create(
+        firm=firm,
+        email="secretary@amani.test",
+        role=role,
+        invited_by=admin,
+    )
+
+    response = client.post(
+        reverse("accept_invitation", args=[invitation.token]),
+        {
+            "first_name": "Secretary",
+            "last_name": "Amani",
+            "password1": "StrongPass123!",
+            "password2": "StrongPass123!",
+        },
+    )
+
+    assert response.status_code == 302
+    user = User.objects.get(email="secretary@amani.test")
+    assert FirmMembership.objects.filter(user=user, firm=firm, role=role).exists()
+    invitation.refresh_from_db()
+    assert invitation.status == UserInvitation.Status.ACCEPTED
+    assert AuditEvent.objects.filter(action="user_invitation_accepted", firm=firm).exists()
+
+
+def _firm_with_user(email: str, role_name: str):
+    firm = Firm.objects.create(
+        name="Amani & Co Advocates LLP",
+        display_name=f"Amani {email}",
+        slug=email.split("@")[0].replace(".", "-"),
+        email="hello@amani.test",
+    )
+    roles = ensure_default_roles_for_firm(firm)
+    user = User.objects.create_user(email, "StrongPass123!")
+    FirmMembership.objects.create(user=user, firm=firm, role=roles[role_name])
+    return firm, user

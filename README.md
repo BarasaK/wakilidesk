@@ -2,7 +2,7 @@
 
 wakiliDesk is a multi-tenant records and digital file management system for Kenyan law firms.
 
-This repository currently contains Milestone 0: the project foundation.
+This repository currently contains the project foundation and Milestone 1 authentication/onboarding flows.
 
 ## Milestone 0 contents
 
@@ -16,6 +16,18 @@ This repository currently contains Milestone 0: the project foundation.
 - Health endpoint
 - Development seed command
 - CI-friendly tests, including a first cross-tenant access test
+
+## Milestone 1 contents
+
+- Account signup
+- Firm onboarding
+- Firm profile administration
+- Firm user list
+- Firm-scoped user invitations
+- Invitation acceptance
+- Role listing, creation, and editing
+- Permission checks for firm administration
+- Audit events for signup, firm creation, invitations, role changes, and firm profile changes
 
 ## Local setup
 
@@ -52,6 +64,8 @@ docker compose exec web pytest
 ## Local URLs
 
 - App: http://localhost:8000/
+- Sign in: http://localhost:8000/accounts/login/
+- Sign up: http://localhost:8000/accounts/signup/
 - Health: http://localhost:8000/health/
 - Django admin: http://localhost:8000/admin/
 - MinIO API: http://localhost:9000/
@@ -100,4 +114,4 @@ clerk@barakalegal.test
 
 ## Next milestone
 
-Milestone 1 should add authentication screens, firm onboarding, user invitations, role management views, and audit events around account and firm administration.
+Milestone 2 should add client records, matter records, matter parties, practice areas, matter numbering, confidentiality levels, and tenant-isolation tests around client and matter access.

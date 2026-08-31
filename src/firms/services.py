@@ -151,3 +151,19 @@ def get_firm_for_user_or_404(user, firm_id):
     if not user_can_access_firm(user, firm):
         raise PermissionDenied("You do not have access to this firm.")
     return firm
+
+
+def user_has_firm_permission(user, firm: Firm, codename: str) -> bool:
+    if user.is_superuser:
+        return True
+    return FirmMembership.objects.filter(
+        user=user,
+        firm=firm,
+        status=FirmMembership.Status.ACTIVE,
+        role__permissions__codename=codename,
+    ).exists()
+
+
+def require_firm_permission(user, firm: Firm, codename: str) -> None:
+    if not user_has_firm_permission(user, firm, codename):
+        raise PermissionDenied("You do not have permission for this action.")

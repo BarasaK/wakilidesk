@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Accept invitation | wakiliDesk{% endblock %}
+
+{% block content %}
+  <main class="auth-shell">
+    <section class="auth-panel" aria-labelledby="invite-title">
+      <h1 id="invite-title" class="brand">wakiliDesk</h1>
+      <p class="lede">Accept invitation to {{ invitation.firm.display_name }}.</p>
+
+      <form method="post">
+        {% csrf_token %}
+        {% if existing_user %}
+          <p>{{ existing_user.email }} will be added to this firm.</p>
+        {% else %}
+          {% for field in form %}
+            <div class="field">
+              <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+              {{ field }}
+              {{ field.errors }}
+            </div>
+          {% endfor %}
+        {% endif %}
+        <button class="button" type="submit">Accept invitation</button>
+      </form>
+    </section>
+  </main>
+{% endblock %}

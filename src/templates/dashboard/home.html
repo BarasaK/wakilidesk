@@ -1,0 +1,26 @@
+{% extends "app_base.html" %}
+
+{% block title %}Dashboard | wakiliDesk{% endblock %}
+
+{% block app_content %}
+  <header class="page-header">
+    <div>
+      <h2>Dashboard</h2>
+      <p class="lede">{{ firm.display_name }} workspace foundation is active.</p>
+    </div>
+    <div class="actions">
+      {% for membership in memberships %}
+        {% if membership.firm_id != firm.id %}
+          <a class="button secondary" href="{% url 'switch_firm' membership.firm_id %}">
+            Switch to {{ membership.firm.display_name }}
+          </a>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </header>
+
+  <section class="panel">
+    <h3>Milestone 1</h3>
+    <p>Firm onboarding, user invitations, roles, and permissions are available for this tenant.</p>
+  </section>
+{% endblock %}

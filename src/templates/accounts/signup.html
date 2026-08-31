@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Create account | wakiliDesk{% endblock %}
+
+{% block content %}
+  <main class="auth-shell">
+    <section class="auth-panel" aria-labelledby="signup-title">
+      <h1 id="signup-title" class="brand">wakiliDesk</h1>
+      <p class="lede">Create your administrator account.</p>
+
+      <form method="post">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        {% for field in form %}
+          <div class="field">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {{ field.errors }}
+          </div>
+        {% endfor %}
+        <button class="button" type="submit">Create account</button>
+      </form>
+
+      <p class="help-row"><a href="{% url 'login' %}">Sign in instead</a></p>
+    </section>
+  </main>
+{% endblock %}
