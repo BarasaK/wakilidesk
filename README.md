@@ -29,6 +29,16 @@ This repository currently contains the project foundation and Milestone 1 authen
 - Permission checks for firm administration
 - Audit events for signup, firm creation, invitations, role changes, and firm profile changes
 
+## Milestone 2 contents
+
+- Client records
+- Practice areas
+- Matter records
+- Matter parties
+- Firm-scoped client and matter numbering
+- Tenant-scoped client and matter views
+- Audit events for client and matter activity
+
 ## Local setup
 
 Create a local environment file:
@@ -66,6 +76,8 @@ docker compose exec web pytest
 - App: http://localhost:8000/
 - Sign in: http://localhost:8000/accounts/login/
 - Sign up: http://localhost:8000/accounts/signup/
+- Clients: http://localhost:8000/clients/
+- Matters: http://localhost:8000/matters/
 - Health: http://localhost:8000/health/
 - Django admin: http://localhost:8000/admin/
 - MinIO API: http://localhost:9000/
@@ -103,6 +115,8 @@ secretary@barakalegal.test
 clerk@barakalegal.test
 ```
 
+The seed command also creates default practice areas, one pilot client, and one pilot matter for each seeded firm.
+
 ## Architectural decisions
 
 - Multi-tenancy starts with a shared PostgreSQL database and shared schema.
@@ -114,4 +128,4 @@ clerk@barakalegal.test
 
 ## Next milestone
 
-Milestone 2 should add client records, matter records, matter parties, practice areas, matter numbering, confidentiality levels, and tenant-isolation tests around client and matter access.
+Milestone 3 should add document categories, document metadata, document versions, secure storage keys, upload/download flows, archive/restore, and tests for document tenant isolation and permissions.

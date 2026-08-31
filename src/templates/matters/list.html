@@ -1,0 +1,43 @@
+{% extends "app_base.html" %}
+
+{% block title %}Matters | wakiliDesk{% endblock %}
+
+{% block app_content %}
+  <header class="page-header">
+    <div>
+      <h2>Matters</h2>
+      <p class="lede">Digital file containers for client work.</p>
+    </div>
+    <div class="actions">
+      <a class="button secondary" href="{% url 'matter_create' %}">Create matter</a>
+      <a class="button secondary" href="{% url 'practice_area_list' %}">Practice areas</a>
+    </div>
+  </header>
+
+  <section class="panel">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Number</th>
+          <th>Title</th>
+          <th>Client</th>
+          <th>Status</th>
+          <th>Confidentiality</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for matter in matters %}
+          <tr>
+            <td>{{ matter.matter_number }}</td>
+            <td><a href="{% url 'matter_detail' matter.id %}">{{ matter.title }}</a></td>
+            <td>{{ matter.client.name }}</td>
+            <td>{{ matter.get_status_display }}</td>
+            <td>{{ matter.get_confidentiality_level_display }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="5">No matters found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+{% endblock %}

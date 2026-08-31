@@ -1,0 +1,26 @@
+{% extends "app_base.html" %}
+
+{% block title %}Practice area | wakiliDesk{% endblock %}
+
+{% block app_content %}
+  <header class="page-header">
+    <div>
+      <h2>{% if area %}Edit Practice Area{% else %}Create Practice Area{% endif %}</h2>
+      <p class="lede">Configure firm-specific practice groups.</p>
+    </div>
+  </header>
+
+  <section class="panel">
+    <form method="post">
+      {% csrf_token %}
+      {% for field in form %}
+        <div class="field">
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {{ field.errors }}
+        </div>
+      {% endfor %}
+      <button class="button" type="submit">Save practice area</button>
+    </form>
+  </section>
+{% endblock %}
