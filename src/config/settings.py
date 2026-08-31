@@ -43,6 +43,8 @@ INSTALLED_APPS = [
     "matters",
     "documents",
     "physical_files",
+    "notifications",
+    "search",
 ]
 
 MIDDLEWARE = [

@@ -5,6 +5,7 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
 from audit.services import record_audit_event
+from documents.models import Document
 from firms.forms import FirmOnboardingForm, FirmProfileForm, RoleForm, UserInvitationForm
 from firms.models import Firm, FirmMembership, Role, UserInvitation
 from firms.services import (
@@ -13,6 +14,9 @@ from firms.services import (
     get_firm_for_user_or_404,
     require_firm_permission,
 )
+from notifications.services import unread_count_for_user
+from physical_files.models import PhysicalFile
+from physical_files.services import overdue_checkouts_for_firm
 
 
 @login_required
@@ -20,10 +24,21 @@ def dashboard(request):
     if request.current_firm is None:
         return redirect("firm_onboarding")
     memberships = get_active_memberships_for_user(request.user).select_related("firm", "role")
+    firm = request.current_firm
+    metrics = {
+        "active_matters": firm.matters.filter(status__in=["OPEN", "ACTIVE"]).count(),
+        "documents_total": Document.objects.filter(firm=firm, deleted_at__isnull=True).count(),
+        "physical_files_checked_out": firm.physical_files.filter(status=PhysicalFile.Status.CHECKED_OUT).count(),
+        "files_awaiting_return": overdue_checkouts_for_firm(firm).count(),
+        "digitisation_total": firm.physical_files.count(),
+        "digitisation_completed": firm.physical_files.filter(digitisation_status=PhysicalFile.DigitisationStatus.COMPLETED).count(),
+        "digitisation_quality_review": firm.physical_files.filter(digitisation_status=PhysicalFile.DigitisationStatus.QUALITY_REVIEW).count(),
+        "unread_notifications": unread_count_for_user(firm=firm, user=request.user),
+    }
     return render(
         request,
         "dashboard/home.html",
-        {"firm": request.current_firm, "memberships": memberships},
+        {"firm": firm, "memberships": memberships, "metrics": metrics},
     )
 
 

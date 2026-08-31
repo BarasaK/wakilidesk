@@ -1,0 +1,68 @@
+{% extends "app_base.html" %}
+
+{% block title %}Search | wakiliDesk{% endblock %}
+
+{% block app_content %}
+  <header class="page-header">
+    <div>
+      <h2>Search</h2>
+      <p class="lede">Tenant-scoped search across filing records.</p>
+    </div>
+  </header>
+
+  <section class="panel">
+    <form method="get">
+      <div class="field">
+        <label for="q">Search</label>
+        <input id="q" name="q" value="{{ query }}" autocomplete="off">
+      </div>
+      <button class="button" type="submit">Search</button>
+    </form>
+  </section>
+
+  {% if query %}
+    <section class="panel">
+      <h3>Clients</h3>
+      <ul>
+        {% for item in results.clients %}
+          <li><a href="{% url 'client_detail' item.id %}">{{ item.client_number }} {{ item.name }}</a></li>
+        {% empty %}
+          <li>No client results.</li>
+        {% endfor %}
+      </ul>
+    </section>
+
+    <section class="panel">
+      <h3>Matters</h3>
+      <ul>
+        {% for item in results.matters %}
+          <li><a href="{% url 'matter_detail' item.id %}">{{ item.matter_number }} {{ item.title }}</a></li>
+        {% empty %}
+          <li>No matter results.</li>
+        {% endfor %}
+      </ul>
+    </section>
+
+    <section class="panel">
+      <h3>Documents</h3>
+      <ul>
+        {% for item in results.documents %}
+          <li><a href="{% url 'document_detail' item.id %}">{{ item.title }}</a></li>
+        {% empty %}
+          <li>No document results.</li>
+        {% endfor %}
+      </ul>
+    </section>
+
+    <section class="panel">
+      <h3>Physical Files</h3>
+      <ul>
+        {% for item in results.physical_files %}
+          <li><a href="{% url 'physical_file_detail' item.id %}">{{ item.physical_file_number }}</a></li>
+        {% empty %}
+          <li>No physical file results.</li>
+        {% endfor %}
+      </ul>
+    </section>
+  {% endif %}
+{% endblock %}

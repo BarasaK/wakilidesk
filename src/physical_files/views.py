@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 
 from firms.services import require_firm_permission
-from physical_files.forms import CheckinForm, CheckoutForm, PhysicalFileForm, StorageLocationForm
+from physical_files.forms import CheckinForm, CheckoutForm, DigitisationReviewForm, PhysicalFileForm, StorageLocationForm
 from physical_files.models import StorageLocation
 from physical_files.services import (
     checkin_physical_file,
@@ -12,6 +12,7 @@ from physical_files.services import (
     get_physical_file_for_firm_or_404,
     overdue_checkouts_for_firm,
     physical_files_for_firm,
+    save_digitisation_review,
     update_physical_file,
 )
 
@@ -171,6 +172,39 @@ def storage_location_edit(request, location_id):
     else:
         form = StorageLocationForm(firm=firm, instance=location)
     return render(request, "physical_files/location_form.html", {"firm": firm, "form": form, "location": location})
+
+
+@login_required
+def digitisation_list(request):
+    firm = _require_current_firm(request)
+    if firm is None:
+        return redirect("firm_onboarding")
+    require_firm_permission(request.user, firm, "view_physical_file")
+    files = physical_files_for_firm(firm).order_by("digitisation_status", "physical_file_number")
+    return render(request, "digitisation/list.html", {"firm": firm, "files": files})
+
+
+@login_required
+def digitisation_review_create(request, physical_file_id):
+    firm = _require_current_firm(request)
+    if firm is None:
+        return redirect("firm_onboarding")
+    require_firm_permission(request.user, firm, "change_storage_location")
+    physical_file = get_physical_file_for_firm_or_404(firm, physical_file_id)
+    if request.method == "POST":
+        form = DigitisationReviewForm(request.POST, firm=firm)
+        if form.is_valid():
+            save_digitisation_review(
+                physical_file=physical_file,
+                firm=firm,
+                data=form.cleaned_data,
+                request=request,
+            )
+            messages.success(request, "Digitisation review saved.")
+            return redirect("digitisation_list")
+    else:
+        form = DigitisationReviewForm(firm=firm)
+    return render(request, "digitisation/review_form.html", {"firm": firm, "physical_file": physical_file, "form": form})
 
 
 def _require_current_firm(request):

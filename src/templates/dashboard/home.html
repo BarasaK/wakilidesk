@@ -20,7 +20,17 @@
   </header>
 
   <section class="panel">
-    <h3>Milestone 1</h3>
-    <p>Firm onboarding, user invitations, roles, and permissions are available for this tenant.</p>
+    <h3>Filing Metrics</h3>
+    <table class="table">
+      <tbody>
+        <tr><th>Active matters</th><td>{{ metrics.active_matters }}</td></tr>
+        <tr><th>Documents</th><td>{{ metrics.documents_total }}</td></tr>
+        <tr><th>Physical files checked out</th><td>{{ metrics.physical_files_checked_out }}</td></tr>
+        <tr><th>Files awaiting return</th><td>{{ metrics.files_awaiting_return }}</td></tr>
+        <tr><th>Digitisation completed</th><td>{{ metrics.digitisation_completed }} / {{ metrics.digitisation_total }}</td></tr>
+        <tr><th>Files awaiting quality review</th><td>{{ metrics.digitisation_quality_review }}</td></tr>
+        <tr><th>Unread notifications</th><td>{{ metrics.unread_notifications }}</td></tr>
+      </tbody>
+    </table>
   </section>
 {% endblock %}
