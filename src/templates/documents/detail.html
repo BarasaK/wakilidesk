@@ -1,0 +1,65 @@
+{% extends "app_base.html" %}
+
+{% block title %}{{ document.title }} | wakiliDesk{% endblock %}
+
+{% block app_content %}
+  <header class="page-header">
+    <div>
+      <h2>{{ document.title }}</h2>
+      <p class="lede">{{ document.matter.matter_number }} · {{ document.document_type.name }}</p>
+    </div>
+    <div class="actions">
+      <a class="button secondary" href="{% url 'document_download' document.id %}">Download</a>
+      <a class="button secondary" href="{% url 'document_edit' document.id %}">Edit metadata</a>
+      <a class="button secondary" href="{% url 'document_version_upload' document.id %}">New version</a>
+    </div>
+  </header>
+
+  <section class="panel">
+    <h3>Metadata</h3>
+    <p>Reference: {{ document.reference_number|default:"-" }}</p>
+    <p>Date: {{ document.document_date|default:"-" }}</p>
+    <p>Source: {{ document.get_source_display }}</p>
+    <p>Confidentiality: {{ document.get_confidentiality_level_display }}</p>
+    <p>Status: {% if document.archived_at %}Archived{% else %}Active{% endif %}</p>
+    <div class="actions">
+      {% if document.archived_at %}
+        <form method="post" action="{% url 'document_restore' document.id %}">
+          {% csrf_token %}
+          <button class="button secondary" type="submit">Restore</button>
+        </form>
+      {% else %}
+        <form method="post" action="{% url 'document_archive' document.id %}">
+          {% csrf_token %}
+          <button class="button secondary" type="submit">Archive</button>
+        </form>
+      {% endif %}
+    </div>
+  </section>
+
+  <section class="panel">
+    <h3>Versions</h3>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Version</th>
+          <th>Filename</th>
+          <th>Size</th>
+          <th>OCR</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for version in document.versions.all %}
+          <tr>
+            <td>{{ version.version_number }}</td>
+            <td>{{ version.original_filename }}</td>
+            <td>{{ version.file_size }}</td>
+            <td>{{ version.get_ocr_status_display }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="4">No versions found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+{% endblock %}

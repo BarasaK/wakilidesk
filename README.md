@@ -39,6 +39,16 @@ This repository currently contains the project foundation and Milestone 1 authen
 - Tenant-scoped client and matter views
 - Audit events for client and matter activity
 
+## Milestone 3 contents
+
+- Document categories
+- Document metadata records
+- Immutable document versions
+- Private tenant-aware storage keys
+- Upload and download flows
+- Archive and restore
+- Audit events for document activity
+
 ## Local setup
 
 Create a local environment file:
@@ -78,6 +88,7 @@ docker compose exec web pytest
 - Sign up: http://localhost:8000/accounts/signup/
 - Clients: http://localhost:8000/clients/
 - Matters: http://localhost:8000/matters/
+- Documents: http://localhost:8000/documents/
 - Health: http://localhost:8000/health/
 - Django admin: http://localhost:8000/admin/
 - MinIO API: http://localhost:9000/
@@ -115,7 +126,7 @@ secretary@barakalegal.test
 clerk@barakalegal.test
 ```
 
-The seed command also creates default practice areas, one pilot client, and one pilot matter for each seeded firm.
+The seed command also creates default practice areas, document categories, one pilot client, one pilot matter, and one pilot document for each seeded firm.
 
 ## Architectural decisions
 
@@ -128,4 +139,4 @@ The seed command also creates default practice areas, one pilot client, and one 
 
 ## Next milestone
 
-Milestone 3 should add document categories, document metadata, document versions, secure storage keys, upload/download flows, archive/restore, and tests for document tenant isolation and permissions.
+Milestone 4 should add physical file records, storage locations, check-out/check-in workflows, overdue tracking, and immutable movement history.
