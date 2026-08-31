@@ -5,6 +5,8 @@ from django.db import transaction
 
 from accounts.models import User
 from clients.services import create_client
+from documents.services import create_document_with_version, ensure_default_document_categories
+from django.core.files.base import ContentFile
 from firms.models import Firm, FirmMembership
 from firms.services import ensure_default_roles_for_firm
 from matters.services import create_matter, ensure_default_practice_areas
@@ -57,6 +59,7 @@ class Command(BaseCommand):
             )
             roles = ensure_default_roles_for_firm(firm)
             practice_areas = ensure_default_practice_areas(firm)
+            document_categories = ensure_default_document_categories(firm)
             domain = spec["slug"].replace("-", "")
             admin_user = None
             for role_name, local_part in role_users:
@@ -97,7 +100,7 @@ class Command(BaseCommand):
                         "status": "ACTIVE",
                     },
                 )
-                create_matter(
+                matter = create_matter(
                     firm=firm,
                     user=admin_user,
                     data={
@@ -113,6 +116,21 @@ class Command(BaseCommand):
                         "physical_file_exists": True,
                         "confidentiality_level": "STANDARD",
                     },
+                )
+                create_document_with_version(
+                    firm=firm,
+                    user=admin_user,
+                    data={
+                        "matter": matter,
+                        "title": "Pilot Instructions",
+                        "document_type": document_categories[0],
+                        "document_date": "2026-08-31",
+                        "reference_number": "PILOT-001",
+                        "description": "Seed document for development.",
+                        "source": "INTERNAL_UPLOAD",
+                        "confidentiality_level": "STANDARD",
+                    },
+                    uploaded_file=ContentFile(b"Pilot instructions", name="pilot-instructions.txt"),
                 )
 
         self.stdout.write(self.style.SUCCESS("Seed data created."))
