@@ -1,0 +1,51 @@
+{% extends "app_base.html" %}
+
+{% block title %}{{ physical_file.physical_file_number }} | wakiliDesk{% endblock %}
+
+{% block app_content %}
+  <header class="page-header">
+    <div>
+      <h2>{{ physical_file.physical_file_number }} Vol {{ physical_file.volume_number }}</h2>
+      <p class="lede">{{ physical_file.matter.matter_number }} · {{ physical_file.matter.title }}</p>
+    </div>
+    <div class="actions">
+      <a class="button secondary" href="{% url 'physical_file_edit' physical_file.id %}">Edit</a>
+      <a class="button secondary" href="{% url 'physical_file_checkout' physical_file.id %}">Check out</a>
+      <a class="button secondary" href="{% url 'physical_file_checkin' physical_file.id %}">Check in</a>
+    </div>
+  </header>
+
+  <section class="panel">
+    <h3>Status</h3>
+    <p>Location: {{ physical_file.storage_location|default:"-" }}</p>
+    <p>Status: {{ physical_file.get_status_display }}</p>
+    <p>Digitisation: {{ physical_file.get_digitisation_status_display }}</p>
+    <p>Barcode/QR: {{ physical_file.barcode_or_qr_code|default:"-" }}</p>
+  </section>
+
+  <section class="panel">
+    <h3>Check-out History</h3>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Out</th>
+          <th>To</th>
+          <th>Expected</th>
+          <th>Returned</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for checkout in physical_file.checkouts.all %}
+          <tr>
+            <td>{{ checkout.checked_out_at }}</td>
+            <td>{{ checkout.checked_out_to.email|default:checkout.checked_out_to_name }}</td>
+            <td>{{ checkout.expected_return_at|default:"-" }}</td>
+            <td>{{ checkout.returned_at|default:"-" }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="4">No check-out history.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+{% endblock %}

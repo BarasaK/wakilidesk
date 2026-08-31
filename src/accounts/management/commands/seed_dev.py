@@ -10,6 +10,7 @@ from django.core.files.base import ContentFile
 from firms.models import Firm, FirmMembership
 from firms.services import ensure_default_roles_for_firm
 from matters.services import create_matter, ensure_default_practice_areas
+from physical_files.services import create_physical_file, ensure_default_storage_locations
 
 
 SEED_PASSWORD = "ChangeMe123!"
@@ -60,6 +61,7 @@ class Command(BaseCommand):
             roles = ensure_default_roles_for_firm(firm)
             practice_areas = ensure_default_practice_areas(firm)
             document_categories = ensure_default_document_categories(firm)
+            storage_locations = ensure_default_storage_locations(firm)
             domain = spec["slug"].replace("-", "")
             admin_user = None
             for role_name, local_part in role_users:
@@ -131,6 +133,19 @@ class Command(BaseCommand):
                         "confidentiality_level": "STANDARD",
                     },
                     uploaded_file=ContentFile(b"Pilot instructions", name="pilot-instructions.txt"),
+                )
+                create_physical_file(
+                    firm=firm,
+                    data={
+                        "matter": matter,
+                        "physical_file_number": f"PF-{firm.slug.upper()}-0001",
+                        "volume_number": 1,
+                        "storage_location": storage_locations[-1],
+                        "status": "IN_STORAGE",
+                        "digitisation_status": "NOT_STARTED",
+                        "barcode_or_qr_code": "",
+                        "notes": "Seed physical file.",
+                    },
                 )
 
         self.stdout.write(self.style.SUCCESS("Seed data created."))
