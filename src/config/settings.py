@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "clients",
     "matters",
     "documents",
+    "physical_files",
 ]
 
 MIDDLEWARE = [

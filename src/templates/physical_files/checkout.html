@@ -1,0 +1,27 @@
+{% extends "app_base.html" %}
+
+{% block title %}Check out file | wakiliDesk{% endblock %}
+
+{% block app_content %}
+  <header class="page-header">
+    <div>
+      <h2>Check Out Physical File</h2>
+      <p class="lede">{{ physical_file }}</p>
+    </div>
+  </header>
+
+  <section class="panel">
+    <form method="post">
+      {% csrf_token %}
+      {{ form.non_field_errors }}
+      {% for field in form %}
+        <div class="field">
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {{ field.errors }}
+        </div>
+      {% endfor %}
+      <button class="button" type="submit">Check out</button>
+    </form>
+  </section>
+{% endblock %}

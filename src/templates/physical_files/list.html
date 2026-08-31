@@ -1,0 +1,62 @@
+{% extends "app_base.html" %}
+
+{% block title %}Physical files | wakiliDesk{% endblock %}
+
+{% block app_content %}
+  <header class="page-header">
+    <div>
+      <h2>Physical Files</h2>
+      <p class="lede">Track storage, movement, and digitisation status.</p>
+    </div>
+    <div class="actions">
+      <a class="button secondary" href="{% url 'physical_file_create' %}">Register file</a>
+      <a class="button secondary" href="{% url 'storage_location_list' %}">Locations</a>
+    </div>
+  </header>
+
+  <section class="panel">
+    <h3>Overdue Checkouts</h3>
+    <table class="table">
+      <thead><tr><th>File</th><th>Expected Return</th><th>Holder</th></tr></thead>
+      <tbody>
+        {% for checkout in overdue %}
+          <tr>
+            <td>{{ checkout.physical_file }}</td>
+            <td>{{ checkout.expected_return_at }}</td>
+            <td>{{ checkout.checked_out_to.email|default:checkout.checked_out_to_name }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="3">No overdue files.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+
+  <section class="panel">
+    <h3>Files</h3>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Number</th>
+          <th>Matter</th>
+          <th>Location</th>
+          <th>Status</th>
+          <th>Digitisation</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for file in files %}
+          <tr>
+            <td><a href="{% url 'physical_file_detail' file.id %}">{{ file.physical_file_number }} Vol {{ file.volume_number }}</a></td>
+            <td>{{ file.matter.matter_number }}</td>
+            <td>{{ file.storage_location|default:"-" }}</td>
+            <td>{{ file.get_status_display }}</td>
+            <td>{{ file.get_digitisation_status_display }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="5">No physical files found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+{% endblock %}

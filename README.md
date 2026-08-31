@@ -49,6 +49,15 @@ This repository currently contains the project foundation and Milestone 1 authen
 - Archive and restore
 - Audit events for document activity
 
+## Milestone 4 contents
+
+- Storage locations
+- Physical file registry
+- Physical file digitisation status
+- Check-out and check-in history
+- Overdue file tracking
+- Tenant-scoped physical file views
+
 ## Local setup
 
 Create a local environment file:
@@ -89,6 +98,7 @@ docker compose exec web pytest
 - Clients: http://localhost:8000/clients/
 - Matters: http://localhost:8000/matters/
 - Documents: http://localhost:8000/documents/
+- Physical files: http://localhost:8000/physical-files/
 - Health: http://localhost:8000/health/
 - Django admin: http://localhost:8000/admin/
 - MinIO API: http://localhost:9000/
@@ -126,7 +136,7 @@ secretary@barakalegal.test
 clerk@barakalegal.test
 ```
 
-The seed command also creates default practice areas, document categories, one pilot client, one pilot matter, and one pilot document for each seeded firm.
+The seed command also creates default practice areas, document categories, storage locations, one pilot client, one pilot matter, one pilot document, and one pilot physical file for each seeded firm.
 
 ## Architectural decisions
 
@@ -139,4 +149,4 @@ The seed command also creates default practice areas, document categories, one p
 
 ## Next milestone
 
-Milestone 4 should add physical file records, storage locations, check-out/check-in workflows, overdue tracking, and immutable movement history.
+Milestone 5 should add the historical digitisation workflow, quality review, search, dashboard metrics, and notification foundations.

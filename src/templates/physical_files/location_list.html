@@ -1,0 +1,31 @@
+{% extends "app_base.html" %}
+
+{% block title %}Storage locations | wakiliDesk{% endblock %}
+
+{% block app_content %}
+  <header class="page-header">
+    <div>
+      <h2>Storage Locations</h2>
+      <p class="lede">Offices, rooms, cabinets, and shelves.</p>
+    </div>
+    <a class="button secondary" href="{% url 'storage_location_create' %}">Create location</a>
+  </header>
+
+  <section class="panel">
+    <table class="table">
+      <thead><tr><th>Name</th><th>Parent</th><th>Status</th><th></th></tr></thead>
+      <tbody>
+        {% for location in locations %}
+          <tr>
+            <td>{{ location.name }}</td>
+            <td>{{ location.parent|default:"-" }}</td>
+            <td>{% if location.is_active %}Active{% else %}Inactive{% endif %}</td>
+            <td><a href="{% url 'storage_location_edit' location.id %}">Edit</a></td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="4">No locations found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+{% endblock %}
