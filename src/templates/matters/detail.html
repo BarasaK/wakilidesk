@@ -1,0 +1,49 @@
+{% extends "app_base.html" %}
+
+{% block title %}{{ matter.matter_number }} | wakiliDesk{% endblock %}
+
+{% block app_content %}
+  <header class="page-header">
+    <div>
+      <h2>{{ matter.matter_number }}</h2>
+      <p class="lede">{{ matter.title }}</p>
+    </div>
+    <div class="actions">
+      <a class="button secondary" href="{% url 'matter_edit' matter.id %}">Edit matter</a>
+      <a class="button secondary" href="{% url 'matter_party_create' matter.id %}">Add party</a>
+    </div>
+  </header>
+
+  <section class="panel">
+    <h3>File Details</h3>
+    <p>Client: <a href="{% url 'client_detail' matter.client.id %}">{{ matter.client.name }}</a></p>
+    <p>Practice area: {{ matter.practice_area|default:"-" }}</p>
+    <p>Status: {{ matter.get_status_display }}</p>
+    <p>Confidentiality: {{ matter.get_confidentiality_level_display }}</p>
+    <p>Opened: {{ matter.opened_date }}</p>
+  </section>
+
+  <section class="panel">
+    <h3>Parties</h3>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Name</th>
+          <th>Contact</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for party in matter.parties.all %}
+          <tr>
+            <td>{{ party.get_party_type_display }}</td>
+            <td>{{ party.name }}</td>
+            <td>{{ party.email }} {{ party.phone }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="3">No parties found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+{% endblock %}

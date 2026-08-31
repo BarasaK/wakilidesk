@@ -1,0 +1,47 @@
+{% extends "app_base.html" %}
+
+{% block title %}{{ client.name }} | wakiliDesk{% endblock %}
+
+{% block app_content %}
+  <header class="page-header">
+    <div>
+      <h2>{{ client.name }}</h2>
+      <p class="lede">{{ client.client_number }} · {{ client.get_client_type_display }}</p>
+    </div>
+    <div class="actions">
+      <a class="button secondary" href="{% url 'client_edit' client.id %}">Edit client</a>
+      <a class="button secondary" href="{% url 'matter_create' %}">Create matter</a>
+    </div>
+  </header>
+
+  <section class="panel">
+    <h3>Contact</h3>
+    <p>Email: {{ client.email|default:"-" }}</p>
+    <p>Phone: {{ client.phone|default:"-" }}</p>
+    <p>Address: {{ client.address|default:"-" }}</p>
+  </section>
+
+  <section class="panel">
+    <h3>Matters</h3>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Number</th>
+          <th>Title</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for matter in matters %}
+          <tr>
+            <td>{{ matter.matter_number }}</td>
+            <td><a href="{% url 'matter_detail' matter.id %}">{{ matter.title }}</a></td>
+            <td>{{ matter.get_status_display }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="3">No matters found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+{% endblock %}

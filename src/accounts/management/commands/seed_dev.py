@@ -4,8 +4,10 @@ from django.core.management.base import BaseCommand
 from django.db import transaction
 
 from accounts.models import User
+from clients.services import create_client
 from firms.models import Firm, FirmMembership
 from firms.services import ensure_default_roles_for_firm
+from matters.services import create_matter, ensure_default_practice_areas
 
 
 SEED_PASSWORD = "ChangeMe123!"
@@ -54,7 +56,9 @@ class Command(BaseCommand):
                 },
             )
             roles = ensure_default_roles_for_firm(firm)
+            practice_areas = ensure_default_practice_areas(firm)
             domain = spec["slug"].replace("-", "")
+            admin_user = None
             for role_name, local_part in role_users:
                 email = f"{local_part}@{domain}.test"
                 user, created = User.objects.get_or_create(
@@ -75,6 +79,39 @@ class Command(BaseCommand):
                     defaults={
                         "role": roles[role_name],
                         "status": FirmMembership.Status.ACTIVE,
+                    },
+                )
+                if role_name == "Firm Administrator":
+                    admin_user = user
+
+            if admin_user and not firm.clients.exists():
+                client = create_client(
+                    firm=firm,
+                    user=admin_user,
+                    data={
+                        "client_type": "INDIVIDUAL",
+                        "name": f"{firm.display_name} Pilot Client",
+                        "email": f"client@{domain}.test",
+                        "phone": "+254700000000",
+                        "address": "Nairobi",
+                        "status": "ACTIVE",
+                    },
+                )
+                create_matter(
+                    firm=firm,
+                    user=admin_user,
+                    data={
+                        "client": client,
+                        "title": "Pilot Matter",
+                        "description": "Development matter for tenant isolation checks.",
+                        "practice_area": practice_areas[0],
+                        "status": "OPEN",
+                        "responsible_partner": admin_user,
+                        "responsible_advocate": admin_user,
+                        "opened_date": "2026-08-31",
+                        "closed_date": None,
+                        "physical_file_exists": True,
+                        "confidentiality_level": "STANDARD",
                     },
                 )
 
