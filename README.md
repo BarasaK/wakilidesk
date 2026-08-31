@@ -58,6 +58,13 @@ This repository currently contains the project foundation and Milestone 1 authen
 - Overdue file tracking
 - Tenant-scoped physical file views
 
+## Milestone 5 contents
+
+- Historical digitisation review records
+- Tenant-scoped global search
+- Dashboard filing metrics
+- In-app notifications
+
 ## Local setup
 
 Create a local environment file:
@@ -99,6 +106,9 @@ docker compose exec web pytest
 - Matters: http://localhost:8000/matters/
 - Documents: http://localhost:8000/documents/
 - Physical files: http://localhost:8000/physical-files/
+- Digitisation: http://localhost:8000/physical-files/digitisation/
+- Search: http://localhost:8000/search/
+- Notifications: http://localhost:8000/notifications/
 - Health: http://localhost:8000/health/
 - Django admin: http://localhost:8000/admin/
 - MinIO API: http://localhost:9000/
@@ -149,4 +159,4 @@ The seed command also creates default practice areas, document categories, stora
 
 ## Next milestone
 
-Milestone 5 should add the historical digitisation workflow, quality review, search, dashboard metrics, and notification foundations.
+Next work should deepen search with PostgreSQL full-text indexes, add OCR Celery jobs, harden document storage against production S3/MinIO, and add deployment/backup documentation.

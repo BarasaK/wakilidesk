@@ -2,7 +2,7 @@ from django import forms
 
 from firms.models import FirmMembership
 from matters.models import Matter
-from physical_files.models import FileCheckout, PhysicalFile, StorageLocation
+from physical_files.models import DigitisationReview, FileCheckout, PhysicalFile, StorageLocation
 
 
 class StorageLocationForm(forms.ModelForm):
@@ -53,3 +53,29 @@ class CheckoutForm(forms.ModelForm):
 
 class CheckinForm(forms.Form):
     notes = forms.CharField(widget=forms.Textarea, required=False)
+
+
+class DigitisationReviewForm(forms.ModelForm):
+    class Meta:
+        model = DigitisationReview
+        fields = (
+            "scanner_operator",
+            "scan_date",
+            "reviewer",
+            "review_date",
+            "missing_page_flag",
+            "poor_quality_flag",
+            "rescan_required",
+            "completion_confirmed",
+            "notes",
+        )
+        widgets = {
+            "scan_date": forms.DateInput(attrs={"type": "date"}),
+            "review_date": forms.DateInput(attrs={"type": "date"}),
+        }
+
+    def __init__(self, *args, firm, **kwargs):
+        super().__init__(*args, **kwargs)
+        users = [membership.user_id for membership in FirmMembership.objects.filter(firm=firm)]
+        self.fields["scanner_operator"].queryset = self.fields["scanner_operator"].queryset.filter(id__in=users)
+        self.fields["reviewer"].queryset = self.fields["reviewer"].queryset.filter(id__in=users)

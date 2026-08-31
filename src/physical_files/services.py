@@ -5,7 +5,7 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
 from audit.services import record_audit_event
-from physical_files.models import FileCheckout, PhysicalFile, StorageLocation
+from physical_files.models import DigitisationReview, FileCheckout, PhysicalFile, StorageLocation
 
 
 def physical_files_for_firm(firm):
@@ -120,3 +120,31 @@ def ensure_default_storage_locations(firm) -> list[StorageLocation]:
     cabinet, _ = StorageLocation.objects.get_or_create(firm=firm, parent=room, name="Cabinet A")
     shelf, _ = StorageLocation.objects.get_or_create(firm=firm, parent=cabinet, name="Shelf 01")
     return [office, room, cabinet, shelf]
+
+
+def digitisation_files_for_firm(firm):
+    return PhysicalFile.objects.filter(firm=firm).select_related("matter", "storage_location")
+
+
+@transaction.atomic
+def save_digitisation_review(*, physical_file, firm, data, request=None) -> DigitisationReview:
+    review = DigitisationReview.objects.create(
+        firm=firm,
+        physical_file=physical_file,
+        **data,
+    )
+    if review.completion_confirmed:
+        physical_file.digitisation_status = PhysicalFile.DigitisationStatus.COMPLETED
+    elif review.rescan_required or review.missing_page_flag or review.poor_quality_flag:
+        physical_file.digitisation_status = PhysicalFile.DigitisationStatus.QUALITY_REVIEW
+    else:
+        physical_file.digitisation_status = PhysicalFile.DigitisationStatus.QUALITY_REVIEW
+    physical_file.save(update_fields=["digitisation_status", "updated_at"])
+    record_audit_event(
+        request=request,
+        firm=firm,
+        action="digitisation_review_created",
+        object_type="DigitisationReview",
+        object_id=review.id,
+    )
+    return review

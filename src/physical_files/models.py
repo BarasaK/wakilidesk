@@ -146,3 +146,42 @@ class FileCheckout(models.Model):
 
     def __str__(self) -> str:
         return f"{self.physical_file} checkout"
+
+
+class DigitisationReview(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    firm = models.ForeignKey("firms.Firm", on_delete=models.CASCADE, related_name="digitisation_reviews")
+    physical_file = models.ForeignKey(PhysicalFile, on_delete=models.CASCADE, related_name="digitisation_reviews")
+    scanner_operator = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name="digitisation_scans",
+        null=True,
+        blank=True,
+    )
+    scan_date = models.DateField(null=True, blank=True)
+    reviewer = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name="digitisation_reviews",
+        null=True,
+        blank=True,
+    )
+    review_date = models.DateField(null=True, blank=True)
+    missing_page_flag = models.BooleanField(default=False)
+    poor_quality_flag = models.BooleanField(default=False)
+    rescan_required = models.BooleanField(default=False)
+    completion_confirmed = models.BooleanField(default=False)
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["firm", "completion_confirmed"], name="digit_review_firm_done_idx"),
+            models.Index(fields=["physical_file", "created_at"], name="digit_review_file_created_idx"),
+        ]
+        ordering = ("-created_at",)
+
+    def __str__(self) -> str:
+        return f"Digitisation review for {self.physical_file}"
