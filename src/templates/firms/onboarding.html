@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Create firm | wakiliDesk{% endblock %}
+
+{% block content %}
+  <main class="auth-shell">
+    <section class="auth-panel" aria-labelledby="firm-title">
+      <h1 id="firm-title" class="brand">Create Law Firm</h1>
+      <p class="lede">Set up the first tenant workspace.</p>
+
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        {% for field in form %}
+          <div class="field">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {{ field.errors }}
+          </div>
+        {% endfor %}
+        <button class="button" type="submit">Create firm</button>
+      </form>
+    </section>
+  </main>
+{% endblock %}

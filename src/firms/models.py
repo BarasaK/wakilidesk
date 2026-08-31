@@ -3,6 +3,7 @@ from __future__ import annotations
 import uuid
 
 from django.conf import settings
+from django.core.signing import TimestampSigner
 from django.db import models
 from django.utils.text import slugify
 from django.utils import timezone
@@ -36,8 +37,8 @@ class Firm(TimeStampedModel):
 
     class Meta:
         indexes = [
-            models.Index(fields=["slug"]),
-            models.Index(fields=["is_active"]),
+            models.Index(fields=["slug"], name="firms_firm_slug_456c64_idx"),
+            models.Index(fields=["is_active"], name="firms_firm_is_acti_1ab640_idx"),
         ]
 
     def save(self, *args, **kwargs):
@@ -75,7 +76,9 @@ class Role(TimeStampedModel):
         constraints = [
             models.UniqueConstraint(fields=["firm", "name"], name="unique_role_per_firm")
         ]
-        indexes = [models.Index(fields=["firm", "name"])]
+        indexes = [
+            models.Index(fields=["firm", "name"], name="firms_role_firm_id_53be3d_idx")
+        ]
 
     def __str__(self) -> str:
         return f"{self.firm}: {self.name}"
@@ -106,9 +109,53 @@ class FirmMembership(TimeStampedModel):
             )
         ]
         indexes = [
-            models.Index(fields=["firm", "status"]),
-            models.Index(fields=["user", "status"]),
+            models.Index(fields=["firm", "status"], name="firms_firmm_firm_id_c31c37_idx"),
+            models.Index(fields=["user", "status"], name="firms_firmm_user_id_b876ee_idx"),
         ]
 
     def __str__(self) -> str:
         return f"{self.user} in {self.firm}"
+
+
+class UserInvitation(TimeStampedModel):
+    class Status(models.TextChoices):
+        PENDING = "PENDING", "Pending"
+        ACCEPTED = "ACCEPTED", "Accepted"
+        CANCELLED = "CANCELLED", "Cancelled"
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    firm = models.ForeignKey(Firm, on_delete=models.CASCADE, related_name="invitations")
+    email = models.EmailField()
+    role = models.ForeignKey(Role, on_delete=models.PROTECT, related_name="invitations")
+    invited_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name="sent_invitations",
+        null=True,
+        blank=True,
+    )
+    status = models.CharField(
+        max_length=20, choices=Status.choices, default=Status.PENDING
+    )
+    accepted_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name="accepted_invitations",
+        null=True,
+        blank=True,
+    )
+    accepted_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["firm", "status"], name="firms_useri_firm_id_606ccf_idx"),
+            models.Index(fields=["email", "status"], name="firms_useri_email_3a33d0_idx"),
+        ]
+
+    @property
+    def token(self) -> str:
+        signer = TimestampSigner()
+        return signer.sign(str(self.id))
+
+    def __str__(self) -> str:
+        return f"{self.email} invited to {self.firm}"

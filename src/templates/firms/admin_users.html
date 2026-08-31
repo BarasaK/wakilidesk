@@ -1,0 +1,63 @@
+{% extends "app_base.html" %}
+
+{% block title %}Users | wakiliDesk{% endblock %}
+
+{% block app_content %}
+  <header class="page-header">
+    <div>
+      <h2>Users</h2>
+      <p class="lede">Manage firm members and invitations.</p>
+    </div>
+    <a class="button secondary" href="{% url 'invite_user' %}">Invite user</a>
+  </header>
+
+  <section class="panel">
+    <h3>Members</h3>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for membership in memberships %}
+          <tr>
+            <td>{{ membership.user.email }}</td>
+            <td>{{ membership.role.name }}</td>
+            <td>{{ membership.status }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="3">No members found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+
+  <section class="panel">
+    <h3>Invitations</h3>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Status</th>
+          <th>Accept URL</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for invitation in invitations %}
+          <tr>
+            <td>{{ invitation.email }}</td>
+            <td>{{ invitation.role.name }}</td>
+            <td>{{ invitation.status }}</td>
+            <td><code>{% url 'accept_invitation' invitation.token %}</code></td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="4">No invitations found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+{% endblock %}

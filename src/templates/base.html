@@ -119,6 +119,138 @@
       font-size: 0.9rem;
       text-align: center;
     }
+
+    .app-shell {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 240px 1fr;
+    }
+
+    .sidebar {
+      background: #16202a;
+      color: #fff;
+      padding: 24px 18px;
+    }
+
+    .sidebar a {
+      display: block;
+      color: #d9f2ef;
+      text-decoration: none;
+      padding: 9px 0;
+      font-weight: 700;
+    }
+
+    .sidebar form {
+      margin: 0;
+    }
+
+    .sidebar button.link-button {
+      display: block;
+      width: 100%;
+      border: 0;
+      padding: 9px 0;
+      background: transparent;
+      color: #d9f2ef;
+      cursor: pointer;
+      font: inherit;
+      font-weight: 700;
+      text-align: left;
+    }
+
+    .main {
+      padding: 28px;
+    }
+
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .panel {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 18px;
+    }
+
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+    }
+
+    .table th,
+    .table td {
+      border-bottom: 1px solid var(--line);
+      padding: 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .button.secondary {
+      display: inline-flex;
+      width: auto;
+      align-items: center;
+      justify-content: center;
+      padding: 0 14px;
+      background: #344054;
+      text-decoration: none;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .full-width {
+      grid-column: 1 / -1;
+    }
+
+    .messages {
+      margin-bottom: 18px;
+    }
+
+    .message {
+      padding: 10px 12px;
+      border: 1px solid #a7f3d0;
+      border-radius: 6px;
+      background: #ecfdf3;
+    }
+
+    @media (max-width: 760px) {
+      .app-shell {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        padding: 16px 18px;
+      }
+
+      .main {
+        padding: 18px;
+      }
+
+      .page-header {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
   </style>
 </head>
 <body>
