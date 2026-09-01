@@ -12,6 +12,10 @@
       <a class="button secondary" href="{% url 'document_download' document.id %}">Download</a>
       <a class="button secondary" href="{% url 'document_edit' document.id %}">Edit metadata</a>
       <a class="button secondary" href="{% url 'document_version_upload' document.id %}">New version</a>
+      <form method="post" action="{% url 'document_reprocess_ocr' document.id %}">
+        {% csrf_token %}
+        <button class="button secondary" type="submit">Reprocess text</button>
+      </form>
     </div>
   </header>
 

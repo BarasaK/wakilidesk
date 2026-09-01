@@ -15,4 +15,5 @@ urlpatterns = [
     path("<uuid:document_id>/download/", views.document_download, name="document_download"),
     path("<uuid:document_id>/archive/", views.document_archive, name="document_archive"),
     path("<uuid:document_id>/restore/", views.document_restore, name="document_restore"),
+    path("<uuid:document_id>/reprocess-ocr/", views.document_reprocess_ocr, name="document_reprocess_ocr"),
 ]
