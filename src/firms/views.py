@@ -29,13 +29,23 @@ def dashboard(request):
     visible_matters = matters_visible_to_user(firm=firm, user=request.user)
     visible_documents = documents_visible_to_user(firm=firm, user=request.user)
     visible_physical_files = physical_files_visible_to_user(firm=firm, user=request.user)
+    digitisation_total = visible_physical_files.count()
+    digitisation_completed = visible_physical_files.filter(
+        digitisation_status=PhysicalFile.DigitisationStatus.COMPLETED
+    ).count()
+    digitisation_percent = (
+        round((digitisation_completed / digitisation_total) * 100)
+        if digitisation_total
+        else 0
+    )
     metrics = {
         "active_matters": visible_matters.filter(status__in=["OPEN", "ACTIVE"]).count(),
         "documents_total": visible_documents.count(),
         "physical_files_checked_out": visible_physical_files.filter(status=PhysicalFile.Status.CHECKED_OUT).count(),
         "files_awaiting_return": overdue_checkouts_visible_to_user(firm=firm, user=request.user).count(),
-        "digitisation_total": visible_physical_files.count(),
-        "digitisation_completed": visible_physical_files.filter(digitisation_status=PhysicalFile.DigitisationStatus.COMPLETED).count(),
+        "digitisation_total": digitisation_total,
+        "digitisation_completed": digitisation_completed,
+        "digitisation_percent": digitisation_percent,
         "digitisation_quality_review": visible_physical_files.filter(digitisation_status=PhysicalFile.DigitisationStatus.QUALITY_REVIEW).count(),
         "unread_notifications": unread_count_for_user(firm=firm, user=request.user),
     }
