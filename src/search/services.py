@@ -3,10 +3,11 @@ from __future__ import annotations
 from django.db.models import Q
 
 from clients.models import Client
-from documents.models import Document
+from documents.services import documents_visible_to_user
 from firms.services import user_has_firm_permission
-from matters.models import Matter, MatterParty
-from physical_files.models import PhysicalFile
+from matters.models import MatterParty
+from matters.services import matters_visible_to_user
+from physical_files.services import physical_files_visible_to_user
 
 
 def global_search(*, firm, user, query: str) -> dict[str, list]:
@@ -27,8 +28,9 @@ def global_search(*, firm, user, query: str) -> dict[str, list]:
         )
 
     if user_has_firm_permission(user, firm, "view_matter"):
+        visible_matters = matters_visible_to_user(firm=firm, user=user)
         results["matters"] = list(
-            Matter.objects.filter(firm=firm).select_related("client", "practice_area").filter(
+            visible_matters.filter(
                 Q(matter_number__icontains=query)
                 | Q(title__icontains=query)
                 | Q(description__icontains=query)
@@ -36,7 +38,7 @@ def global_search(*, firm, user, query: str) -> dict[str, list]:
             )[:20]
         )
         results["parties"] = list(
-            MatterParty.objects.filter(firm=firm).select_related("matter").filter(
+            MatterParty.objects.filter(firm=firm, matter__in=visible_matters).select_related("matter").filter(
                 Q(name__icontains=query)
                 | Q(email__icontains=query)
                 | Q(phone__icontains=query)
@@ -45,8 +47,7 @@ def global_search(*, firm, user, query: str) -> dict[str, list]:
 
     if user_has_firm_permission(user, firm, "view_document"):
         results["documents"] = list(
-            Document.objects.filter(firm=firm, deleted_at__isnull=True)
-            .select_related("matter", "document_type")
+            documents_visible_to_user(firm=firm, user=user)
             .filter(
                 Q(title__icontains=query)
                 | Q(reference_number__icontains=query)
@@ -58,7 +59,7 @@ def global_search(*, firm, user, query: str) -> dict[str, list]:
 
     if user_has_firm_permission(user, firm, "view_physical_file"):
         results["physical_files"] = list(
-            PhysicalFile.objects.filter(firm=firm).select_related("matter", "storage_location").filter(
+            physical_files_visible_to_user(firm=firm, user=user).filter(
                 Q(physical_file_number__icontains=query)
                 | Q(barcode_or_qr_code__icontains=query)
                 | Q(notes__icontains=query)

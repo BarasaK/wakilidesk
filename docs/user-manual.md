@@ -53,9 +53,13 @@ Use **Clients** to view and create client records. Each client belongs to the ac
 
 Use **Matters** to create legal files linked to a client and practice area. Matter numbers are generated per firm, year, and practice area. Matter parties can be added from a matter detail page.
 
+Restricted and partner-only matters are visible only to users with confidential-matter permission or users assigned as the responsible partner or advocate.
+
 ## Documents
 
 Use **Documents** to upload matter documents, record metadata, and download stored versions. Supported local MVP file types include plain text, PDF, images, Microsoft Word, and DOCX. Documents can be archived and restored without deleting their stored versions.
+
+A document cannot be saved with a confidentiality level lower than its linked matter.
 
 ## Text extraction
 

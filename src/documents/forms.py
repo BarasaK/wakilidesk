@@ -2,6 +2,7 @@ from django import forms
 
 from documents.models import Document, DocumentCategory
 from matters.models import Matter
+from matters.services import matters_visible_to_user
 
 
 class DocumentUploadForm(forms.ModelForm):
@@ -20,9 +21,14 @@ class DocumentUploadForm(forms.ModelForm):
             "confidentiality_level",
         )
 
-    def __init__(self, *args, firm, **kwargs):
+    def __init__(self, *args, firm, user=None, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["matter"].queryset = Matter.objects.filter(firm=firm).order_by("-opened_date", "matter_number")
+        matters = (
+            matters_visible_to_user(firm=firm, user=user)
+            if user is not None
+            else Matter.objects.filter(firm=firm)
+        )
+        self.fields["matter"].queryset = matters.order_by("-opened_date", "matter_number")
         self.fields["document_type"].queryset = DocumentCategory.objects.filter(
             firm=firm, is_active=True
         ).order_by("name")

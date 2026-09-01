@@ -8,8 +8,8 @@ from matters.models import PracticeArea
 from matters.services import (
     create_matter,
     create_matter_party,
-    get_matter_for_firm_or_404,
-    matters_for_firm,
+    get_matter_for_user_or_404,
+    matters_visible_to_user,
     update_matter,
 )
 
@@ -20,7 +20,7 @@ def matter_list(request):
     if firm is None:
         return redirect("firm_onboarding")
     require_firm_permission(request.user, firm, "view_matter")
-    matters = matters_for_firm(firm)
+    matters = matters_visible_to_user(firm=firm, user=request.user)
     return render(request, "matters/list.html", {"firm": firm, "matters": matters})
 
 
@@ -52,7 +52,7 @@ def matter_detail(request, matter_id):
     if firm is None:
         return redirect("firm_onboarding")
     require_firm_permission(request.user, firm, "view_matter")
-    matter = get_matter_for_firm_or_404(firm, matter_id)
+    matter = get_matter_for_user_or_404(firm=firm, user=request.user, matter_id=matter_id)
     return render(request, "matters/detail.html", {"firm": firm, "matter": matter})
 
 
@@ -62,7 +62,7 @@ def matter_edit(request, matter_id):
     if firm is None:
         return redirect("firm_onboarding")
     require_firm_permission(request.user, firm, "edit_matter")
-    matter = get_matter_for_firm_or_404(firm, matter_id)
+    matter = get_matter_for_user_or_404(firm=firm, user=request.user, matter_id=matter_id)
     if request.method == "POST":
         form = MatterForm(request.POST, firm=firm, instance=matter)
         if form.is_valid():
@@ -80,7 +80,7 @@ def matter_party_create(request, matter_id):
     if firm is None:
         return redirect("firm_onboarding")
     require_firm_permission(request.user, firm, "edit_matter")
-    matter = get_matter_for_firm_or_404(firm, matter_id)
+    matter = get_matter_for_user_or_404(firm=firm, user=request.user, matter_id=matter_id)
     if request.method == "POST":
         form = MatterPartyForm(request.POST)
         if form.is_valid():

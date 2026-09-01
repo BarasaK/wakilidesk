@@ -5,7 +5,7 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
 from audit.services import record_audit_event
-from documents.models import Document
+from documents.services import documents_visible_to_user
 from firms.forms import FirmOnboardingForm, FirmProfileForm, RoleForm, UserInvitationForm
 from firms.models import Firm, FirmMembership, Role, UserInvitation
 from firms.services import (
@@ -16,7 +16,8 @@ from firms.services import (
 )
 from notifications.services import unread_count_for_user
 from physical_files.models import PhysicalFile
-from physical_files.services import overdue_checkouts_for_firm
+from physical_files.services import overdue_checkouts_visible_to_user, physical_files_visible_to_user
+from matters.services import matters_visible_to_user
 
 
 @login_required
@@ -25,14 +26,17 @@ def dashboard(request):
         return redirect("firm_onboarding")
     memberships = get_active_memberships_for_user(request.user).select_related("firm", "role")
     firm = request.current_firm
+    visible_matters = matters_visible_to_user(firm=firm, user=request.user)
+    visible_documents = documents_visible_to_user(firm=firm, user=request.user)
+    visible_physical_files = physical_files_visible_to_user(firm=firm, user=request.user)
     metrics = {
-        "active_matters": firm.matters.filter(status__in=["OPEN", "ACTIVE"]).count(),
-        "documents_total": Document.objects.filter(firm=firm, deleted_at__isnull=True).count(),
-        "physical_files_checked_out": firm.physical_files.filter(status=PhysicalFile.Status.CHECKED_OUT).count(),
-        "files_awaiting_return": overdue_checkouts_for_firm(firm).count(),
-        "digitisation_total": firm.physical_files.count(),
-        "digitisation_completed": firm.physical_files.filter(digitisation_status=PhysicalFile.DigitisationStatus.COMPLETED).count(),
-        "digitisation_quality_review": firm.physical_files.filter(digitisation_status=PhysicalFile.DigitisationStatus.QUALITY_REVIEW).count(),
+        "active_matters": visible_matters.filter(status__in=["OPEN", "ACTIVE"]).count(),
+        "documents_total": visible_documents.count(),
+        "physical_files_checked_out": visible_physical_files.filter(status=PhysicalFile.Status.CHECKED_OUT).count(),
+        "files_awaiting_return": overdue_checkouts_visible_to_user(firm=firm, user=request.user).count(),
+        "digitisation_total": visible_physical_files.count(),
+        "digitisation_completed": visible_physical_files.filter(digitisation_status=PhysicalFile.DigitisationStatus.COMPLETED).count(),
+        "digitisation_quality_review": visible_physical_files.filter(digitisation_status=PhysicalFile.DigitisationStatus.QUALITY_REVIEW).count(),
         "unread_notifications": unread_count_for_user(firm=firm, user=request.user),
     }
     return render(

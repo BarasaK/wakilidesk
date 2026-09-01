@@ -2,6 +2,7 @@ from django import forms
 
 from firms.models import FirmMembership
 from matters.models import Matter
+from matters.services import matters_visible_to_user
 from physical_files.models import DigitisationReview, FileCheckout, PhysicalFile, StorageLocation
 
 
@@ -29,9 +30,14 @@ class PhysicalFileForm(forms.ModelForm):
             "notes",
         )
 
-    def __init__(self, *args, firm, **kwargs):
+    def __init__(self, *args, firm, user=None, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["matter"].queryset = Matter.objects.filter(firm=firm).order_by("matter_number")
+        matters = (
+            matters_visible_to_user(firm=firm, user=user)
+            if user is not None
+            else Matter.objects.filter(firm=firm)
+        )
+        self.fields["matter"].queryset = matters.order_by("matter_number")
         self.fields["storage_location"].queryset = StorageLocation.objects.filter(
             firm=firm, is_active=True
         ).order_by("name")
