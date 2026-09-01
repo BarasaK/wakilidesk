@@ -17,6 +17,7 @@ from documents.services import (
     documents_for_firm,
     get_document_for_firm_or_404,
     restore_document,
+    schedule_text_extraction,
     update_document_metadata,
 )
 from firms.services import require_firm_permission
@@ -140,6 +141,19 @@ def document_restore(request, document_id):
     if request.method == "POST":
         restore_document(document=document, firm=firm, request=request)
         messages.success(request, "Document restored.")
+    return redirect("document_detail", document_id=document.id)
+
+
+@login_required
+def document_reprocess_ocr(request, document_id):
+    firm = _require_current_firm(request)
+    if firm is None:
+        return redirect("firm_onboarding")
+    require_firm_permission(request.user, firm, "edit_document_metadata")
+    document = get_document_for_firm_or_404(firm, document_id)
+    if request.method == "POST" and document.current_version_id:
+        schedule_text_extraction(document.current_version)
+        messages.success(request, "Document text extraction queued.")
     return redirect("document_detail", document_id=document.id)
 
 

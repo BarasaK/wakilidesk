@@ -65,6 +65,14 @@ This repository currently contains the project foundation and Milestone 1 authen
 - Dashboard filing metrics
 - In-app notifications
 
+## Milestone 6 contents
+
+- Celery OCR/text-extraction task boundary
+- Plain-text extraction
+- OCR reprocessing action
+- Failed processing notification hook
+- Deployment and backup notes
+
 ## Local setup
 
 Create a local environment file:
@@ -95,6 +103,12 @@ Run tests:
 
 ```powershell
 docker compose exec web pytest
+```
+
+Run the Celery worker:
+
+```powershell
+docker compose up worker
 ```
 
 ## Local URLs
@@ -159,4 +173,4 @@ The seed command also creates default practice areas, document categories, stora
 
 ## Next milestone
 
-Next work should deepen search with PostgreSQL full-text indexes, add OCR Celery jobs, harden document storage against production S3/MinIO, and add deployment/backup documentation.
+Next work should deepen search with PostgreSQL full-text indexes, add a real PDF/OCR engine, harden document storage against production S3/MinIO, and add richer reporting.

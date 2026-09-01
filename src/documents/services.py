@@ -50,6 +50,7 @@ def create_document_with_version(*, firm, user, data, uploaded_file, request=Non
         object_type="Document",
         object_id=document.id,
     )
+    schedule_text_extraction(version)
     return document
 
 
@@ -85,6 +86,7 @@ def create_document_version(*, document, firm, user, uploaded_file, request=None
             object_type="DocumentVersion",
             object_id=version.id,
         )
+    schedule_text_extraction(version)
     return version
 
 
@@ -167,3 +169,9 @@ def ensure_default_document_categories(firm) -> list[DocumentCategory]:
         )
         categories.append(category)
     return categories
+
+
+def schedule_text_extraction(version: DocumentVersion) -> None:
+    from documents.tasks import extract_text_for_version
+
+    extract_text_for_version.delay(str(version.id))

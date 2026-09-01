@@ -122,6 +122,9 @@ LOGIN_REDIRECT_URL = "dashboard"
 LOGOUT_REDIRECT_URL = "login"
 
 REDIS_URL = os.getenv("REDIS_URL", "redis://redis:6379/0")
+CELERY_BROKER_URL = REDIS_URL
+CELERY_RESULT_BACKEND = REDIS_URL
+CELERY_TASK_ALWAYS_EAGER = env_bool("CELERY_TASK_ALWAYS_EAGER", False)
 
 S3_ENDPOINT = os.getenv("S3_ENDPOINT", "http://minio:9000")
 S3_ACCESS_KEY = os.getenv("S3_ACCESS_KEY", "wakilidesk")
