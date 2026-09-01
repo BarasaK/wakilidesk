@@ -229,6 +229,183 @@
       background: #ecfdf3;
     }
 
+    .dashboard-band {
+      margin-bottom: 18px;
+    }
+
+    .section-heading {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 14px;
+    }
+
+    .section-heading h3 {
+      margin: 0 0 4px;
+    }
+
+    .section-heading.compact {
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .metric-card {
+      display: flex;
+      min-height: 112px;
+      gap: 14px;
+      align-items: flex-start;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: 0 10px 30px rgba(16, 24, 40, 0.05);
+    }
+
+    .metric-card.urgent {
+      border-color: #fecdca;
+      background: #fffafa;
+    }
+
+    .metric-icon,
+    .quick-icon {
+      display: inline-grid;
+      flex: 0 0 auto;
+      place-items: center;
+      border-radius: 8px;
+      background: #ccfbf1;
+      color: #0f766e;
+    }
+
+    .metric-icon {
+      width: 42px;
+      height: 42px;
+    }
+
+    .metric-icon svg,
+    .quick-icon svg {
+      width: 22px;
+      height: 22px;
+      fill: none;
+      stroke: currentColor;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-width: 2;
+    }
+
+    .metric-icon.blue {
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+
+    .metric-icon.amber {
+      background: #fef3c7;
+      color: #b45309;
+    }
+
+    .metric-icon.red {
+      background: #fee4e2;
+      color: #b42318;
+    }
+
+    .metric-icon.violet {
+      background: #ede9fe;
+      color: #6d28d9;
+    }
+
+    .metric-icon.green {
+      background: #dcfce7;
+      color: #15803d;
+    }
+
+    .metric-label {
+      margin: 0 0 6px;
+      color: var(--muted);
+      font-size: 0.86rem;
+      font-weight: 700;
+    }
+
+    .metric-value {
+      display: block;
+      font-size: 2rem;
+      line-height: 1;
+      letter-spacing: 0;
+    }
+
+    .dashboard-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(280px, 380px);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .progress-percent {
+      color: var(--accent-dark);
+      font-size: 1.35rem;
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 12px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: #e5e7eb;
+      margin-bottom: 14px;
+    }
+
+    .progress-track span {
+      display: block;
+      height: 100%;
+      border-radius: inherit;
+      background: var(--accent);
+    }
+
+    .text-link {
+      display: inline-flex;
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .quick-actions h3 {
+      margin-top: 0;
+    }
+
+    .quick-action-grid {
+      display: grid;
+      gap: 10px;
+    }
+
+    .quick-action-grid a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 46px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--ink);
+      font-weight: 700;
+      text-decoration: none;
+      background: #fff;
+    }
+
+    .quick-action-grid a:hover,
+    .quick-action-grid a:focus {
+      border-color: var(--accent);
+      color: var(--accent-dark);
+    }
+
+    .quick-icon {
+      width: 32px;
+      height: 32px;
+    }
+
     @media (max-width: 760px) {
       .app-shell {
         grid-template-columns: 1fr;
@@ -248,6 +425,15 @@
       }
 
       .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .section-heading {
+        flex-direction: column;
+      }
+
+      .metric-grid,
+      .dashboard-layout {
         grid-template-columns: 1fr;
       }
     }
