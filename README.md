@@ -73,6 +73,13 @@ This repository currently contains the project foundation and Milestone 1 authen
 - Failed processing notification hook
 - Deployment and backup notes
 
+## Milestone 7 contents
+
+- Confidentiality-aware matter access policy
+- Restricted matter filtering for documents, physical files, digitisation, dashboard metrics, and search
+- Document confidentiality inheritance validation
+- Regression tests for restricted records and assigned-user access
+
 ## Local setup
 
 Create a local environment file:
@@ -188,4 +195,4 @@ See [docs/user-manual.md](docs/user-manual.md) for the MVP user workflow and see
 
 ## Next milestone
 
-Next work should deepen search with PostgreSQL full-text indexes, add a real PDF/OCR engine, harden document storage against production S3/MinIO, and add richer reporting.
+Next work should add explicit matter access lists, deepen search with PostgreSQL full-text indexes, add a real PDF/OCR engine, harden document storage against production S3/MinIO, and add richer reporting.

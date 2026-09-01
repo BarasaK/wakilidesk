@@ -9,9 +9,9 @@ from physical_files.services import (
     checkin_physical_file,
     checkout_physical_file,
     create_physical_file,
-    get_physical_file_for_firm_or_404,
-    overdue_checkouts_for_firm,
-    physical_files_for_firm,
+    overdue_checkouts_visible_to_user,
+    get_physical_file_for_user_or_404,
+    physical_files_visible_to_user,
     save_digitisation_review,
     update_physical_file,
 )
@@ -23,8 +23,8 @@ def physical_file_list(request):
     if firm is None:
         return redirect("firm_onboarding")
     require_firm_permission(request.user, firm, "view_physical_file")
-    files = physical_files_for_firm(firm)
-    overdue = overdue_checkouts_for_firm(firm)
+    files = physical_files_visible_to_user(firm=firm, user=request.user)
+    overdue = overdue_checkouts_visible_to_user(firm=firm, user=request.user)
     return render(request, "physical_files/list.html", {"firm": firm, "files": files, "overdue": overdue})
 
 
@@ -35,13 +35,13 @@ def physical_file_create(request):
         return redirect("firm_onboarding")
     require_firm_permission(request.user, firm, "create_physical_file")
     if request.method == "POST":
-        form = PhysicalFileForm(request.POST, firm=firm)
+        form = PhysicalFileForm(request.POST, firm=firm, user=request.user)
         if form.is_valid():
             physical_file = create_physical_file(firm=firm, data=form.cleaned_data, request=request)
             messages.success(request, "Physical file created.")
             return redirect("physical_file_detail", physical_file_id=physical_file.id)
     else:
-        form = PhysicalFileForm(firm=firm)
+        form = PhysicalFileForm(firm=firm, user=request.user)
     return render(request, "physical_files/form.html", {"firm": firm, "form": form})
 
 
@@ -51,7 +51,11 @@ def physical_file_detail(request, physical_file_id):
     if firm is None:
         return redirect("firm_onboarding")
     require_firm_permission(request.user, firm, "view_physical_file")
-    physical_file = get_physical_file_for_firm_or_404(firm, physical_file_id)
+    physical_file = get_physical_file_for_user_or_404(
+        firm=firm,
+        user=request.user,
+        physical_file_id=physical_file_id,
+    )
     return render(request, "physical_files/detail.html", {"firm": firm, "physical_file": physical_file})
 
 
@@ -61,15 +65,19 @@ def physical_file_edit(request, physical_file_id):
     if firm is None:
         return redirect("firm_onboarding")
     require_firm_permission(request.user, firm, "change_storage_location")
-    physical_file = get_physical_file_for_firm_or_404(firm, physical_file_id)
+    physical_file = get_physical_file_for_user_or_404(
+        firm=firm,
+        user=request.user,
+        physical_file_id=physical_file_id,
+    )
     if request.method == "POST":
-        form = PhysicalFileForm(request.POST, firm=firm, instance=physical_file)
+        form = PhysicalFileForm(request.POST, firm=firm, user=request.user, instance=physical_file)
         if form.is_valid():
             update_physical_file(physical_file=physical_file, firm=firm, data=form.cleaned_data, request=request)
             messages.success(request, "Physical file updated.")
             return redirect("physical_file_detail", physical_file_id=physical_file.id)
     else:
-        form = PhysicalFileForm(firm=firm, instance=physical_file)
+        form = PhysicalFileForm(firm=firm, user=request.user, instance=physical_file)
     return render(request, "physical_files/form.html", {"firm": firm, "form": form, "physical_file": physical_file})
 
 
@@ -79,7 +87,11 @@ def physical_file_checkout(request, physical_file_id):
     if firm is None:
         return redirect("firm_onboarding")
     require_firm_permission(request.user, firm, "checkout_physical_file")
-    physical_file = get_physical_file_for_firm_or_404(firm, physical_file_id)
+    physical_file = get_physical_file_for_user_or_404(
+        firm=firm,
+        user=request.user,
+        physical_file_id=physical_file_id,
+    )
     if request.method == "POST":
         form = CheckoutForm(request.POST, firm=firm)
         if form.is_valid():
@@ -106,7 +118,11 @@ def physical_file_checkin(request, physical_file_id):
     if firm is None:
         return redirect("firm_onboarding")
     require_firm_permission(request.user, firm, "checkin_physical_file")
-    physical_file = get_physical_file_for_firm_or_404(firm, physical_file_id)
+    physical_file = get_physical_file_for_user_or_404(
+        firm=firm,
+        user=request.user,
+        physical_file_id=physical_file_id,
+    )
     if request.method == "POST":
         form = CheckinForm(request.POST)
         if form.is_valid():
@@ -180,7 +196,10 @@ def digitisation_list(request):
     if firm is None:
         return redirect("firm_onboarding")
     require_firm_permission(request.user, firm, "view_physical_file")
-    files = physical_files_for_firm(firm).order_by("digitisation_status", "physical_file_number")
+    files = physical_files_visible_to_user(firm=firm, user=request.user).order_by(
+        "digitisation_status",
+        "physical_file_number",
+    )
     return render(request, "digitisation/list.html", {"firm": firm, "files": files})
 
 
@@ -190,7 +209,11 @@ def digitisation_review_create(request, physical_file_id):
     if firm is None:
         return redirect("firm_onboarding")
     require_firm_permission(request.user, firm, "change_storage_location")
-    physical_file = get_physical_file_for_firm_or_404(firm, physical_file_id)
+    physical_file = get_physical_file_for_user_or_404(
+        firm=firm,
+        user=request.user,
+        physical_file_id=physical_file_id,
+    )
     if request.method == "POST":
         form = DigitisationReviewForm(request.POST, firm=firm)
         if form.is_valid():

@@ -8,6 +8,7 @@ from django.utils import timezone
 from audit.services import record_audit_event
 from documents.models import Document, DocumentCategory, DocumentVersion
 from documents.storage import private_storage_path, save_uploaded_document_file
+from matters.services import matters_visible_to_user, require_matter_access
 
 
 def documents_for_firm(firm):
@@ -16,8 +17,16 @@ def documents_for_firm(firm):
     )
 
 
+def documents_visible_to_user(*, firm, user):
+    return documents_for_firm(firm).filter(matter__in=matters_visible_to_user(firm=firm, user=user))
+
+
 def get_document_for_firm_or_404(firm, document_id):
     return get_object_or_404(Document, id=document_id, firm=firm, deleted_at__isnull=True)
+
+
+def get_document_for_user_or_404(*, firm, user, document_id):
+    return get_object_or_404(documents_visible_to_user(firm=firm, user=user), id=document_id)
 
 
 @transaction.atomic
@@ -30,6 +39,8 @@ def create_document_with_version(*, firm, user, data, uploaded_file, request=Non
         raise ValueError("Matter does not belong to the current firm.")
     if category.firm_id != firm.id:
         raise ValueError("Document category does not belong to the current firm.")
+    require_matter_access(matter=matter, firm=firm, user=user)
+    validate_document_confidentiality(matter=matter, document_level=data["confidentiality_level"])
 
     document = Document.objects.create(firm=firm, uploaded_by=user, **data)
     version = create_document_version(
@@ -58,6 +69,7 @@ def create_document_with_version(*, firm, user, data, uploaded_file, request=Non
 def create_document_version(*, document, firm, user, uploaded_file, request=None, audit=True) -> DocumentVersion:
     if document.firm_id != firm.id:
         raise ValueError("Document does not belong to the current firm.")
+    require_matter_access(matter=document.matter, firm=firm, user=user)
     next_number = document.versions.count() + 1
     version_id = DocumentVersion._meta.get_field("id").get_default()
     storage = save_uploaded_document_file(
@@ -95,6 +107,7 @@ def update_document_metadata(*, document, firm, data, request=None) -> Document:
     category = data["document_type"]
     if category.firm_id != firm.id:
         raise ValueError("Document category does not belong to the current firm.")
+    validate_document_confidentiality(matter=document.matter, document_level=data["confidentiality_level"])
     for field, value in data.items():
         setattr(document, field, value)
     document.save()
@@ -147,6 +160,13 @@ def document_file_response(*, document, firm, request=None):
     return FileResponse(path.open("rb"), as_attachment=True, filename=version.original_filename)
 
 
+def validate_document_confidentiality(*, matter, document_level: str) -> None:
+    matter_rank = _CONFIDENTIALITY_RANK[matter.confidentiality_level]
+    document_rank = _CONFIDENTIALITY_RANK[document_level]
+    if document_rank < matter_rank:
+        raise ValueError("Document confidentiality cannot be lower than the matter confidentiality.")
+
+
 def ensure_default_document_categories(firm) -> list[DocumentCategory]:
     names = [
         "Client Instructions",
@@ -175,3 +195,11 @@ def schedule_text_extraction(version: DocumentVersion) -> None:
     from documents.tasks import extract_text_for_version
 
     extract_text_for_version.delay(str(version.id))
+
+
+_CONFIDENTIALITY_RANK = {
+    Document.ConfidentialityLevel.STANDARD: 0,
+    Document.ConfidentialityLevel.RESTRICTED: 1,
+    Document.ConfidentialityLevel.PARTNER_ONLY: 2,
+    Document.ConfidentialityLevel.CUSTOM: 3,
+}

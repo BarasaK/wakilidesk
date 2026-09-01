@@ -5,6 +5,7 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
 from audit.services import record_audit_event
+from matters.services import matters_visible_to_user, require_matter_access
 from physical_files.models import DigitisationReview, FileCheckout, PhysicalFile, StorageLocation
 
 
@@ -12,8 +13,19 @@ def physical_files_for_firm(firm):
     return PhysicalFile.objects.filter(firm=firm).select_related("matter", "storage_location")
 
 
+def physical_files_visible_to_user(*, firm, user):
+    return physical_files_for_firm(firm).filter(matter__in=matters_visible_to_user(firm=firm, user=user))
+
+
 def get_physical_file_for_firm_or_404(firm, physical_file_id):
     return get_object_or_404(PhysicalFile, id=physical_file_id, firm=firm)
+
+
+def get_physical_file_for_user_or_404(*, firm, user, physical_file_id):
+    return get_object_or_404(
+        physical_files_visible_to_user(firm=firm, user=user),
+        id=physical_file_id,
+    )
 
 
 @transaction.atomic
@@ -24,6 +36,9 @@ def create_physical_file(*, firm, data, request=None) -> PhysicalFile:
         raise ValueError("Matter does not belong to the current firm.")
     if location is not None and location.firm_id != firm.id:
         raise ValueError("Storage location does not belong to the current firm.")
+    user = request.user if request is not None else None
+    if user is not None:
+        require_matter_access(matter=matter, firm=firm, user=user)
     physical_file = PhysicalFile.objects.create(firm=firm, **data)
     record_audit_event(
         request=request,
@@ -43,6 +58,9 @@ def update_physical_file(*, physical_file, firm, data, request=None) -> Physical
         raise ValueError("Matter does not belong to the current firm.")
     if location is not None and location.firm_id != firm.id:
         raise ValueError("Storage location does not belong to the current firm.")
+    user = request.user if request is not None else None
+    if user is not None:
+        require_matter_access(matter=matter, firm=firm, user=user)
     for field, value in data.items():
         setattr(physical_file, field, value)
     physical_file.save()
@@ -112,6 +130,12 @@ def overdue_checkouts_for_firm(firm):
         returned_at__isnull=True,
         expected_return_at__lt=timezone.now(),
     ).select_related("physical_file", "checked_out_to")
+
+
+def overdue_checkouts_visible_to_user(*, firm, user):
+    return overdue_checkouts_for_firm(firm).filter(
+        physical_file__matter__in=matters_visible_to_user(firm=firm, user=user)
+    )
 
 
 def ensure_default_storage_locations(firm) -> list[StorageLocation]:

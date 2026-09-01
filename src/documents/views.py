@@ -14,8 +14,8 @@ from documents.services import (
     create_document_version,
     create_document_with_version,
     document_file_response,
-    documents_for_firm,
-    get_document_for_firm_or_404,
+    documents_visible_to_user,
+    get_document_for_user_or_404,
     restore_document,
     schedule_text_extraction,
     update_document_metadata,
@@ -29,7 +29,7 @@ def document_list(request):
     if firm is None:
         return redirect("firm_onboarding")
     require_firm_permission(request.user, firm, "view_document")
-    documents = documents_for_firm(firm)
+    documents = documents_visible_to_user(firm=firm, user=request.user)
     return render(request, "documents/list.html", {"firm": firm, "documents": documents})
 
 
@@ -40,19 +40,22 @@ def document_upload(request):
         return redirect("firm_onboarding")
     require_firm_permission(request.user, firm, "upload_document")
     if request.method == "POST":
-        form = DocumentUploadForm(request.POST, request.FILES, firm=firm)
+        form = DocumentUploadForm(request.POST, request.FILES, firm=firm, user=request.user)
         if form.is_valid():
-            document = create_document_with_version(
-                firm=firm,
-                user=request.user,
-                data=form.cleaned_data,
-                uploaded_file=form.cleaned_data["file"],
-                request=request,
-            )
-            messages.success(request, "Document uploaded.")
-            return redirect("document_detail", document_id=document.id)
+            try:
+                document = create_document_with_version(
+                    firm=firm,
+                    user=request.user,
+                    data=form.cleaned_data,
+                    uploaded_file=form.cleaned_data["file"],
+                    request=request,
+                )
+                messages.success(request, "Document uploaded.")
+                return redirect("document_detail", document_id=document.id)
+            except ValueError as exc:
+                form.add_error(None, str(exc))
     else:
-        form = DocumentUploadForm(firm=firm)
+        form = DocumentUploadForm(firm=firm, user=request.user)
     return render(request, "documents/upload.html", {"firm": firm, "form": form})
 
 
@@ -62,7 +65,7 @@ def document_detail(request, document_id):
     if firm is None:
         return redirect("firm_onboarding")
     require_firm_permission(request.user, firm, "view_document")
-    document = get_document_for_firm_or_404(firm, document_id)
+    document = get_document_for_user_or_404(firm=firm, user=request.user, document_id=document_id)
     return render(request, "documents/detail.html", {"firm": firm, "document": document})
 
 
@@ -72,13 +75,16 @@ def document_edit(request, document_id):
     if firm is None:
         return redirect("firm_onboarding")
     require_firm_permission(request.user, firm, "edit_document_metadata")
-    document = get_document_for_firm_or_404(firm, document_id)
+    document = get_document_for_user_or_404(firm=firm, user=request.user, document_id=document_id)
     if request.method == "POST":
         form = DocumentMetadataForm(request.POST, firm=firm, instance=document)
         if form.is_valid():
-            update_document_metadata(document=document, firm=firm, data=form.cleaned_data, request=request)
-            messages.success(request, "Document metadata updated.")
-            return redirect("document_detail", document_id=document.id)
+            try:
+                update_document_metadata(document=document, firm=firm, data=form.cleaned_data, request=request)
+                messages.success(request, "Document metadata updated.")
+                return redirect("document_detail", document_id=document.id)
+            except ValueError as exc:
+                form.add_error(None, str(exc))
     else:
         form = DocumentMetadataForm(firm=firm, instance=document)
     return render(request, "documents/edit.html", {"firm": firm, "document": document, "form": form})
@@ -90,7 +96,7 @@ def document_version_upload(request, document_id):
     if firm is None:
         return redirect("firm_onboarding")
     require_firm_permission(request.user, firm, "create_document_version")
-    document = get_document_for_firm_or_404(firm, document_id)
+    document = get_document_for_user_or_404(firm=firm, user=request.user, document_id=document_id)
     if request.method == "POST":
         form = DocumentVersionUploadForm(request.POST, request.FILES)
         if form.is_valid():
@@ -114,7 +120,7 @@ def document_download(request, document_id):
     if firm is None:
         return redirect("firm_onboarding")
     require_firm_permission(request.user, firm, "download_document")
-    document = get_document_for_firm_or_404(firm, document_id)
+    document = get_document_for_user_or_404(firm=firm, user=request.user, document_id=document_id)
     return document_file_response(document=document, firm=firm, request=request)
 
 
@@ -124,7 +130,7 @@ def document_archive(request, document_id):
     if firm is None:
         return redirect("firm_onboarding")
     require_firm_permission(request.user, firm, "archive_document")
-    document = get_document_for_firm_or_404(firm, document_id)
+    document = get_document_for_user_or_404(firm=firm, user=request.user, document_id=document_id)
     if request.method == "POST":
         archive_document(document=document, firm=firm, request=request)
         messages.success(request, "Document archived.")
@@ -137,7 +143,7 @@ def document_restore(request, document_id):
     if firm is None:
         return redirect("firm_onboarding")
     require_firm_permission(request.user, firm, "restore_document")
-    document = get_document_for_firm_or_404(firm, document_id)
+    document = get_document_for_user_or_404(firm=firm, user=request.user, document_id=document_id)
     if request.method == "POST":
         restore_document(document=document, firm=firm, request=request)
         messages.success(request, "Document restored.")
@@ -150,7 +156,7 @@ def document_reprocess_ocr(request, document_id):
     if firm is None:
         return redirect("firm_onboarding")
     require_firm_permission(request.user, firm, "edit_document_metadata")
-    document = get_document_for_firm_or_404(firm, document_id)
+    document = get_document_for_user_or_404(firm=firm, user=request.user, document_id=document_id)
     if request.method == "POST" and document.current_version_id:
         schedule_text_extraction(document.current_version)
         messages.success(request, "Document text extraction queued.")
