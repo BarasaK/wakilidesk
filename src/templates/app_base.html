@@ -1,6 +1,14 @@
 {% extends "base.html" %}
 
 {% block content %}
+  {% if request.current_firm %}
+    <style>
+      .app-shell {
+        --accent: {{ request.current_firm.accent_color }};
+        --accent-dark: {{ request.current_firm.accent_color }};
+      }
+    </style>
+  {% endif %}
   <div class="app-shell">
     <aside class="sidebar">
       <h1 class="brand">wakiliDesk</h1>

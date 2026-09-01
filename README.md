@@ -22,6 +22,7 @@ This repository currently contains the project foundation and Milestone 1 authen
 - Account signup
 - Firm onboarding
 - Firm profile administration
+- Firm logo and theme color configuration
 - Firm user list
 - Firm-scoped user invitations
 - Invitation acceptance

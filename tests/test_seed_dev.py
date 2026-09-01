@@ -18,6 +18,7 @@ def test_seed_dev_creates_kosmas_law_dummy_content_idempotently():
 
     firm = Firm.objects.get(slug="kosmaslaw")
     assert firm.display_name == "Kosmas Law"
+    assert firm.accent_color == "#7c2d12"
     assert User.objects.filter(email="admin@kosmaslaw.test").exists()
     assert FirmMembership.objects.filter(firm=firm).count() == 6
     assert Client.objects.filter(firm=firm).count() == 3

@@ -23,7 +23,7 @@ Use it to:
 
 After signing in, the left navigation gives access to:
 
-- **Dashboard**: summary of matters, documents, files, digitisation, and notifications.
+- **Dashboard**: summary of matters, documents, files, digitisation, and notifications using the firm's theme color.
 - **Clients**: client records.
 - **Matters**: legal files or case files.
 - **Documents**: uploaded document records and versions.
@@ -414,7 +414,7 @@ Keep permissions limited to what each role needs.
 
 ### Update Firm Profile
 
-Use **Firm Profile** to update the firm's details, including display name, contact information, address, timezone, currency, logo, and matter numbering pattern.
+Use **Firm Profile** to update the firm's details, including display name, contact information, address, timezone, currency, logo, theme color, and matter numbering pattern.
 
 ## 16. Good Practice for Law Firms
 

@@ -26,18 +26,21 @@ FIRM_SPECS = [
         "display_name": "Amani Advocates",
         "slug": "amani-advocates",
         "email": "admin@amani.test",
+        "accent_color": "#0f766e",
     },
     {
         "name": "Baraka Legal Partners",
         "display_name": "Baraka Legal",
         "slug": "baraka-legal",
         "email": "admin@baraka.test",
+        "accent_color": "#1d4ed8",
     },
     {
         "name": "Kosmas Law Advocates LLP",
         "display_name": "Kosmas Law",
         "slug": "kosmaslaw",
         "email": "admin@kosmaslaw.test",
+        "accent_color": "#7c2d12",
     },
 ]
 
@@ -154,6 +157,7 @@ class Command(BaseCommand):
                 "country": "Kenya",
                 "timezone": "Africa/Nairobi",
                 "currency": "KES",
+                "accent_color": spec["accent_color"],
                 "is_active": True,
             },
         )

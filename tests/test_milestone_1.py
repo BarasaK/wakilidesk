@@ -36,15 +36,56 @@ def test_signup_then_firm_onboarding_creates_admin_membership(client):
             "timezone": "Africa/Nairobi",
             "currency": "KES",
             "file_number_pattern": "{PRACTICE_AREA}/{YEAR}/{SEQUENCE}",
+            "accent_color": "#1d4ed8",
         },
     )
 
     assert onboarding_response.status_code == 302
     assert onboarding_response["Location"] == reverse("dashboard")
     firm = Firm.objects.get(slug="new-firm")
+    assert firm.accent_color == "#1d4ed8"
     membership = FirmMembership.objects.get(user__email="newadmin@example.test", firm=firm)
     assert membership.role.name == "Firm Administrator"
     assert AuditEvent.objects.filter(action="firm_created", firm=firm).exists()
+
+
+@pytest.mark.django_db
+def test_firm_admin_can_update_theme_color(client):
+    firm, admin = _firm_with_user("admin@amani.test", "Firm Administrator")
+
+    client.force_login(admin)
+    response = client.post(
+        reverse("firm_profile"),
+        {
+            "display_name": firm.display_name,
+            "email": firm.email,
+            "phone": firm.phone,
+            "address": firm.address,
+            "city": firm.city,
+            "country": firm.country,
+            "timezone": firm.timezone,
+            "currency": firm.currency,
+            "file_number_pattern": firm.file_number_pattern,
+            "accent_color": "#7c2d12",
+        },
+    )
+    firm.refresh_from_db()
+
+    assert response.status_code == 302
+    assert firm.accent_color == "#7c2d12"
+
+
+@pytest.mark.django_db
+def test_dashboard_uses_firm_theme_color(client):
+    firm, admin = _firm_with_user("admin@theme.test", "Firm Administrator")
+    firm.accent_color = "#1d4ed8"
+    firm.save(update_fields=["accent_color"])
+
+    client.force_login(admin)
+    response = client.get(reverse("dashboard"))
+
+    assert response.status_code == 200
+    assert b"--accent: #1d4ed8" in response.content
 
 
 @pytest.mark.django_db
