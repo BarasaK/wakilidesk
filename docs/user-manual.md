@@ -1,18 +1,111 @@
-# wakiliDesk User Manual
+# wakiliDesk MVP User Manual
 
-This manual covers the current MVP workflow for local development and pilot demos.
+This manual explains how to run, seed, navigate, administer, and test the current wakiliDesk MVP.
 
-## Getting started
+wakiliDesk is a multi-tenant records and digital file management system for Kenyan law firms. The current MVP focuses on firm onboarding, users and roles, clients, matters, document management, physical file tracking, digitisation review, search, notifications, audit logging, and confidentiality-aware access controls.
 
-Start the application stack, apply migrations, and create demo data:
+## 1. MVP Scope
+
+The MVP supports:
+
+- Email-based sign in and signup.
+- Law firm workspace creation.
+- Firm profile administration.
+- Firm users, invitations, roles, and configurable permissions.
+- Client records.
+- Matter records and matter parties.
+- Practice areas and matter numbering.
+- Document upload, metadata, versioning, archive, restore, and download.
+- Private local document storage under tenant-aware paths.
+- Background text extraction task boundary.
+- OCR reprocessing action for document versions.
+- Physical file registry.
+- Storage locations.
+- File checkout and check-in history.
+- Digitisation quality review records.
+- Tenant-scoped global search.
+- In-app notifications.
+- Dashboard metrics.
+- Confidentiality filtering for restricted records.
+- Docker-based local development.
+
+The MVP does not yet include billing, client/trust accounting, court diary, M-Pesa, eTIMS, Judiciary integrations, client portal, AI drafting, full OCR for scanned PDFs/images, or production object-storage signing.
+
+## 2. Local Setup
+
+Run the application with Docker Compose from the repository root.
+
+Create a local environment file:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Build and start the services:
 
 ```powershell
 docker compose up --build
+```
+
+In a second terminal, apply migrations:
+
+```powershell
 docker compose exec web python manage.py migrate
+```
+
+Create development data:
+
+```powershell
 docker compose exec web python manage.py seed_dev
 ```
 
-Open the application at http://localhost:8000/accounts/login/.
+Run tests:
+
+```powershell
+docker compose exec web pytest
+```
+
+Run only Django checks:
+
+```powershell
+docker compose exec web python manage.py check
+```
+
+Run the Celery worker:
+
+```powershell
+docker compose up worker
+```
+
+## 3. Local URLs
+
+- App dashboard: http://localhost:8000/
+- Sign in: http://localhost:8000/accounts/login/
+- Sign up: http://localhost:8000/accounts/signup/
+- Clients: http://localhost:8000/clients/
+- Matters: http://localhost:8000/matters/
+- Documents: http://localhost:8000/documents/
+- Physical files: http://localhost:8000/physical-files/
+- Digitisation: http://localhost:8000/physical-files/digitisation/
+- Search: http://localhost:8000/search/
+- Notifications: http://localhost:8000/notifications/
+- Firm users: http://localhost:8000/app/administration/users/
+- Roles: http://localhost:8000/app/administration/roles/
+- Firm profile: http://localhost:8000/app/firm/profile/
+- Health check: http://localhost:8000/health/
+- Django admin: http://localhost:8000/admin/
+- MinIO API: http://localhost:9000/
+- MinIO console: http://localhost:9001/
+
+## 4. Seeded Demo Data
+
+The `seed_dev` command creates three demo law firms:
+
+- Amani Advocates
+- Baraka Legal
+- Kosmas Law
+
+The command is intended to be idempotent. You can run it again after migrations or local data changes without creating duplicate demo clients, matters, documents, physical files, or notifications.
 
 All seeded users use this password:
 
@@ -20,15 +113,29 @@ All seeded users use this password:
 ChangeMe123!
 ```
 
-## Seeded law firms
+### Amani Advocates
 
-The seed command creates three demo law firms:
+```text
+admin@amaniadvocates.test
+partner@amaniadvocates.test
+advocate1@amaniadvocates.test
+advocate2@amaniadvocates.test
+secretary@amaniadvocates.test
+clerk@amaniadvocates.test
+```
 
-- Amani Advocates
-- Baraka Legal
-- Kosmas Law
+### Baraka Legal
 
-Kosmas Law accounts:
+```text
+admin@barakalegal.test
+partner@barakalegal.test
+advocate1@barakalegal.test
+advocate2@barakalegal.test
+secretary@barakalegal.test
+clerk@barakalegal.test
+```
+
+### Kosmas Law
 
 ```text
 admin@kosmaslaw.test
@@ -39,60 +146,721 @@ secretary@kosmaslaw.test
 clerk@kosmaslaw.test
 ```
 
-Each firm receives users, roles, practice areas, document categories, storage locations, clients, matters, matter parties, documents, physical files, and an in-app notification.
+Each firm receives:
 
-## Dashboard
+- Default roles and permissions.
+- Default practice areas.
+- Default document categories.
+- Default storage locations.
+- Three clients.
+- Three matters.
+- Matter parties.
+- Six text documents.
+- Three physical files.
+- One in-app notification.
 
-After login, the dashboard shows the current firm's working totals, including clients, matters, documents, physical files, overdue checkouts, digitisation review items, and unread notifications. Use the navigation links to move between records.
+## 5. User Roles
 
-## Clients
+wakiliDesk uses firm-scoped roles. A user receives access through a firm membership, not through a single firm field on the user account.
 
-Use **Clients** to view and create client records. Each client belongs to the active firm and receives a firm-scoped client number. Individual and organisation clients can both be recorded.
+### Firm Administrator
 
-## Matters
+Typical user: managing partner, practice manager, IT/admin lead.
 
-Use **Matters** to create legal files linked to a client and practice area. Matter numbers are generated per firm, year, and practice area. Matter parties can be added from a matter detail page.
+Can manage users, invitations, roles, firm settings, clients, matters, documents, physical files, and confidential matters.
 
-Restricted and partner-only matters are visible only to users with confidential-matter permission or users assigned as the responsible partner or advocate.
+### Partner
 
-## Documents
+Typical user: partner or supervising advocate.
 
-Use **Documents** to upload matter documents, record metadata, and download stored versions. Supported local MVP file types include plain text, PDF, images, Microsoft Word, and DOCX. Documents can be archived and restored without deleting their stored versions.
+Can view clients, matters, documents, physical files, create and edit matters, upload documents, download documents, create document versions, and manage confidential matters.
 
-A document cannot be saved with a confidentiality level lower than its linked matter.
+### Advocate
 
-## Text extraction
+Typical user: associate advocate or fee earner.
 
-Plain text uploads are processed by the Celery task boundary added in Milestone 6. Use the document detail page to reprocess text extraction when needed. Failed processing creates an in-app notification for the uploading user.
+Can view clients and matters, create and edit matters, upload documents, download documents, and create document versions. Does not manage confidential matters by default.
 
-## Physical files
+### Secretary
 
-Use **Physical files** to register paper files, assign storage locations, track digitisation status, and record barcode or QR references. Physical files are linked to matters.
+Typical user: legal secretary or administrative assistant.
 
-## Checkout and check-in
+Can view, create, and edit clients; view and create matters; view and upload documents; edit document metadata; and view physical files.
 
-Open a physical file detail page to check a file out to a user or named recipient. A checked-out file is marked unavailable until it is checked in. Overdue checkouts are shown in the physical files area and dashboard metrics.
+### Clerk / Records Officer
 
-## Digitisation
+Typical user: registry clerk or digitisation operator.
 
-Use **Digitisation** to record scan and quality review status for physical files. Review records capture scanner, reviewer, quality flags, rescan requirements, completion confirmation, and notes.
+Can view clients, matters, documents, and physical files; upload and index documents; create physical files; check files out and in; and change storage locations.
 
-## Search
+### Auditor / Read-only
 
-Use **Search** to search across clients, matters, documents, and physical files within the active firm. Extracted document text is included when available.
+Typical user: internal reviewer, external auditor, or compliance reviewer.
 
-## Notifications
+Can view clients, matters, documents, physical files, and audit logs. Can download documents but cannot change normal records.
 
-Use **Notifications** to see unread and read in-app messages. Notifications are firm-scoped and user-specific.
+### Finance
 
-## Firm administration
+Placeholder role for future billing and accounts modules. It currently has no default permissions.
 
-Firm administrators can manage firm profile settings, users, invitations, roles, and permissions. Role changes affect access within that firm only.
+## 6. Signing In
 
-## Django admin
+Open http://localhost:8000/accounts/login/.
 
-The Django admin is available at http://localhost:8000/admin/ for development inspection. Create a superuser with:
+Enter a seeded email and password, for example:
+
+```text
+admin@kosmaslaw.test
+ChangeMe123!
+```
+
+After login, wakiliDesk opens the current firm dashboard. If a user belongs to more than one firm, firm switching links appear on the dashboard.
+
+## 7. Creating a New Firm
+
+Use signup when testing a fresh firm onboarding journey.
+
+1. Open http://localhost:8000/accounts/signup/.
+2. Create the user account.
+3. Complete firm onboarding.
+4. The new user becomes the Firm Administrator for that firm.
+5. The application creates default roles for the firm.
+6. The user lands on the dashboard.
+
+Default firm values are optimized for Kenyan firms:
+
+- Country: Kenya
+- Timezone: Africa/Nairobi
+- Currency: KES
+- Matter number pattern: `{PRACTICE_AREA}/{YEAR}/{SEQUENCE}`
+
+## 8. Dashboard
+
+The dashboard gives an operational summary for the active firm. Metrics are filtered to records the current user can access.
+
+Dashboard cards show:
+
+- Active matters.
+- Documents.
+- Physical files checked out.
+- Files awaiting return.
+- Files awaiting quality review.
+- Unread notifications.
+
+The digitisation progress panel shows completed physical files against total physical files available to the current user.
+
+Common actions provide shortcuts to:
+
+- New client.
+- New matter.
+- Upload document.
+- Register file.
+
+## 9. Clients
+
+Use **Clients** to maintain client records for the active firm.
+
+Client types:
+
+- Individual.
+- Organisation.
+
+Common fields:
+
+- Client type.
+- Name.
+- Company registration number, where applicable.
+- National ID or passport, where applicable.
+- KRA PIN, where applicable.
+- Email.
+- Phone.
+- Address.
+- Status.
+
+### Create a client
+
+1. Open **Clients**.
+2. Select **Create client**.
+3. Complete the form.
+4. Save.
+
+wakiliDesk assigns a firm-scoped client number, for example `CL-00001`.
+
+### Edit a client
+
+1. Open the client detail page.
+2. Select **Edit client**.
+3. Update the form.
+4. Save.
+
+Client records are tenant-scoped. A user from another firm cannot retrieve another firm's client.
+
+## 10. Matters
+
+Matters are the main digital file containers.
+
+Common fields:
+
+- Client.
+- Title.
+- Description.
+- Practice area.
+- Status.
+- Responsible partner.
+- Responsible advocate.
+- Opened date.
+- Closed date.
+- Whether a physical file exists.
+- Confidentiality level.
+
+Matter statuses:
+
+- Open.
+- Active.
+- On hold.
+- Closed.
+- Archived.
+
+### Create a matter
+
+1. Open **Matters**.
+2. Select **Create matter**.
+3. Choose the client.
+4. Choose the practice area.
+5. Assign responsible users if needed.
+6. Set status and confidentiality.
+7. Save.
+
+wakiliDesk generates the matter number from the firm's numbering pattern. The default format is:
+
+```text
+{PRACTICE_AREA}/{YEAR}/{SEQUENCE}
+```
+
+Example:
+
+```text
+LIT/2026/00001
+```
+
+### Add a matter party
+
+1. Open a matter.
+2. Select **Add party**.
+3. Choose the party type.
+4. Enter name and contact details.
+5. Save.
+
+Matter party types include opposing party, interested party, witness, company director, and other.
+
+## 11. Confidentiality
+
+Confidentiality levels are:
+
+- Standard.
+- Restricted.
+- Partner only.
+- Custom.
+
+Standard matters are visible to users with the relevant view permission.
+
+Restricted, partner-only, and custom matters are visible only to:
+
+- Users with `manage_confidential_matter`.
+- The matter's responsible partner.
+- The matter's responsible advocate.
+
+Documents and physical files inherit access from their linked matter. If a user cannot access the matter, they cannot access linked documents, physical files, digitisation records, or search results for that matter.
+
+A document cannot be saved with a confidentiality level lower than its linked matter. For example, a restricted matter cannot contain a standard document unless a future explicit override rule is added.
+
+## 12. Practice Areas
+
+Practice areas are firm-configurable.
+
+Default practice areas include:
+
+- Litigation.
+- Conveyancing.
+- Corporate & Commercial.
+- Employment.
+- Family.
+- Probate & Succession.
+- Debt Recovery.
+- Intellectual Property.
+- Tax.
+- Arbitration.
+
+Firm administrators can create and edit practice areas from the practice area screen. Practice area codes are used in generated matter numbers.
+
+## 13. Documents
+
+Documents are matter-linked records with metadata and immutable file versions.
+
+Common document fields:
+
+- Matter.
+- Title.
+- Document type.
+- Document date.
+- Reference number.
+- Description.
+- Source.
+- Confidentiality level.
+- File.
+
+Document sources:
+
+- Scanned physical.
+- Email.
+- Internal upload.
+- Client upload.
+- Migration.
+- System generated.
+
+Supported MVP file types:
+
+- Plain text.
+- PDF.
+- JPEG.
+- PNG.
+- TIFF.
+- DOC.
+- DOCX.
+
+### Upload a document
+
+1. Open **Documents**.
+2. Select **Upload document**.
+3. Choose an accessible matter.
+4. Enter document metadata.
+5. Select the file.
+6. Save.
+
+The upload creates:
+
+- A document metadata record.
+- Version 1 of the document file.
+- A private tenant-aware storage key.
+- A checksum.
+- An audit event.
+- A queued text-extraction task.
+
+### Add a new version
+
+1. Open the document detail page.
+2. Select **Upload new version**.
+3. Choose the replacement or revised file.
+4. Save.
+
+New versions do not overwrite older versions. The document points to the latest version as its current version.
+
+### Download a document
+
+1. Open the document detail page.
+2. Select **Download current version**.
+
+Downloads require `download_document` permission and access to the linked matter.
+
+### Archive and restore
+
+Use archive when a document should no longer appear as active. Archive does not permanently delete the stored file or version history.
+
+Users with restore permission can restore archived documents.
+
+## 14. Text Extraction and OCR Boundary
+
+The MVP includes the asynchronous processing boundary needed for OCR/text extraction.
+
+Current behavior:
+
+- Plain text files are extracted into searchable text.
+- Other file types are marked through the OCR/task boundary but do not yet receive full scanned-image OCR.
+- Failed processing creates an in-app notification for the uploading user.
+- A document detail page can trigger reprocessing.
+
+For local testing, run the worker:
+
+```powershell
+docker compose up worker
+```
+
+If Celery is not running, uploads still complete, but queued background extraction may not execute until a worker is available.
+
+## 15. Physical Files
+
+Physical files represent paper files that coexist with digital records.
+
+Common fields:
+
+- Matter.
+- Physical file number.
+- Volume number.
+- Storage location.
+- Status.
+- Digitisation status.
+- Barcode or QR reference.
+- Notes.
+
+Physical file statuses:
+
+- In storage.
+- Checked out.
+- Archived.
+- Missing.
+- Destroyed.
+
+Digitisation statuses:
+
+- Not started.
+- Preparing.
+- Scanning.
+- Indexing.
+- Quality review.
+- Completed.
+- On hold.
+
+### Register a physical file
+
+1. Open **Physical files**.
+2. Select **Register file**.
+3. Choose an accessible matter.
+4. Enter physical file number and volume.
+5. Select storage location.
+6. Set file and digitisation status.
+7. Save.
+
+### Edit a physical file
+
+Use edit to change file metadata, storage location, barcode/QR reference, notes, or digitisation state.
+
+## 16. Storage Locations
+
+Storage locations are hierarchical and firm-scoped.
+
+Example:
+
+```text
+Nairobi Office
+Records Room
+Cabinet A
+Shelf 01
+```
+
+Firm administrators or records users with the relevant permission can create and edit locations from the storage location screen.
+
+## 17. Checkout and Check-in
+
+Checkout records who has a physical file and when it should be returned.
+
+Checkout fields:
+
+- Checked out to.
+- Checked out to name.
+- Expected return date and time.
+- Purpose.
+- Notes.
+
+### Check out a file
+
+1. Open the physical file detail page.
+2. Select **Check out**.
+3. Choose a user or enter a named recipient.
+4. Enter expected return date and purpose.
+5. Save.
+
+Once checked out, the physical file status changes to checked out.
+
+### Check in a file
+
+1. Open the physical file detail page.
+2. Select **Check in**.
+3. Add return notes if needed.
+4. Save.
+
+Once checked in, the physical file status returns to in storage.
+
+wakiliDesk prevents duplicate active checkouts for the same physical file.
+
+## 18. Digitisation Review
+
+Digitisation review is used for historical paper-file conversion.
+
+Review fields:
+
+- Scanner/operator.
+- Scan date.
+- Reviewer.
+- Review date.
+- Missing-page flag.
+- Poor-quality flag.
+- Rescan required.
+- Completion confirmed.
+- Notes.
+
+### Record a review
+
+1. Open **Digitisation**.
+2. Open the review action for a physical file.
+3. Enter scanner and reviewer details.
+4. Set quality flags.
+5. Confirm completion only when the digital record is acceptable.
+6. Save.
+
+If completion is confirmed, the linked physical file is marked completed. If there are quality issues, the file remains in quality review.
+
+## 19. Search
+
+Global search is tenant-scoped and confidentiality-aware.
+
+Search can find:
+
+- Client names.
+- Client numbers.
+- Client email or phone.
+- Matter numbers.
+- Matter titles.
+- Matter descriptions.
+- Matter parties.
+- Document titles.
+- Document reference numbers.
+- Document descriptions.
+- Extracted document text.
+- Physical file numbers.
+- Barcode or QR references.
+- Physical file notes.
+
+Search results only include records the current user has permission to view.
+
+## 20. Notifications
+
+Notifications are in-app, firm-scoped, and user-specific.
+
+Current MVP notification examples:
+
+- Seed data ready.
+- Failed document processing.
+
+Users can open the notification list and mark notifications as read.
+
+## 21. Firm Administration
+
+Firm administration includes:
+
+- Firm profile.
+- Users.
+- Invitations.
+- Roles.
+- Permissions.
+- Practice areas.
+- Document categories.
+- Storage locations.
+
+### Invite a user
+
+1. Open **Users**.
+2. Select **Invite user**.
+3. Enter the user's email address.
+4. Select a role.
+5. Save.
+
+The application creates a firm invitation. The invited user can accept the invitation, set a password, and receive membership in the firm.
+
+### Manage roles
+
+1. Open **Roles**.
+2. Create or edit a role.
+3. Assign permissions.
+4. Save.
+
+Permissions are grouped by module, including clients, matters, documents, physical files, and administration.
+
+### Manage firm profile
+
+Use **Firm Profile** to update firm details such as legal name, display name, email, phone, address, city, country, timezone, currency, logo, and matter numbering pattern.
+
+## 22. Audit Trail
+
+Audit logging records significant system actions.
+
+Current audited examples include:
+
+- Firm creation.
+- Firm profile updates.
+- User invitations.
+- Role creation and updates.
+- Client creation and updates.
+- Matter creation and updates.
+- Matter party creation.
+- Document upload.
+- Document version creation.
+- Document metadata update.
+- Document download.
+- Document archive and restore.
+- Physical file creation and updates.
+- Physical file checkout and check-in.
+- Digitisation review creation.
+
+Audit records are tenant-scoped and should not be edited through normal application interfaces.
+
+## 23. Data Protection Operating Notes
+
+For pilot use:
+
+- Use least-privilege roles.
+- Do not grant confidential-matter permission broadly.
+- Avoid storing unnecessary national ID, passport, or KRA PIN data unless needed.
+- Use document categories consistently.
+- Keep physical file checkout records current.
+- Review overdue files regularly.
+- Confirm digitisation quality before marking files completed.
+- Do not use seeded passwords in production.
+- Do not commit `.env` files or secrets.
+
+## 24. Troubleshooting
+
+### Login page does not load
+
+Run:
+
+```powershell
+docker compose exec web python manage.py check
+```
+
+Confirm the app is running:
+
+```powershell
+docker compose ps
+```
+
+Open:
+
+```text
+http://localhost:8000/accounts/login/
+```
+
+### Seed command fails
+
+Run migrations first:
+
+```powershell
+docker compose exec web python manage.py migrate
+```
+
+Then rerun:
+
+```powershell
+docker compose exec web python manage.py seed_dev
+```
+
+### Document text is not searchable
+
+Confirm the worker is running:
+
+```powershell
+docker compose up worker
+```
+
+For plain text documents, open the document detail page and use the reprocess action.
+
+### Test database already exists
+
+If pytest fails during test database creation after an interrupted or parallel run, recreate the test database:
+
+```powershell
+docker compose exec web pytest --create-db
+```
+
+### Static UI looks plain
+
+The current MVP uses Django templates and inline CSS in `src/templates/base.html`. It does not yet include a Tailwind build pipeline or separate frontend asset bundling.
+
+## 25. Developer and Admin Commands
+
+Apply migrations:
+
+```powershell
+docker compose exec web python manage.py migrate
+```
+
+Create demo data:
+
+```powershell
+docker compose exec web python manage.py seed_dev
+```
+
+Create a Django superuser:
 
 ```powershell
 docker compose exec web python manage.py createsuperuser
 ```
+
+Run tests:
+
+```powershell
+docker compose exec web pytest
+```
+
+Run tests with test database recreation:
+
+```powershell
+docker compose exec web pytest --create-db
+```
+
+Run a targeted test:
+
+```powershell
+docker compose exec web pytest tests/test_milestone_7.py
+```
+
+Run Django checks:
+
+```powershell
+docker compose exec web python manage.py check
+```
+
+Check for missing migrations:
+
+```powershell
+docker compose exec web python manage.py makemigrations --check --dry-run
+```
+
+## 26. Pilot Readiness Checklist
+
+Before a controlled pilot:
+
+- Confirm each pilot firm has correct users and roles.
+- Replace all demo passwords.
+- Confirm firm profile data and numbering pattern.
+- Confirm document categories and practice areas.
+- Confirm storage locations.
+- Upload sample documents and verify download behavior.
+- Start Celery worker and verify text extraction.
+- Register several physical files.
+- Test checkout and check-in.
+- Record at least one digitisation review.
+- Confirm confidential matters are hidden from unassigned users.
+- Run the automated test suite.
+- Confirm backup and restore procedures in `docs/deployment-and-backup.md`.
+
+## 27. Known MVP Limitations
+
+- OCR is a task boundary with plain-text extraction; scanned PDF/image OCR is future work.
+- Object storage is represented by private local storage in the current implementation.
+- Search is simple database filtering, not PostgreSQL full-text ranking yet.
+- Explicit matter access lists are not implemented yet.
+- Email delivery architecture exists through Django configuration, but production email workflows need hardening.
+- Advanced reporting is not implemented yet.
+- Client portal and external integrations are outside MVP scope.
+
+## 28. Recommended Next Improvements
+
+For the next post-MVP hardening pass:
+
+- Add explicit matter access lists.
+- Add PostgreSQL full-text search indexes and ranking.
+- Add real PDF text extraction and scanned image OCR.
+- Add S3/MinIO production storage adapter with signed downloads.
+- Add audit log review UI.
+- Add richer dashboard trends and recent activity.
+- Add email notification delivery.
