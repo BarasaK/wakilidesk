@@ -180,9 +180,10 @@ clerk@kosmaslaw.test
 
 The seed command also creates default practice areas, document categories, storage locations, clients, matters, matter parties, documents, physical files, and notifications for each seeded firm.
 
-## User manual
+## Manuals
 
-See [docs/user-manual.md](docs/user-manual.md) for the MVP user workflow and seeded demo account reference.
+- [Technical MVP manual](docs/user-manual.md): setup, seed data, local operations, troubleshooting, and pilot notes.
+- [End user manual](docs/end-user-manual.md): non-technical guide for firm users and administrators.
 
 ## Architectural decisions
 
