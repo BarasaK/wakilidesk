@@ -93,7 +93,7 @@ In a second terminal, run migrations:
 docker compose exec web python manage.py migrate
 ```
 
-Seed development firms and users:
+Seed development firms, users, and dummy content:
 
 ```powershell
 docker compose exec web python manage.py seed_dev
@@ -130,7 +130,7 @@ docker compose up worker
 
 ## Development accounts
 
-The seed command creates these example accounts for Firm A and Firm B.
+The seed command creates example accounts for Amani Advocates, Baraka Legal, and Kosmas Law.
 
 Password for all seeded users:
 
@@ -160,7 +160,22 @@ secretary@barakalegal.test
 clerk@barakalegal.test
 ```
 
-The seed command also creates default practice areas, document categories, storage locations, one pilot client, one pilot matter, one pilot document, and one pilot physical file for each seeded firm.
+Kosmas Law:
+
+```text
+admin@kosmaslaw.test
+partner@kosmaslaw.test
+advocate1@kosmaslaw.test
+advocate2@kosmaslaw.test
+secretary@kosmaslaw.test
+clerk@kosmaslaw.test
+```
+
+The seed command also creates default practice areas, document categories, storage locations, clients, matters, matter parties, documents, physical files, and notifications for each seeded firm.
+
+## User manual
+
+See [docs/user-manual.md](docs/user-manual.md) for the MVP user workflow and seeded demo account reference.
 
 ## Architectural decisions
 

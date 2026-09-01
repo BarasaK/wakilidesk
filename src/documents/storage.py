@@ -20,7 +20,11 @@ ALLOWED_MIME_TYPES = {
 
 
 def save_uploaded_document_file(*, firm, matter, document, version_id, uploaded_file):
-    mime_type = uploaded_file.content_type or mimetypes.guess_type(uploaded_file.name)[0] or "application/octet-stream"
+    mime_type = (
+        getattr(uploaded_file, "content_type", None)
+        or mimetypes.guess_type(uploaded_file.name)[0]
+        or "application/octet-stream"
+    )
     if mime_type not in ALLOWED_MIME_TYPES:
         raise ValueError(f"Unsupported file type: {mime_type}")
 
