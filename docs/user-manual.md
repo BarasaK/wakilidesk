@@ -11,6 +11,7 @@ The MVP supports:
 - Email-based sign in and signup.
 - Law firm workspace creation.
 - Firm profile administration.
+- Firm branding with logo and theme color.
 - Firm users, invitations, roles, and configurable permissions.
 - Client records.
 - Matter records and matter parties.
@@ -677,7 +678,7 @@ Permissions are grouped by module, including clients, matters, documents, physic
 
 ### Manage firm profile
 
-Use **Firm Profile** to update firm details such as legal name, display name, email, phone, address, city, country, timezone, currency, logo, and matter numbering pattern.
+Use **Firm Profile** to update firm details such as legal name, display name, email, phone, address, city, country, timezone, currency, logo, theme color, and matter numbering pattern.
 
 ## 22. Audit Trail
 
@@ -832,6 +833,7 @@ Before a controlled pilot:
 - Confirm each pilot firm has correct users and roles.
 - Replace all demo passwords.
 - Confirm firm profile data and numbering pattern.
+- Confirm the firm logo and theme color.
 - Confirm document categories and practice areas.
 - Confirm storage locations.
 - Upload sample documents and verify download behavior.

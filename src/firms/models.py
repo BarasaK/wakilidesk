@@ -3,6 +3,7 @@ from __future__ import annotations
 import uuid
 
 from django.conf import settings
+from django.core.validators import RegexValidator
 from django.core.signing import TimestampSigner
 from django.db import models
 from django.utils.text import slugify
@@ -32,6 +33,16 @@ class Firm(TimeStampedModel):
     currency = models.CharField(max_length=3, default="KES")
     file_number_pattern = models.CharField(
         max_length=100, default="{PRACTICE_AREA}/{YEAR}/{SEQUENCE}"
+    )
+    accent_color = models.CharField(
+        max_length=7,
+        default="#0f766e",
+        validators=[
+            RegexValidator(
+                regex=r"^#[0-9A-Fa-f]{6}$",
+                message="Enter a valid hex color, for example #0f766e.",
+            )
+        ],
     )
     is_active = models.BooleanField(default=True)
 
