@@ -2,7 +2,7 @@
 
 wakiliDesk is a multi-tenant records and digital file management system for Kenyan law firms.
 
-This repository contains the current wakiliDesk MVP through Milestone 7, plus Docker-based local development and VPS staging deployment automation.
+This repository contains the current wakiliDesk MVP through Milestone 8, plus Docker-based local development and VPS staging deployment automation.
 
 ## Milestone 0 contents
 
@@ -196,6 +196,7 @@ The seed command also creates default practice areas, document categories, stora
 ## Manuals
 
 - [Technical MVP manual](docs/user-manual.md): setup, seed data, local operations, troubleshooting, and pilot notes.
+- [Technical architecture](docs/architecture.md): system flow, framework choices, modules, routes, background jobs, and deployment architecture.
 - [End user manual](docs/end-user-manual.md): non-technical guide for firm users and administrators.
 - [VPS staging deployment](docs/vps-staging-deployment.md): Docker Compose and GitHub Actions deployment guide.
 
