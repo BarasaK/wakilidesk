@@ -2,7 +2,7 @@
 
 wakiliDesk is a multi-tenant records and digital file management system for Kenyan law firms.
 
-This repository currently contains the project foundation and Milestone 1 authentication/onboarding flows.
+This repository contains the current wakiliDesk MVP through Milestone 7, plus Docker-based local development and VPS staging deployment automation.
 
 ## Milestone 0 contents
 
