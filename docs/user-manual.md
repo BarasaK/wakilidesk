@@ -24,7 +24,7 @@ The MVP supports:
 - Storage locations.
 - File checkout and check-in history.
 - Digitisation quality review records.
-- Court diary events and reminder schedules.
+- Court diary events, visual calendar, and reminder schedules.
 - Tenant-scoped global search.
 - In-app notifications.
 - Optional email reminders through configured SMTP.
@@ -91,6 +91,7 @@ docker compose up worker
 - Physical files: http://localhost:8000/physical-files/
 - Digitisation: http://localhost:8000/physical-files/digitisation/
 - Diary: http://localhost:8000/diary/
+- Diary calendar: http://localhost:8000/diary/calendar/
 - Search: http://localhost:8000/search/
 - Notifications: http://localhost:8000/notifications/
 - Firm users: http://localhost:8000/app/administration/users/
@@ -682,11 +683,16 @@ Review fields:
 
 If completion is confirmed, the linked physical file is marked completed. If there are quality issues, the file remains in quality review.
 
-## 20. Court Diary and Reminders
+## 20. Court Diary, Calendar, and Reminders
 
 The court diary tracks dated work such as mentions, hearings, filing deadlines, client meetings, internal tasks, and other firm events.
 
 Diary events are firm-scoped. If a diary event is linked to a confidential matter, the event is hidden from users who cannot access that matter.
+
+The diary has two views:
+
+- **List view**: best for filtering, operational follow-up, and reviewing all matching events.
+- **Calendar view**: best for seeing booked dates across a month.
 
 Common diary fields:
 
@@ -719,6 +725,14 @@ Diary event statuses:
 5. Choose reminder timing such as same day, 1 day before, 3 days before, or 7 days before.
 6. Choose reminder channels: in-app, email, or both.
 7. Save.
+
+### Use the calendar view
+
+1. Open **Diary**.
+2. Select **Calendar view**.
+3. Use **Previous**, **Today**, and **Next** to move between months.
+4. Select a diary event inside the calendar to open its detail page.
+5. Select **Add** on a date cell to create a diary event prefilled for that date.
 
 ### Reminder processing
 

@@ -1,0 +1,54 @@
+{% extends "app_base.html" %}
+
+{% block title %}Diary Calendar | wakiliDesk{% endblock %}
+
+{% block app_content %}
+  <header class="page-header">
+    <div>
+      <h2>Diary Calendar</h2>
+      <p class="lede">{{ month_start|date:"F Y" }} court dates, deadlines, meetings, and tasks.</p>
+    </div>
+    <div class="actions">
+      <a class="button secondary" href="{% url 'diary_event_list' %}">List view</a>
+      <a class="button secondary" href="{% url 'diary_event_create' %}">Create diary event</a>
+    </div>
+  </header>
+
+  <section class="panel calendar-panel">
+    <div class="calendar-toolbar">
+      <a class="button secondary" href="{% url 'diary_calendar' %}?month={{ previous_month|date:'Y-m' }}">Previous</a>
+      <a class="button secondary" href="{% url 'diary_calendar' %}">Today</a>
+      <a class="button secondary" href="{% url 'diary_calendar' %}?month={{ next_month|date:'Y-m' }}">Next</a>
+    </div>
+
+    <div class="calendar-weekdays" aria-hidden="true">
+      {% for label in weekday_labels %}
+        <div>{{ label }}</div>
+      {% endfor %}
+    </div>
+
+    <div class="calendar-grid">
+      {% for week in weeks %}
+        {% for day in week %}
+          <article class="calendar-day{% if not day.is_current_month %} muted{% endif %}{% if day.is_today %} today{% endif %}">
+            <div class="calendar-day-head">
+              <strong>{{ day.date|date:"j" }}</strong>
+              <a href="{% url 'diary_event_create' %}?start={{ day.date|date:'Y-m-d' }}">Add</a>
+            </div>
+
+            <div class="calendar-events">
+              {% for event in day.events %}
+                <a class="calendar-event event-{{ event.event_type|lower }} status-{{ event.status|lower }}" href="{% url 'diary_event_detail' event.id %}">
+                  <span>{{ event.start_at|date:"H:i" }}</span>
+                  {{ event.title }}
+                </a>
+              {% empty %}
+                <span class="calendar-empty">No events</span>
+              {% endfor %}
+            </div>
+          </article>
+        {% endfor %}
+      {% endfor %}
+    </div>
+  </section>
+{% endblock %}
