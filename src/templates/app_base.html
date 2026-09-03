@@ -10,11 +10,14 @@
     </style>
   {% endif %}
   <div class="app-shell">
+    <a class="skip-link" href="#main-content">Skip to content</a>
     <aside class="sidebar">
-      <h1 class="brand">wakiliDesk</h1>
-      {% if request.current_firm %}
-        <p class="lede">{{ request.current_firm.display_name }}</p>
-      {% endif %}
+      <div class="sidebar-branding">
+        <h1 class="brand">wakiliDesk</h1>
+        {% if request.current_firm %}
+          <p class="lede">{{ request.current_firm.display_name }}</p>
+        {% endif %}
+      </div>
       <nav aria-label="Primary">
         <a href="{% url 'dashboard' %}">Dashboard</a>
         <a href="{% url 'client_list' %}">Clients</a>
@@ -34,7 +37,7 @@
         </form>
       </nav>
     </aside>
-    <main class="main">
+    <main class="main" id="main-content">
       {% if messages %}
         <div class="messages">
           {% for message in messages %}
