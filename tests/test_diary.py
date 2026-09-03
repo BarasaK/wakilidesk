@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 import pytest
 from django.core import mail
@@ -109,6 +109,59 @@ def test_dashboard_shows_upcoming_diary_events(client):
     assert response.status_code == 200
     assert b"Upcoming Diary" in response.content
     assert b"Upcoming mention" in response.content
+
+
+@pytest.mark.django_db
+def test_diary_calendar_shows_accessible_month_events(client):
+    _firm, admin, matter, _assigned, _unassigned = _setup()
+    event = DiaryEvent.objects.create(
+        firm=matter.firm,
+        matter=matter,
+        title="Calendar hearing",
+        event_type=DiaryEvent.EventType.HEARING,
+        start_at=timezone.make_aware(datetime(2026, 9, 15, 9, 30)),
+        assigned_to=admin,
+        created_by=admin,
+    )
+
+    client.force_login(admin)
+    response = client.get(reverse("diary_calendar"), {"month": "2026-09"})
+
+    assert response.status_code == 200
+    assert b"Diary Calendar" in response.content
+    assert b"Calendar hearing" in response.content
+    assert reverse("diary_event_detail", args=[event.id]).encode() in response.content
+
+
+@pytest.mark.django_db
+def test_diary_calendar_hides_restricted_events_from_unassigned_user(client):
+    _firm, _admin, matter, assigned, unassigned = _setup(confidential=True)
+    DiaryEvent.objects.create(
+        firm=matter.firm,
+        matter=matter,
+        title="Hidden calendar hearing",
+        event_type=DiaryEvent.EventType.HEARING,
+        start_at=timezone.make_aware(datetime(2026, 9, 15, 9, 30)),
+        assigned_to=assigned,
+        created_by=assigned,
+    )
+
+    client.force_login(unassigned)
+    response = client.get(reverse("diary_calendar"), {"month": "2026-09"})
+
+    assert response.status_code == 200
+    assert b"Hidden calendar hearing" not in response.content
+
+
+@pytest.mark.django_db
+def test_new_event_from_calendar_prefills_start_date(client):
+    _firm, admin, _matter, _assigned, _unassigned = _setup()
+    client.force_login(admin)
+
+    response = client.get(reverse("diary_event_create"), {"start": "2026-09-20"})
+
+    assert response.status_code == 200
+    assert b'value="2026-09-20T09:00"' in response.content
 
 
 @pytest.mark.django_db

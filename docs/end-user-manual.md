@@ -30,7 +30,7 @@ After signing in, the left navigation gives access to:
 - **Documents**: uploaded document records and versions.
 - **Physical Files**: paper file register and movement tracking.
 - **Digitisation**: scanning and quality review tracking.
-- **Diary**: court dates, filing deadlines, meetings, and reminders.
+- **Diary**: court dates, filing deadlines, meetings, reminders, and a month calendar.
 - **Search**: firm-wide search across permitted records.
 - **Notifications**: messages that need attention.
 - **Users, Roles, Firm Profile**: administration areas for authorised users.
@@ -343,7 +343,7 @@ If completion is confirmed, wakiliDesk marks the physical file as completed. If 
 
 ## 13. Court Diary
 
-Use the diary to track court appearances, filing deadlines, meetings, and internal follow-up work.
+Use the diary to track court appearances, filing deadlines, meetings, and internal follow-up work. You can use the list view for filtering or the calendar view to see booked dates across the month.
 
 ### Create a Diary Event
 
@@ -374,6 +374,14 @@ Reminders appear in **Notifications** when due. If email reminders are enabled b
 If a court date is completed, adjourned, or cancelled, open the diary event and update its status. This keeps the dashboard accurate.
 
 Diary items linked to confidential matters are only visible to users who can view those matters.
+
+### Use the Calendar View
+
+1. Open **Diary**.
+2. Select **Calendar view**.
+3. Use **Previous**, **Today**, and **Next** to move between months.
+4. Open an event from the calendar to view details.
+5. Use **Add** on a date to create a diary event for that day.
 
 ## 14. Search
 

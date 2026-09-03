@@ -85,6 +85,7 @@ This repository contains the current wakiliDesk MVP through Milestone 7, plus Do
 
 - Court diary events linked to matters
 - Diary filters for type, status, assigned user, search text, and date range
+- Visual month calendar for booked events
 - Dashboard upcoming diary panel and diary metrics
 - In-app and email reminder records
 - Celery task and management command for due reminders
@@ -139,6 +140,7 @@ docker compose up worker
 - Physical files: http://localhost:8000/physical-files/
 - Digitisation: http://localhost:8000/physical-files/digitisation/
 - Diary: http://localhost:8000/diary/
+- Diary calendar: http://localhost:8000/diary/calendar/
 - Search: http://localhost:8000/search/
 - Notifications: http://localhost:8000/notifications/
 - Health: http://localhost:8000/health/

@@ -1,3 +1,5 @@
+from datetime import date, datetime, time, timedelta
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
@@ -46,6 +48,61 @@ def diary_event_list(request):
 
 
 @login_required
+def diary_calendar(request):
+    firm = _require_current_firm(request)
+    if firm is None:
+        return redirect("firm_onboarding")
+    require_firm_permission(request.user, firm, "view_diaryevent")
+
+    target_date = _month_from_request(request)
+    month_start = target_date.replace(day=1)
+    next_month = _add_months(month_start, 1)
+    previous_month = _add_months(month_start, -1)
+    grid_start = month_start - timedelta(days=month_start.weekday())
+    grid_end = grid_start + timedelta(days=42)
+
+    start_at = timezone.make_aware(datetime.combine(grid_start, time.min))
+    end_at = timezone.make_aware(datetime.combine(grid_end, time.min))
+    events = diary_events_visible_to_user(firm=firm, user=request.user).filter(
+        start_at__gte=start_at,
+        start_at__lt=end_at,
+    )
+    events_by_date = {}
+    for event in events:
+        events_by_date.setdefault(timezone.localtime(event.start_at).date(), []).append(event)
+
+    today = timezone.localdate()
+    weeks = []
+    for week_index in range(6):
+        week = []
+        for day_index in range(7):
+            day = grid_start + timedelta(days=(week_index * 7) + day_index)
+            week.append(
+                {
+                    "date": day,
+                    "events": events_by_date.get(day, []),
+                    "is_current_month": day.month == month_start.month,
+                    "is_today": day == today,
+                }
+            )
+        weeks.append(week)
+
+    return render(
+        request,
+        "diary/calendar.html",
+        {
+            "firm": firm,
+            "weeks": weeks,
+            "month_start": month_start,
+            "previous_month": previous_month,
+            "next_month": next_month,
+            "today": today,
+            "weekday_labels": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+        },
+    )
+
+
+@login_required
 def diary_event_create(request):
     firm = _require_current_firm(request)
     if firm is None:
@@ -65,7 +122,11 @@ def diary_event_create(request):
             messages.success(request, "Diary event created.")
             return redirect("diary_event_detail", event_id=event.id)
     else:
-        form = DiaryEventForm(firm=firm, user=request.user)
+        form = DiaryEventForm(
+            firm=firm,
+            user=request.user,
+            initial=_initial_event_data(request),
+        )
     return render(request, "diary/form.html", {"firm": firm, "form": form})
 
 
@@ -146,3 +207,31 @@ def _require_current_firm(request):
     if request.current_firm is None:
         return None
     return request.current_firm
+
+
+def _month_from_request(request):
+    month = request.GET.get("month")
+    if month:
+        try:
+            return datetime.strptime(month, "%Y-%m").date()
+        except ValueError:
+            pass
+    return timezone.localdate()
+
+
+def _add_months(value, months):
+    year = value.year + ((value.month - 1 + months) // 12)
+    month = ((value.month - 1 + months) % 12) + 1
+    return date(year, month, 1)
+
+
+def _initial_event_data(request):
+    start = request.GET.get("start")
+    if not start:
+        return {}
+    try:
+        start_date = datetime.strptime(start, "%Y-%m-%d").date()
+    except ValueError:
+        return {}
+    start_at = timezone.make_aware(datetime.combine(start_date, time(hour=9)))
+    return {"start_at": start_at}
