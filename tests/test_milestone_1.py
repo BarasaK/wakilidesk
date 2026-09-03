@@ -117,6 +117,45 @@ def test_user_without_manage_users_cannot_invite(client):
 
 
 @pytest.mark.django_db
+def test_navigation_hides_inaccessible_admin_links(client):
+    _firm, auditor = _firm_with_user("auditor@amani.test", "Auditor / Read-only")
+
+    client.force_login(auditor)
+    response = client.get(reverse("dashboard"))
+
+    assert response.status_code == 200
+    assert b">Clients<" in response.content
+    assert b">Users<" not in response.content
+    assert b">Roles<" not in response.content
+    assert b">Firm Profile<" not in response.content
+    assert b"New client" not in response.content
+    assert b"Upload document" not in response.content
+    assert b"New diary event" not in response.content
+    assert client.get(reverse("admin_users")).status_code == 403
+
+
+@pytest.mark.django_db
+def test_module_actions_hide_inaccessible_links(client):
+    firm, clerk = _firm_with_user("clerk@amani.test", "Clerk / Records Officer")
+
+    client.force_login(clerk)
+    documents_response = client.get(reverse("document_list"))
+    physical_files_response = client.get(reverse("physical_file_list"))
+    matters_response = client.get(reverse("matter_list"))
+
+    assert documents_response.status_code == 200
+    assert b"Upload document" in documents_response.content
+    assert b"Categories" not in documents_response.content
+    assert physical_files_response.status_code == 200
+    assert b"Register file" in physical_files_response.content
+    assert b"Locations" in physical_files_response.content
+    assert matters_response.status_code == 200
+    assert b"Create matter" not in matters_response.content
+    assert b"Practice areas" not in matters_response.content
+    assert firm.roles.filter(name="Clerk / Records Officer").exists()
+
+
+@pytest.mark.django_db
 def test_invited_user_can_accept_invitation(client):
     firm, admin = _firm_with_user("admin@amani.test", "Firm Administrator")
     role = firm.roles.get(name="Secretary")

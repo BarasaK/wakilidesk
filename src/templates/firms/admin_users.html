@@ -8,7 +8,9 @@
       <h2>Users</h2>
       <p class="lede">Manage firm members and invitations.</p>
     </div>
-    <a class="button secondary" href="{% url 'invite_user' %}">Invite user</a>
+    {% if "manage_users" in firm_permissions %}
+      <a class="button secondary" href="{% url 'invite_user' %}">Invite user</a>
+    {% endif %}
   </header>
 
   <section class="panel">

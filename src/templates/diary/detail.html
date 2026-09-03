@@ -9,8 +9,12 @@
       <p class="lede">{{ event.get_event_type_display }} on {{ event.start_at|date:"d M Y H:i" }}</p>
     </div>
     <div class="actions">
-      <a class="button secondary" href="{% url 'diary_event_edit' event.id %}">Edit event</a>
-      <a class="button secondary" href="{% url 'diary_event_delete' event.id %}">Delete</a>
+      {% if "edit_diaryevent" in firm_permissions %}
+        <a class="button secondary" href="{% url 'diary_event_edit' event.id %}">Edit event</a>
+      {% endif %}
+      {% if "delete_diaryevent" in firm_permissions %}
+        <a class="button secondary" href="{% url 'diary_event_delete' event.id %}">Delete</a>
+      {% endif %}
     </div>
   </header>
 
@@ -55,18 +59,20 @@
   <section class="panel">
     <h3>Update Status</h3>
     <div class="actions">
-      <form method="post" action="{% url 'diary_event_status' event.id 'COMPLETED' %}">
-        {% csrf_token %}
-        <button class="button secondary" type="submit">Mark completed</button>
-      </form>
-      <form method="post" action="{% url 'diary_event_status' event.id 'ADJOURNED' %}">
-        {% csrf_token %}
-        <button class="button secondary" type="submit">Mark adjourned</button>
-      </form>
-      <form method="post" action="{% url 'diary_event_status' event.id 'CANCELLED' %}">
-        {% csrf_token %}
-        <button class="button secondary" type="submit">Cancel event</button>
-      </form>
+      {% if "edit_diaryevent" in firm_permissions %}
+        <form method="post" action="{% url 'diary_event_status' event.id 'COMPLETED' %}">
+          {% csrf_token %}
+          <button class="button secondary" type="submit">Mark completed</button>
+        </form>
+        <form method="post" action="{% url 'diary_event_status' event.id 'ADJOURNED' %}">
+          {% csrf_token %}
+          <button class="button secondary" type="submit">Mark adjourned</button>
+        </form>
+        <form method="post" action="{% url 'diary_event_status' event.id 'CANCELLED' %}">
+          {% csrf_token %}
+          <button class="button secondary" type="submit">Cancel event</button>
+        </form>
+      {% endif %}
     </div>
   </section>
 {% endblock %}

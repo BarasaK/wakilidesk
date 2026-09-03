@@ -8,7 +8,9 @@
       <h2>Document Categories</h2>
       <p class="lede">Firm-specific filing categories.</p>
     </div>
-    <a class="button secondary" href="{% url 'document_category_create' %}">Create category</a>
+    {% if "manage_firm_settings" in firm_permissions %}
+      <a class="button secondary" href="{% url 'document_category_create' %}">Create category</a>
+    {% endif %}
   </header>
 
   <section class="panel">
@@ -25,7 +27,11 @@
           <tr>
             <td>{{ category.name }}</td>
             <td>{% if category.is_active %}Active{% else %}Inactive{% endif %}</td>
-            <td><a href="{% url 'document_category_edit' category.id %}">Edit</a></td>
+            <td>
+              {% if "manage_firm_settings" in firm_permissions %}
+                <a href="{% url 'document_category_edit' category.id %}">Edit</a>
+              {% endif %}
+            </td>
           </tr>
         {% empty %}
           <tr><td colspan="3">No categories found.</td></tr>

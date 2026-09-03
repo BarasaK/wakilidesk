@@ -25,7 +25,9 @@
         <h3 id="metrics-title">Filing Metrics</h3>
         <p class="lede">Current operational view across accessible firm records.</p>
       </div>
-      <a class="button secondary" href="{% url 'global_search' %}">Search records</a>
+      {% if "view_client" in firm_permissions or "view_matter" in firm_permissions or "view_document" in firm_permissions or "view_physical_file" in firm_permissions %}
+        <a class="button secondary" href="{% url 'global_search' %}">Search records</a>
+      {% endif %}
     </div>
 
     <div class="metric-grid">
@@ -145,36 +147,46 @@
     <div class="panel quick-actions">
       <h3>Common Actions</h3>
       <div class="quick-action-grid">
-        <a href="{% url 'client_create' %}">
-          <span class="quick-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" role="img"><path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4zm-7 8a7 7 0 0 1 14 0"/></svg>
-          </span>
-          New client
-        </a>
-        <a href="{% url 'matter_create' %}">
-          <span class="quick-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" role="img"><path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h3.1l1.8 2H18A2 2 0 0 1 20 8v9.5a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 17.5z"/></svg>
-          </span>
-          New matter
-        </a>
-        <a href="{% url 'document_upload' %}">
-          <span class="quick-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" role="img"><path d="M12 4v10M8 8l4-4 4 4M5 18h14"/></svg>
-          </span>
-          Upload document
-        </a>
-        <a href="{% url 'physical_file_create' %}">
-          <span class="quick-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" role="img"><path d="M5 8h14v11H5zM8 8V5h8v3M8 12h8M8 16h5"/></svg>
-          </span>
-          Register file
-        </a>
-        <a href="{% url 'diary_event_create' %}">
-          <span class="quick-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" role="img"><path d="M7 3v4M17 3v4M4 9h16M6 5h12a2 2 0 0 1 2 2v12H4V7a2 2 0 0 1 2-2z"/></svg>
-          </span>
-          New diary event
-        </a>
+        {% if "create_client" in firm_permissions %}
+          <a href="{% url 'client_create' %}">
+            <span class="quick-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" role="img"><path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4zm-7 8a7 7 0 0 1 14 0"/></svg>
+            </span>
+            New client
+          </a>
+        {% endif %}
+        {% if "create_matter" in firm_permissions %}
+          <a href="{% url 'matter_create' %}">
+            <span class="quick-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" role="img"><path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h3.1l1.8 2H18A2 2 0 0 1 20 8v9.5a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 17.5z"/></svg>
+            </span>
+            New matter
+          </a>
+        {% endif %}
+        {% if "upload_document" in firm_permissions %}
+          <a href="{% url 'document_upload' %}">
+            <span class="quick-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" role="img"><path d="M12 4v10M8 8l4-4 4 4M5 18h14"/></svg>
+            </span>
+            Upload document
+          </a>
+        {% endif %}
+        {% if "create_physical_file" in firm_permissions %}
+          <a href="{% url 'physical_file_create' %}">
+            <span class="quick-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" role="img"><path d="M5 8h14v11H5zM8 8V5h8v3M8 12h8M8 16h5"/></svg>
+            </span>
+            Register file
+          </a>
+        {% endif %}
+        {% if "create_diaryevent" in firm_permissions %}
+          <a href="{% url 'diary_event_create' %}">
+            <span class="quick-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" role="img"><path d="M7 3v4M17 3v4M4 9h16M6 5h12a2 2 0 0 1 2 2v12H4V7a2 2 0 0 1 2-2z"/></svg>
+            </span>
+            New diary event
+          </a>
+        {% endif %}
       </div>
     </div>
   </section>
@@ -191,7 +203,9 @@
       <div class="progress-track" aria-hidden="true">
         <span style="width: {{ metrics.digitisation_percent }}%"></span>
       </div>
-      <a class="text-link" href="{% url 'digitisation_list' %}">Open digitisation queue</a>
+      {% if "view_physical_file" in firm_permissions %}
+        <a class="text-link" href="{% url 'digitisation_list' %}">Open digitisation queue</a>
+      {% endif %}
     </div>
 
     <div></div>

@@ -9,8 +9,12 @@
       <p class="lede">{{ client.client_number }} · {{ client.get_client_type_display }}</p>
     </div>
     <div class="actions">
-      <a class="button secondary" href="{% url 'client_edit' client.id %}">Edit client</a>
-      <a class="button secondary" href="{% url 'matter_create' %}">Create matter</a>
+      {% if "edit_client" in firm_permissions %}
+        <a class="button secondary" href="{% url 'client_edit' client.id %}">Edit client</a>
+      {% endif %}
+      {% if "create_matter" in firm_permissions %}
+        <a class="button secondary" href="{% url 'matter_create' %}">Create matter</a>
+      {% endif %}
     </div>
   </header>
 

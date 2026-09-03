@@ -10,7 +10,9 @@
     </div>
     <div class="actions">
       <a class="button secondary" href="{% url 'diary_event_list' %}">List view</a>
-      <a class="button secondary" href="{% url 'diary_event_create' %}">Create diary event</a>
+      {% if "create_diaryevent" in firm_permissions %}
+        <a class="button secondary" href="{% url 'diary_event_create' %}">Create diary event</a>
+      {% endif %}
     </div>
   </header>
 
@@ -33,7 +35,9 @@
           <article class="calendar-day{% if not day.is_current_month %} muted{% endif %}{% if day.is_today %} today{% endif %}">
             <div class="calendar-day-head">
               <strong>{{ day.date|date:"j" }}</strong>
-              <a href="{% url 'diary_event_create' %}?start={{ day.date|date:'Y-m-d' }}">Add</a>
+              {% if "create_diaryevent" in firm_permissions %}
+                <a href="{% url 'diary_event_create' %}?start={{ day.date|date:'Y-m-d' }}">Add</a>
+              {% endif %}
             </div>
 
             <div class="calendar-events">

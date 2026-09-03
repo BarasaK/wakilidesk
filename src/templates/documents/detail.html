@@ -9,13 +9,21 @@
       <p class="lede">{{ document.matter.matter_number }} · {{ document.document_type.name }}</p>
     </div>
     <div class="actions">
-      <a class="button secondary" href="{% url 'document_download' document.id %}">Download</a>
-      <a class="button secondary" href="{% url 'document_edit' document.id %}">Edit metadata</a>
-      <a class="button secondary" href="{% url 'document_version_upload' document.id %}">New version</a>
-      <form method="post" action="{% url 'document_reprocess_ocr' document.id %}">
-        {% csrf_token %}
-        <button class="button secondary" type="submit">Reprocess text</button>
-      </form>
+      {% if "download_document" in firm_permissions %}
+        <a class="button secondary" href="{% url 'document_download' document.id %}">Download</a>
+      {% endif %}
+      {% if "edit_document_metadata" in firm_permissions %}
+        <a class="button secondary" href="{% url 'document_edit' document.id %}">Edit metadata</a>
+      {% endif %}
+      {% if "create_document_version" in firm_permissions %}
+        <a class="button secondary" href="{% url 'document_version_upload' document.id %}">New version</a>
+      {% endif %}
+      {% if "edit_document_metadata" in firm_permissions %}
+        <form method="post" action="{% url 'document_reprocess_ocr' document.id %}">
+          {% csrf_token %}
+          <button class="button secondary" type="submit">Reprocess text</button>
+        </form>
+      {% endif %}
     </div>
   </header>
 
@@ -28,15 +36,19 @@
     <p>Status: {% if document.archived_at %}Archived{% else %}Active{% endif %}</p>
     <div class="actions">
       {% if document.archived_at %}
-        <form method="post" action="{% url 'document_restore' document.id %}">
-          {% csrf_token %}
-          <button class="button secondary" type="submit">Restore</button>
-        </form>
+        {% if "restore_document" in firm_permissions %}
+          <form method="post" action="{% url 'document_restore' document.id %}">
+            {% csrf_token %}
+            <button class="button secondary" type="submit">Restore</button>
+          </form>
+        {% endif %}
       {% else %}
-        <form method="post" action="{% url 'document_archive' document.id %}">
-          {% csrf_token %}
-          <button class="button secondary" type="submit">Archive</button>
-        </form>
+        {% if "archive_document" in firm_permissions %}
+          <form method="post" action="{% url 'document_archive' document.id %}">
+            {% csrf_token %}
+            <button class="button secondary" type="submit">Archive</button>
+          </form>
+        {% endif %}
       {% endif %}
     </div>
   </section>
