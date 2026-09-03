@@ -4,6 +4,8 @@ This guide deploys wakiliDesk to the Ubuntu 22.04 VPS at `184.174.32.103` using 
 
 The staging deployment is designed to coexist with other sites on the same VPS. wakiliDesk binds to `127.0.0.1:8085` by default, so it is not exposed publicly until Nginx proxies traffic to it.
 
+If you want to browse the app directly at `http://184.174.32.103:8085/` before a staging domain is ready, set `WAKILIDESK_HOST_BIND=0.0.0.0` in `.env.prod`, allow the port through the VPS firewall, and redeploy. Switch it back to `127.0.0.1` once Nginx is proxying the app.
+
 ## 1. GitHub Secrets
 
 Configure these repository secrets:
@@ -60,6 +62,7 @@ ALLOWED_HOSTS=184.174.32.103,localhost,127.0.0.1
 CSRF_TRUSTED_ORIGINS=http://184.174.32.103
 POSTGRES_PASSWORD=<strong database password>
 WAKILIDESK_HOST_PORT=8085
+WAKILIDESK_HOST_BIND=127.0.0.1
 ```
 
 Generate a Django secret locally or on the VPS:
@@ -86,6 +89,35 @@ Confirm services:
 ```bash
 docker compose -f docker-compose.prod.yml ps
 curl -f http://127.0.0.1:8085/health/
+```
+
+For temporary direct-IP staging access, update `.env.prod`:
+
+```text
+WAKILIDESK_HOST_BIND=0.0.0.0
+WAKILIDESK_HOST_PORT=8085
+ALLOWED_HOSTS=184.174.32.103,localhost,127.0.0.1
+CSRF_TRUSTED_ORIGINS=http://184.174.32.103:8085
+```
+
+Then redeploy:
+
+```bash
+APP_DIR=/opt/wakilidesk scripts/deploy.sh
+```
+
+If UFW is active, allow the staging port as `root` or another sudo-capable user:
+
+```bash
+ufw allow 8085/tcp
+ufw status
+```
+
+Now test:
+
+```bash
+curl -f http://127.0.0.1:8085/health/
+curl -f http://184.174.32.103:8085/health/
 ```
 
 Optional for staging:
@@ -174,5 +206,33 @@ git reset --hard origin/master
 
 - `.env.prod` must never be committed.
 - The staging compose file keeps Postgres and Redis off public host ports.
-- The app listens on localhost only by default.
+- The app listens on localhost only by default. Use `WAKILIDESK_HOST_BIND=0.0.0.0` only for temporary direct-IP staging access.
 - Current MVP document storage uses the container media volume. Production pilots should move legal documents to private S3-compatible object storage with signed downloads.
+
+## 9. Troubleshooting
+
+### Browser says connection refused on `184.174.32.103:8085`
+
+This usually means the app is either not running or is bound to localhost only.
+
+Check the containers:
+
+```bash
+cd /opt/wakilidesk
+docker compose --env-file .env.prod -f docker-compose.prod.yml ps
+```
+
+Check whether the app answers locally on the VPS:
+
+```bash
+curl -f http://127.0.0.1:8085/health/
+```
+
+If local curl works but the browser fails, either keep `WAKILIDESK_HOST_BIND=127.0.0.1` and configure Nginx, or set this for temporary direct access:
+
+```text
+WAKILIDESK_HOST_BIND=0.0.0.0
+CSRF_TRUSTED_ORIGINS=http://184.174.32.103:8085
+```
+
+Then redeploy and confirm the firewall allows `8085/tcp`.
