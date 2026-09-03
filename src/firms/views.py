@@ -3,8 +3,11 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 
 from audit.services import record_audit_event
+from diary.models import DiaryEvent
+from diary.services import diary_events_visible_to_user
 from documents.services import documents_visible_to_user
 from firms.forms import FirmOnboardingForm, FirmProfileForm, RoleForm, UserInvitationForm
 from firms.models import Firm, FirmMembership, Role, UserInvitation
@@ -29,6 +32,8 @@ def dashboard(request):
     visible_matters = matters_visible_to_user(firm=firm, user=request.user)
     visible_documents = documents_visible_to_user(firm=firm, user=request.user)
     visible_physical_files = physical_files_visible_to_user(firm=firm, user=request.user)
+    visible_diary_events = diary_events_visible_to_user(firm=firm, user=request.user)
+    now = timezone.now()
     digitisation_total = visible_physical_files.count()
     digitisation_completed = visible_physical_files.filter(
         digitisation_status=PhysicalFile.DigitisationStatus.COMPLETED
@@ -47,12 +52,29 @@ def dashboard(request):
         "digitisation_completed": digitisation_completed,
         "digitisation_percent": digitisation_percent,
         "digitisation_quality_review": visible_physical_files.filter(digitisation_status=PhysicalFile.DigitisationStatus.QUALITY_REVIEW).count(),
+        "diary_upcoming": visible_diary_events.filter(
+            status=DiaryEvent.Status.SCHEDULED,
+            start_at__gte=now,
+        ).count(),
+        "diary_overdue": visible_diary_events.filter(
+            status=DiaryEvent.Status.SCHEDULED,
+            start_at__lt=now,
+        ).count(),
         "unread_notifications": unread_count_for_user(firm=firm, user=request.user),
     }
+    upcoming_diary_events = visible_diary_events.filter(
+        status=DiaryEvent.Status.SCHEDULED,
+        start_at__gte=now,
+    )[:5]
     return render(
         request,
         "dashboard/home.html",
-        {"firm": firm, "memberships": memberships, "metrics": metrics},
+        {
+            "firm": firm,
+            "memberships": memberships,
+            "metrics": metrics,
+            "upcoming_diary_events": upcoming_diary_events,
+        },
     )
 
 

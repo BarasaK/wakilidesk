@@ -88,22 +88,58 @@
           <strong class="metric-value">{{ metrics.unread_notifications }}</strong>
         </div>
       </article>
+
+      <article class="metric-card">
+        <span class="metric-icon blue" aria-hidden="true">
+          <svg viewBox="0 0 24 24" role="img"><path d="M7 3v4M17 3v4M4 9h16M6 5h12a2 2 0 0 1 2 2v12H4V7a2 2 0 0 1 2-2z"/></svg>
+        </span>
+        <div>
+          <p class="metric-label">Upcoming diary events</p>
+          <strong class="metric-value">{{ metrics.diary_upcoming }}</strong>
+        </div>
+      </article>
+
+      <article class="metric-card urgent">
+        <span class="metric-icon red" aria-hidden="true">
+          <svg viewBox="0 0 24 24" role="img"><path d="M12 8v5l3 2M12 3a9 9 0 1 0 9 9M17 3h4v4"/></svg>
+        </span>
+        <div>
+          <p class="metric-label">Past scheduled events</p>
+          <strong class="metric-value">{{ metrics.diary_overdue }}</strong>
+        </div>
+      </article>
     </div>
   </section>
 
   <section class="dashboard-layout">
-    <div class="panel progress-panel">
+    <div class="panel">
       <div class="section-heading compact">
         <div>
-          <h3>Digitisation Progress</h3>
-          <p class="lede">{{ metrics.digitisation_completed }} / {{ metrics.digitisation_total }} files completed</p>
+          <h3>Upcoming Diary</h3>
+          <p class="lede">Next scheduled court dates, deadlines, and meetings.</p>
         </div>
-        <strong class="progress-percent">{{ metrics.digitisation_percent }}%</strong>
+        <a class="text-link" href="{% url 'diary_event_list' %}">Open diary</a>
       </div>
-      <div class="progress-track" aria-hidden="true">
-        <span style="width: {{ metrics.digitisation_percent }}%"></span>
-      </div>
-      <a class="text-link" href="{% url 'digitisation_list' %}">Open digitisation queue</a>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Event</th>
+            <th>Matter</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for event in upcoming_diary_events %}
+            <tr>
+              <td>{{ event.start_at|date:"d M Y H:i" }}</td>
+              <td><a href="{% url 'diary_event_detail' event.id %}">{{ event.title }}</a><br>{{ event.get_event_type_display }}</td>
+              <td>{% if event.matter %}{{ event.matter.matter_number }}{% else %}-{% endif %}</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="3">No upcoming diary events.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
 
     <div class="panel quick-actions">
@@ -133,7 +169,31 @@
           </span>
           Register file
         </a>
+        <a href="{% url 'diary_event_create' %}">
+          <span class="quick-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" role="img"><path d="M7 3v4M17 3v4M4 9h16M6 5h12a2 2 0 0 1 2 2v12H4V7a2 2 0 0 1 2-2z"/></svg>
+          </span>
+          New diary event
+        </a>
       </div>
     </div>
+  </section>
+
+  <section class="dashboard-layout">
+    <div class="panel progress-panel">
+      <div class="section-heading compact">
+        <div>
+          <h3>Digitisation Progress</h3>
+          <p class="lede">{{ metrics.digitisation_completed }} / {{ metrics.digitisation_total }} files completed</p>
+        </div>
+        <strong class="progress-percent">{{ metrics.digitisation_percent }}%</strong>
+      </div>
+      <div class="progress-track" aria-hidden="true">
+        <span style="width: {{ metrics.digitisation_percent }}%"></span>
+      </div>
+      <a class="text-link" href="{% url 'digitisation_list' %}">Open digitisation queue</a>
+    </div>
+
+    <div></div>
   </section>
 {% endblock %}

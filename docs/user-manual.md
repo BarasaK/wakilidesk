@@ -24,13 +24,15 @@ The MVP supports:
 - Storage locations.
 - File checkout and check-in history.
 - Digitisation quality review records.
+- Court diary events and reminder schedules.
 - Tenant-scoped global search.
 - In-app notifications.
+- Optional email reminders through configured SMTP.
 - Dashboard metrics.
 - Confidentiality filtering for restricted records.
 - Docker-based local development.
 
-The MVP does not yet include billing, client/trust accounting, court diary, M-Pesa, eTIMS, Judiciary integrations, client portal, AI drafting, full OCR for scanned PDFs/images, or production object-storage signing.
+The MVP does not yet include billing, client/trust accounting, M-Pesa, eTIMS, Judiciary integrations, client portal, AI drafting, full OCR for scanned PDFs/images, or production object-storage signing.
 
 ## 2. Local Setup
 
@@ -88,6 +90,7 @@ docker compose up worker
 - Documents: http://localhost:8000/documents/
 - Physical files: http://localhost:8000/physical-files/
 - Digitisation: http://localhost:8000/physical-files/digitisation/
+- Diary: http://localhost:8000/diary/
 - Search: http://localhost:8000/search/
 - Notifications: http://localhost:8000/notifications/
 - Firm users: http://localhost:8000/app/administration/users/
@@ -223,6 +226,7 @@ Each firm receives:
 - Matter parties.
 - Six text documents.
 - Three physical files.
+- Three diary events with in-app and email reminders.
 - One in-app notification.
 
 ## 6. User Roles
@@ -233,37 +237,37 @@ wakiliDesk uses firm-scoped roles. A user receives access through a firm members
 
 Typical user: managing partner, practice manager, IT/admin lead.
 
-Can manage users, invitations, roles, firm settings, clients, matters, documents, physical files, and confidential matters.
+Can manage users, invitations, roles, firm settings, clients, matters, documents, physical files, diary events, reminders, and confidential matters.
 
 ### Partner
 
 Typical user: partner or supervising advocate.
 
-Can view clients, matters, documents, physical files, create and edit matters, upload documents, download documents, create document versions, and manage confidential matters.
+Can view clients, matters, documents, physical files, and diary events; create and edit matters; upload documents; download documents; create document versions; manage diary reminders; and manage confidential matters.
 
 ### Advocate
 
 Typical user: associate advocate or fee earner.
 
-Can view clients and matters, create and edit matters, upload documents, download documents, and create document versions. Does not manage confidential matters by default.
+Can view clients, matters, documents, and diary events; create and edit matters and diary events; upload documents; download documents; and create document versions. Does not manage confidential matters by default.
 
 ### Secretary
 
 Typical user: legal secretary or administrative assistant.
 
-Can view, create, and edit clients; view and create matters; view and upload documents; edit document metadata; and view physical files.
+Can view, create, and edit clients; view and create matters; view and upload documents; edit document metadata; view physical files; and create or edit diary events.
 
 ### Clerk / Records Officer
 
 Typical user: registry clerk or digitisation operator.
 
-Can view clients, matters, documents, and physical files; upload and index documents; create physical files; check files out and in; and change storage locations.
+Can view clients, matters, documents, physical files, and diary events; upload and index documents; create physical files; check files out and in; and change storage locations.
 
 ### Auditor / Read-only
 
 Typical user: internal reviewer, external auditor, or compliance reviewer.
 
-Can view clients, matters, documents, physical files, and audit logs. Can download documents but cannot change normal records.
+Can view clients, matters, documents, physical files, diary events, and audit logs. Can download documents but cannot change normal records.
 
 ### Finance
 
@@ -311,6 +315,8 @@ Dashboard cards show:
 - Physical files checked out.
 - Files awaiting return.
 - Files awaiting quality review.
+- Upcoming diary events.
+- Past scheduled diary events.
 - Unread notifications.
 
 The digitisation progress panel shows completed physical files against total physical files available to the current user.
@@ -321,6 +327,7 @@ Common actions provide shortcuts to:
 - New matter.
 - Upload document.
 - Register file.
+- New diary event.
 
 ## 10. Clients
 
@@ -675,7 +682,83 @@ Review fields:
 
 If completion is confirmed, the linked physical file is marked completed. If there are quality issues, the file remains in quality review.
 
-## 20. Search
+## 20. Court Diary and Reminders
+
+The court diary tracks dated work such as mentions, hearings, filing deadlines, client meetings, internal tasks, and other firm events.
+
+Diary events are firm-scoped. If a diary event is linked to a confidential matter, the event is hidden from users who cannot access that matter.
+
+Common diary fields:
+
+- Matter, optional.
+- Title.
+- Event type.
+- Start date and time.
+- End date and time, optional.
+- Court name.
+- Location.
+- Assigned user.
+- Status.
+- Notes.
+- Reminder schedule.
+- Reminder channels.
+
+Diary event statuses:
+
+- Scheduled.
+- Completed.
+- Adjourned.
+- Cancelled.
+
+### Create a diary event
+
+1. Open **Diary**.
+2. Select **Create diary event**.
+3. Choose the linked matter if the event belongs to a matter.
+4. Enter the event title, type, start date and time, court, location, and assigned user.
+5. Choose reminder timing such as same day, 1 day before, 3 days before, or 7 days before.
+6. Choose reminder channels: in-app, email, or both.
+7. Save.
+
+### Reminder processing
+
+Due reminders are sent by the `send_diary_reminders` Celery task or by the management command:
+
+```powershell
+docker compose exec web python manage.py send_diary_reminders
+```
+
+For staging:
+
+```bash
+cd /opt/wakilidesk
+docker compose --env-file .env.prod -f docker-compose.prod.yml exec web python manage.py send_diary_reminders
+```
+
+In-app reminders create unread notifications for the assigned user. If no assigned user exists, the reminder goes to the event creator.
+
+Email reminders use Django's configured email backend. Offline and early staging environments can keep:
+
+```text
+EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend
+DEFAULT_FROM_EMAIL=wakilidesk@gmail.com
+```
+
+For Gmail SMTP testing, use a Gmail app password and set:
+
+```text
+EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_USER=wakilidesk@gmail.com
+EMAIL_PASSWORD=<gmail-app-password>
+EMAIL_USE_TLS=true
+DEFAULT_FROM_EMAIL=wakilidesk@gmail.com
+```
+
+Failed email reminders are marked failed with a failure reason. A failed email does not prevent other due reminders from being processed.
+
+## 21. Search
 
 Global search is tenant-scoped and confidentiality-aware.
 
@@ -698,7 +781,7 @@ Search can find:
 
 Search results only include records the current user has permission to view.
 
-## 21. Notifications
+## 22. Notifications
 
 Notifications are in-app, firm-scoped, and user-specific.
 
@@ -706,10 +789,11 @@ Current MVP notification examples:
 
 - Seed data ready.
 - Failed document processing.
+- Court diary reminders.
 
 Users can open the notification list and mark notifications as read.
 
-## 22. Firm Administration
+## 23. Firm Administration
 
 Firm administration includes:
 
@@ -745,7 +829,7 @@ Permissions are grouped by module, including clients, matters, documents, physic
 
 Use **Firm Profile** to update firm details such as legal name, display name, email, phone, address, city, country, timezone, currency, logo, theme color, and matter numbering pattern.
 
-## 23. Audit Trail
+## 24. Audit Trail
 
 Audit logging records significant system actions.
 
@@ -766,10 +850,11 @@ Current audited examples include:
 - Physical file creation and updates.
 - Physical file checkout and check-in.
 - Digitisation review creation.
+- Diary event creation and updates.
 
 Audit records are tenant-scoped and should not be edited through normal application interfaces.
 
-## 24. Data Protection Operating Notes
+## 25. Data Protection Operating Notes
 
 For pilot use:
 
@@ -778,12 +863,13 @@ For pilot use:
 - Avoid storing unnecessary national ID, passport, or KRA PIN data unless needed.
 - Use document categories consistently.
 - Keep physical file checkout records current.
+- Keep court diary events current after adjournments, mentions, and hearings.
 - Review overdue files regularly.
 - Confirm digitisation quality before marking files completed.
 - Do not use seeded passwords in production.
 - Do not commit `.env` files or secrets.
 
-## 25. Troubleshooting
+## 26. Troubleshooting
 
 ### Login page does not load
 
@@ -829,6 +915,16 @@ docker compose up worker
 
 For plain text documents, open the document detail page and use the reprocess action.
 
+### Diary reminders are not arriving
+
+Run the reminder command manually:
+
+```powershell
+docker compose exec web python manage.py send_diary_reminders
+```
+
+Confirm the event has pending reminders and the reminder time is due. For email reminders, confirm `EMAIL_BACKEND`, `EMAIL_HOST`, `EMAIL_USER`, `EMAIL_PASSWORD`, and `DEFAULT_FROM_EMAIL` are set correctly.
+
 ### Test database already exists
 
 If pytest fails during test database creation after an interrupted or parallel run, recreate the test database:
@@ -841,7 +937,7 @@ docker compose exec web pytest --create-db
 
 The current MVP uses Django templates and inline CSS in `src/templates/base.html`. It does not yet include a Tailwind build pipeline or separate frontend asset bundling.
 
-## 26. Developer and Admin Commands
+## 27. Developer and Admin Commands
 
 Apply migrations:
 
@@ -885,13 +981,19 @@ Run Django checks:
 docker compose exec web python manage.py check
 ```
 
+Send due diary reminders:
+
+```powershell
+docker compose exec web python manage.py send_diary_reminders
+```
+
 Check for missing migrations:
 
 ```powershell
 docker compose exec web python manage.py makemigrations --check --dry-run
 ```
 
-## 27. Pilot Readiness Checklist
+## 28. Pilot Readiness Checklist
 
 Before a controlled pilot:
 
@@ -906,21 +1008,22 @@ Before a controlled pilot:
 - Register several physical files.
 - Test checkout and check-in.
 - Record at least one digitisation review.
+- Create sample court diary events and confirm in-app reminders.
 - Confirm confidential matters are hidden from unassigned users.
 - Run the automated test suite.
 - Confirm backup and restore procedures in `docs/deployment-and-backup.md`.
 
-## 28. Known MVP Limitations
+## 29. Known MVP Limitations
 
 - OCR is a task boundary with plain-text extraction; scanned PDF/image OCR is future work.
 - Object storage is represented by private local storage in the current implementation.
 - Search is simple database filtering, not PostgreSQL full-text ranking yet.
 - Explicit matter access lists are not implemented yet.
-- Email delivery architecture exists through Django configuration, but production email workflows need hardening.
+- Email reminders use Django email settings, but production deliverability, bounce handling, and templates need hardening.
 - Advanced reporting is not implemented yet.
 - Client portal and external integrations are outside MVP scope.
 
-## 29. Recommended Next Improvements
+## 30. Recommended Next Improvements
 
 For the next post-MVP hardening pass:
 
@@ -930,4 +1033,4 @@ For the next post-MVP hardening pass:
 - Add S3/MinIO production storage adapter with signed downloads.
 - Add audit log review UI.
 - Add richer dashboard trends and recent activity.
-- Add email notification delivery.
+- Add recurring diary events and richer calendar export.

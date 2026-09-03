@@ -81,6 +81,15 @@ This repository contains the current wakiliDesk MVP through Milestone 7, plus Do
 - Document confidentiality inheritance validation
 - Regression tests for restricted records and assigned-user access
 
+## Milestone 8 contents
+
+- Court diary events linked to matters
+- Diary filters for type, status, assigned user, search text, and date range
+- Dashboard upcoming diary panel and diary metrics
+- In-app and email reminder records
+- Celery task and management command for due reminders
+- Tenant-scoped and confidentiality-aware diary access
+
 ## Local setup
 
 Create a local environment file:
@@ -129,6 +138,7 @@ docker compose up worker
 - Documents: http://localhost:8000/documents/
 - Physical files: http://localhost:8000/physical-files/
 - Digitisation: http://localhost:8000/physical-files/digitisation/
+- Diary: http://localhost:8000/diary/
 - Search: http://localhost:8000/search/
 - Notifications: http://localhost:8000/notifications/
 - Health: http://localhost:8000/health/

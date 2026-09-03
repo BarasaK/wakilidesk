@@ -4,6 +4,7 @@ from django.test import override_settings
 
 from accounts.models import User
 from clients.models import Client
+from diary.models import DiaryEvent, DiaryReminder
 from documents.models import Document
 from firms.models import Firm, FirmMembership
 from matters.models import Matter, MatterParty
@@ -26,6 +27,8 @@ def test_seed_dev_creates_kosmas_law_dummy_content_idempotently():
     assert MatterParty.objects.filter(firm=firm).count() == 6
     assert Document.objects.filter(firm=firm).count() == 6
     assert PhysicalFile.objects.filter(firm=firm).count() == 3
+    assert DiaryEvent.objects.filter(firm=firm).count() == 3
+    assert DiaryReminder.objects.filter(event__firm=firm).count() == 10
     assert Notification.objects.filter(firm=firm, title="Development data ready").count() == 1
 
     counts = {
@@ -33,6 +36,8 @@ def test_seed_dev_creates_kosmas_law_dummy_content_idempotently():
         "matters": Matter.objects.filter(firm=firm).count(),
         "documents": Document.objects.filter(firm=firm).count(),
         "physical_files": PhysicalFile.objects.filter(firm=firm).count(),
+        "diary_events": DiaryEvent.objects.filter(firm=firm).count(),
+        "diary_reminders": DiaryReminder.objects.filter(event__firm=firm).count(),
         "notifications": Notification.objects.filter(firm=firm).count(),
     }
 
@@ -42,4 +47,6 @@ def test_seed_dev_creates_kosmas_law_dummy_content_idempotently():
     assert Matter.objects.filter(firm=firm).count() == counts["matters"]
     assert Document.objects.filter(firm=firm).count() == counts["documents"]
     assert PhysicalFile.objects.filter(firm=firm).count() == counts["physical_files"]
+    assert DiaryEvent.objects.filter(firm=firm).count() == counts["diary_events"]
+    assert DiaryReminder.objects.filter(event__firm=firm).count() == counts["diary_reminders"]
     assert Notification.objects.filter(firm=firm).count() == counts["notifications"]

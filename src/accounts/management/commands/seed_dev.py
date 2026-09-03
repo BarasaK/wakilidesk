@@ -3,10 +3,12 @@ from __future__ import annotations
 from django.core.files.base import ContentFile
 from django.core.management.base import BaseCommand
 from django.db import transaction
+from django.utils import timezone
 
 from accounts.models import User
 from clients.models import Client
 from clients.services import create_client
+from diary.models import DiaryEvent, DiaryReminder
 from documents.models import Document
 from documents.services import create_document_with_version, ensure_default_document_categories
 from firms.models import Firm, FirmMembership
@@ -206,6 +208,7 @@ class Command(BaseCommand):
         advocate_user = context["users"]["advocate1"]
         domain = firm.slug.replace("-", "")
         clients = {}
+        matters = {}
 
         for spec in CLIENT_SPECS:
             client = Client.objects.filter(firm=firm, name=spec["name"]).first()
@@ -246,6 +249,9 @@ class Command(BaseCommand):
             self._seed_matter_parties(firm, matter, spec["parties"], domain)
             self._seed_documents(context, matter, spec, admin_user)
             self._seed_physical_file(context, matter, index)
+            matters[spec["title"]] = matter
+
+        self._seed_diary_events(context, matters)
 
         if not firm.notifications.filter(recipient=admin_user, title="Development data ready").exists():
             notify_user(
@@ -256,6 +262,69 @@ class Command(BaseCommand):
                 object_type="Firm",
                 object_id=firm.id,
             )
+
+    def _seed_diary_events(self, context, matters):
+        firm = context["firm"]
+        admin_user = context["users"]["admin"]
+        advocate_user = context["users"]["advocate1"]
+        now = timezone.now()
+        specs = [
+            {
+                "matter": matters["Employment Claim"],
+                "title": "Employment claim mention",
+                "event_type": DiaryEvent.EventType.MENTION,
+                "start_at": now + timezone.timedelta(days=2, hours=2),
+                "end_at": now + timezone.timedelta(days=2, hours=3),
+                "court_name": "Employment and Labour Relations Court",
+                "location": "Milimani Law Courts",
+                "assigned_to": advocate_user,
+            },
+            {
+                "matter": matters["Commercial Lease Review"],
+                "title": "Lease filing deadline",
+                "event_type": DiaryEvent.EventType.FILING_DEADLINE,
+                "start_at": now + timezone.timedelta(days=5),
+                "end_at": None,
+                "court_name": "",
+                "location": "Registry",
+                "assigned_to": admin_user,
+            },
+            {
+                "matter": matters["Shareholders Agreement"],
+                "title": "Client signing meeting",
+                "event_type": DiaryEvent.EventType.CLIENT_MEETING,
+                "start_at": now + timezone.timedelta(days=7, hours=4),
+                "end_at": now + timezone.timedelta(days=7, hours=5),
+                "court_name": "",
+                "location": "Boardroom",
+                "assigned_to": advocate_user,
+            },
+        ]
+
+        for spec in specs:
+            event, _created = DiaryEvent.objects.update_or_create(
+                firm=firm,
+                matter=spec["matter"],
+                title=spec["title"],
+                defaults={
+                    **spec,
+                    "firm": firm,
+                    "created_by": admin_user,
+                    "status": DiaryEvent.Status.SCHEDULED,
+                    "notes": "Seeded diary event for reminder testing.",
+                },
+            )
+            event.reminders.filter(status=DiaryReminder.Status.PENDING).delete()
+            for days_before in (1, 3):
+                remind_at = event.start_at - timezone.timedelta(days=days_before)
+                if remind_at <= timezone.now():
+                    continue
+                for channel in (DiaryReminder.Channel.IN_APP, DiaryReminder.Channel.EMAIL):
+                    DiaryReminder.objects.get_or_create(
+                        event=event,
+                        remind_at=remind_at,
+                        channel=channel,
+                    )
 
     def _seed_matter_parties(self, firm, matter, party_specs, domain):
         for party_type, name in party_specs:
