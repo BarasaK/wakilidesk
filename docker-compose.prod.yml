@@ -1,0 +1,52 @@
+services:
+  web:
+    build: .
+    command: gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers ${GUNICORN_WORKERS:-3} --timeout ${GUNICORN_TIMEOUT:-60}
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${WAKILIDESK_HOST_PORT:-8085}:8000"
+    env_file:
+      - ${WAKILIDESK_ENV_FILE:-.env.prod}
+    volumes:
+      - wakilidesk_media:/app/media
+      - wakilidesk_staticfiles:/app/staticfiles
+    depends_on:
+      - db
+      - redis
+
+  worker:
+    build: .
+    command: celery -A config worker --loglevel=${CELERY_LOG_LEVEL:-info}
+    restart: unless-stopped
+    env_file:
+      - ${WAKILIDESK_ENV_FILE:-.env.prod}
+    volumes:
+      - wakilidesk_media:/app/media
+    depends_on:
+      - db
+      - redis
+
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    env_file:
+      - ${WAKILIDESK_ENV_FILE:-.env.prod}
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - wakilidesk_postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - wakilidesk_redis_data:/data
+
+volumes:
+  wakilidesk_postgres_data:
+  wakilidesk_redis_data:
+  wakilidesk_media:
+  wakilidesk_staticfiles:

@@ -185,6 +185,7 @@ The seed command also creates default practice areas, document categories, stora
 
 - [Technical MVP manual](docs/user-manual.md): setup, seed data, local operations, troubleshooting, and pilot notes.
 - [End user manual](docs/end-user-manual.md): non-technical guide for firm users and administrators.
+- [VPS staging deployment](docs/vps-staging-deployment.md): Docker Compose and GitHub Actions deployment guide.
 
 ## Architectural decisions
 
