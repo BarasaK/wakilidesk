@@ -156,6 +156,25 @@
       grid-template-columns: 240px 1fr;
     }
 
+    .skip-link {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      z-index: 1000;
+      transform: translateY(-140%);
+      border-radius: 6px;
+      padding: 9px 12px;
+      background: var(--accent);
+      color: #fff;
+      font-weight: 700;
+      text-decoration: none;
+      transition: transform 0.15s ease;
+    }
+
+    .skip-link:focus {
+      transform: translateY(0);
+    }
+
     .sidebar {
       background: #16202a;
       color: #fff;
@@ -168,6 +187,10 @@
       text-decoration: none;
       padding: 9px 0;
       font-weight: 700;
+    }
+
+    .sidebar-branding .lede {
+      color: #bdd7d4;
     }
 
     .sidebar form {
@@ -205,6 +228,10 @@
       border-radius: 8px;
       padding: 20px;
       margin-bottom: 18px;
+    }
+
+    .panel:has(.table) {
+      overflow-x: auto;
     }
 
     .table {
@@ -587,11 +614,86 @@
       }
 
       .sidebar {
-        padding: 16px 18px;
+        position: sticky;
+        top: 0;
+        z-index: 30;
+        padding: 12px 14px 10px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+        box-shadow: 0 8px 24px rgba(16, 24, 40, 0.14);
+      }
+
+      .sidebar-branding {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 8px;
+      }
+
+      .sidebar .brand {
+        flex: 0 0 auto;
+        margin: 0;
+        font-size: 1.2rem;
+      }
+
+      .sidebar .lede {
+        overflow: hidden;
+        margin: 0;
+        color: #bdd7d4;
+        font-size: 0.82rem;
+        text-align: right;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .sidebar nav {
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        padding: 2px 0 4px;
+        scrollbar-width: thin;
+        scroll-snap-type: x proximity;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .sidebar a,
+      .sidebar button.link-button {
+        display: inline-flex;
+        flex: 0 0 auto;
+        align-items: center;
+        min-height: 38px;
+        border: 1px solid rgba(217, 242, 239, 0.2);
+        border-radius: 6px;
+        padding: 8px 11px;
+        background: rgba(255, 255, 255, 0.06);
+        line-height: 1;
+        scroll-snap-align: start;
+        white-space: nowrap;
+      }
+
+      .sidebar a:hover,
+      .sidebar a:focus,
+      .sidebar button.link-button:hover,
+      .sidebar button.link-button:focus {
+        background: rgba(255, 255, 255, 0.12);
+        outline: 2px solid rgba(217, 242, 239, 0.28);
+        outline-offset: 2px;
+      }
+
+      .sidebar form {
+        flex: 0 0 auto;
       }
 
       .main {
-        padding: 18px;
+        padding: 18px 14px;
+      }
+
+      .panel {
+        padding: 16px;
+      }
+
+      .table {
+        min-width: 620px;
       }
 
       .page-header {
