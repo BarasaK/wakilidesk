@@ -11,3 +11,5 @@ media/
 staticfiles/
 .mypy_cache/
 .ruff_cache/
+endusermanual_draft.md
+*.pdf
