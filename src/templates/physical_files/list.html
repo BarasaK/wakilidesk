@@ -9,8 +9,12 @@
       <p class="lede">Track storage, movement, and digitisation status.</p>
     </div>
     <div class="actions">
-      <a class="button secondary" href="{% url 'physical_file_create' %}">Register file</a>
-      <a class="button secondary" href="{% url 'storage_location_list' %}">Locations</a>
+      {% if "create_physical_file" in firm_permissions %}
+        <a class="button secondary" href="{% url 'physical_file_create' %}">Register file</a>
+      {% endif %}
+      {% if "change_storage_location" in firm_permissions %}
+        <a class="button secondary" href="{% url 'storage_location_list' %}">Locations</a>
+      {% endif %}
     </div>
   </header>
 

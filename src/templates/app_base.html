@@ -20,17 +20,37 @@
       </div>
       <nav aria-label="Primary">
         <a href="{% url 'dashboard' %}">Dashboard</a>
-        <a href="{% url 'client_list' %}">Clients</a>
-        <a href="{% url 'matter_list' %}">Matters</a>
-        <a href="{% url 'document_list' %}">Documents</a>
-        <a href="{% url 'physical_file_list' %}">Physical Files</a>
-        <a href="{% url 'diary_event_list' %}">Diary</a>
-        <a href="{% url 'digitisation_list' %}">Digitisation</a>
-        <a href="{% url 'global_search' %}">Search</a>
+        {% if "view_client" in firm_permissions %}
+          <a href="{% url 'client_list' %}">Clients</a>
+        {% endif %}
+        {% if "view_matter" in firm_permissions %}
+          <a href="{% url 'matter_list' %}">Matters</a>
+        {% endif %}
+        {% if "view_document" in firm_permissions %}
+          <a href="{% url 'document_list' %}">Documents</a>
+        {% endif %}
+        {% if "view_physical_file" in firm_permissions %}
+          <a href="{% url 'physical_file_list' %}">Physical Files</a>
+        {% endif %}
+        {% if "view_diaryevent" in firm_permissions %}
+          <a href="{% url 'diary_event_list' %}">Diary</a>
+        {% endif %}
+        {% if "view_physical_file" in firm_permissions %}
+          <a href="{% url 'digitisation_list' %}">Digitisation</a>
+        {% endif %}
+        {% if "view_client" in firm_permissions or "view_matter" in firm_permissions or "view_document" in firm_permissions or "view_physical_file" in firm_permissions %}
+          <a href="{% url 'global_search' %}">Search</a>
+        {% endif %}
         <a href="{% url 'notification_list' %}">Notifications</a>
-        <a href="{% url 'admin_users' %}">Users</a>
-        <a href="{% url 'roles_list' %}">Roles</a>
-        <a href="{% url 'firm_profile' %}">Firm Profile</a>
+        {% if "manage_users" in firm_permissions %}
+          <a href="{% url 'admin_users' %}">Users</a>
+        {% endif %}
+        {% if "manage_roles" in firm_permissions %}
+          <a href="{% url 'roles_list' %}">Roles</a>
+        {% endif %}
+        {% if "manage_firm_settings" in firm_permissions %}
+          <a href="{% url 'firm_profile' %}">Firm Profile</a>
+        {% endif %}
         <form method="post" action="{% url 'logout' %}">
           {% csrf_token %}
           <button class="link-button" type="submit">Sign out</button>

@@ -9,8 +9,12 @@
       <p class="lede">Digital file containers for client work.</p>
     </div>
     <div class="actions">
-      <a class="button secondary" href="{% url 'matter_create' %}">Create matter</a>
-      <a class="button secondary" href="{% url 'practice_area_list' %}">Practice areas</a>
+      {% if "create_matter" in firm_permissions %}
+        <a class="button secondary" href="{% url 'matter_create' %}">Create matter</a>
+      {% endif %}
+      {% if "manage_firm_settings" in firm_permissions %}
+        <a class="button secondary" href="{% url 'practice_area_list' %}">Practice areas</a>
+      {% endif %}
     </div>
   </header>
 

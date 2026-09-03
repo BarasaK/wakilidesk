@@ -8,7 +8,9 @@
       <h2>Practice Areas</h2>
       <p class="lede">Matter-number prefixes and reporting categories.</p>
     </div>
-    <a class="button secondary" href="{% url 'practice_area_create' %}">Create practice area</a>
+    {% if "manage_firm_settings" in firm_permissions %}
+      <a class="button secondary" href="{% url 'practice_area_create' %}">Create practice area</a>
+    {% endif %}
   </header>
 
   <section class="panel">
@@ -27,7 +29,11 @@
             <td>{{ area.name }}</td>
             <td>{{ area.code }}</td>
             <td>{% if area.is_active %}Active{% else %}Inactive{% endif %}</td>
-            <td><a href="{% url 'practice_area_edit' area.id %}">Edit</a></td>
+            <td>
+              {% if "manage_firm_settings" in firm_permissions %}
+                <a href="{% url 'practice_area_edit' area.id %}">Edit</a>
+              {% endif %}
+            </td>
           </tr>
         {% empty %}
           <tr><td colspan="4">No practice areas found.</td></tr>

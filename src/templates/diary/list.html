@@ -10,7 +10,9 @@
     </div>
     <div class="actions">
       <a class="button secondary" href="{% url 'diary_calendar' %}">Calendar view</a>
-      <a class="button secondary" href="{% url 'diary_event_create' %}">Create diary event</a>
+      {% if "create_diaryevent" in firm_permissions %}
+        <a class="button secondary" href="{% url 'diary_event_create' %}">Create diary event</a>
+      {% endif %}
     </div>
   </header>
 

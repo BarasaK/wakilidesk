@@ -9,8 +9,12 @@
       <p class="lede">Matter-linked document records and versions.</p>
     </div>
     <div class="actions">
-      <a class="button secondary" href="{% url 'document_upload' %}">Upload document</a>
-      <a class="button secondary" href="{% url 'document_category_list' %}">Categories</a>
+      {% if "upload_document" in firm_permissions %}
+        <a class="button secondary" href="{% url 'document_upload' %}">Upload document</a>
+      {% endif %}
+      {% if "manage_firm_settings" in firm_permissions %}
+        <a class="button secondary" href="{% url 'document_category_list' %}">Categories</a>
+      {% endif %}
     </div>
   </header>
 

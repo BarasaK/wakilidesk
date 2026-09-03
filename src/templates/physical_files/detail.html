@@ -9,9 +9,15 @@
       <p class="lede">{{ physical_file.matter.matter_number }} · {{ physical_file.matter.title }}</p>
     </div>
     <div class="actions">
-      <a class="button secondary" href="{% url 'physical_file_edit' physical_file.id %}">Edit</a>
-      <a class="button secondary" href="{% url 'physical_file_checkout' physical_file.id %}">Check out</a>
-      <a class="button secondary" href="{% url 'physical_file_checkin' physical_file.id %}">Check in</a>
+      {% if "change_storage_location" in firm_permissions %}
+        <a class="button secondary" href="{% url 'physical_file_edit' physical_file.id %}">Edit</a>
+      {% endif %}
+      {% if "checkout_physical_file" in firm_permissions %}
+        <a class="button secondary" href="{% url 'physical_file_checkout' physical_file.id %}">Check out</a>
+      {% endif %}
+      {% if "checkin_physical_file" in firm_permissions %}
+        <a class="button secondary" href="{% url 'physical_file_checkin' physical_file.id %}">Check in</a>
+      {% endif %}
     </div>
   </header>
 

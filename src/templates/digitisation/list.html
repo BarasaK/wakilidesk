@@ -20,7 +20,11 @@
             <td>{{ file.matter.matter_number }}</td>
             <td>{{ file.get_digitisation_status_display }}</td>
             <td>{{ file.digitisation_reviews.count }}</td>
-            <td><a href="{% url 'digitisation_review_create' file.id %}">Review</a></td>
+            <td>
+              {% if "change_storage_location" in firm_permissions %}
+                <a href="{% url 'digitisation_review_create' file.id %}">Review</a>
+              {% endif %}
+            </td>
           </tr>
         {% empty %}
           <tr><td colspan="5">No physical files registered.</td></tr>

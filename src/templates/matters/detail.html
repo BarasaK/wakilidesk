@@ -9,8 +9,10 @@
       <p class="lede">{{ matter.title }}</p>
     </div>
     <div class="actions">
-      <a class="button secondary" href="{% url 'matter_edit' matter.id %}">Edit matter</a>
-      <a class="button secondary" href="{% url 'matter_party_create' matter.id %}">Add party</a>
+      {% if "edit_matter" in firm_permissions %}
+        <a class="button secondary" href="{% url 'matter_edit' matter.id %}">Edit matter</a>
+        <a class="button secondary" href="{% url 'matter_party_create' matter.id %}">Add party</a>
+      {% endif %}
     </div>
   </header>
 
