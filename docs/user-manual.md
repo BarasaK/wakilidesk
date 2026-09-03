@@ -4,6 +4,8 @@ This manual explains how to run, seed, navigate, administer, and test the curren
 
 wakiliDesk is a multi-tenant records and digital file management system for Kenyan law firms. The current MVP focuses on firm onboarding, users and roles, clients, matters, document management, physical file tracking, digitisation review, search, notifications, audit logging, and confidentiality-aware access controls.
 
+For system flow, framework choices, module boundaries, API routes, background jobs, and deployment architecture, see `docs/architecture.md`.
+
 ## 1. MVP Scope
 
 The MVP supports:
