@@ -42,11 +42,16 @@ After adding the user to the Docker group, log out and log back in before testin
 
 Create the first checkout manually. This avoids giving GitHub Actions passwordless `sudo` access on a shared VPS.
 
-As `deploy`:
+As `root` or another sudo-capable user:
 
 ```bash
-sudo mkdir -p /opt/wakilidesk
-sudo chown deploy:deploy /opt/wakilidesk
+mkdir -p /opt/wakilidesk
+chown deploy:deploy /opt/wakilidesk
+```
+
+Then as `deploy`:
+
+```bash
 git clone https://github.com/BarasaK/wakilidesk.git /opt/wakilidesk
 cd /opt/wakilidesk
 cp .env.prod.example .env.prod

@@ -98,7 +98,72 @@ docker compose up worker
 - MinIO API: http://localhost:9000/
 - MinIO console: http://localhost:9001/
 
-## 4. Seeded Demo Data
+## 4. VPS Staging Deployment
+
+The MVP includes a production-style Docker Compose file and GitHub Actions workflow for staging deployments to the VPS.
+
+Current staging target:
+
+```text
+http://184.174.32.103:8085/
+```
+
+Primary files:
+
+- `.github/workflows/deploy.yml`
+- `docker-compose.prod.yml`
+- `.env.prod.example`
+- `scripts/deploy.sh`
+- `docs/vps-staging-deployment.md`
+
+The GitHub Actions workflow deploys automatically when `master` is pushed. It SSHs into the VPS, resets `/opt/wakilidesk` to `origin/master`, builds images, starts Postgres and Redis, waits for Postgres readiness, runs migrations, collects static files, restarts the web and worker containers, and runs Django checks.
+
+Server-only configuration lives in `/opt/wakilidesk/.env.prod` and must not be committed.
+
+Important staging environment values:
+
+```text
+DJANGO_DEBUG=false
+ALLOWED_HOSTS=184.174.32.103,localhost,127.0.0.1
+CSRF_TRUSTED_ORIGINS=http://184.174.32.103:8085
+WAKILIDESK_HOST_PORT=8085
+WAKILIDESK_HOST_BIND=0.0.0.0
+```
+
+Use `WAKILIDESK_HOST_BIND=0.0.0.0` only for temporary direct-IP staging access. For Nginx reverse proxy access through a domain, change it back to `127.0.0.1` and proxy traffic to `http://127.0.0.1:8085`.
+
+Manual redeploy from the VPS:
+
+```bash
+cd /opt/wakilidesk
+APP_DIR=/opt/wakilidesk scripts/deploy.sh
+```
+
+Confirm the staging app is healthy:
+
+```bash
+curl -f http://127.0.0.1:8085/health/
+curl -f http://184.174.32.103:8085/health/
+```
+
+Seed staging demo data:
+
+```bash
+cd /opt/wakilidesk
+docker compose --env-file .env.prod -f docker-compose.prod.yml exec web python manage.py seed_dev
+```
+
+If `docker compose ps` shows `127.0.0.1:8085->8000/tcp` after setting `WAKILIDESK_HOST_BIND=0.0.0.0`, recreate the web container:
+
+```bash
+docker compose --env-file .env.prod -f docker-compose.prod.yml stop web
+docker compose --env-file .env.prod -f docker-compose.prod.yml rm -f web
+docker compose --env-file .env.prod -f docker-compose.prod.yml up -d web
+```
+
+For the full VPS setup and rollback procedure, use `docs/vps-staging-deployment.md`.
+
+## 5. Seeded Demo Data
 
 The `seed_dev` command creates three demo law firms:
 
@@ -160,7 +225,7 @@ Each firm receives:
 - Three physical files.
 - One in-app notification.
 
-## 5. User Roles
+## 6. User Roles
 
 wakiliDesk uses firm-scoped roles. A user receives access through a firm membership, not through a single firm field on the user account.
 
@@ -204,7 +269,7 @@ Can view clients, matters, documents, physical files, and audit logs. Can downlo
 
 Placeholder role for future billing and accounts modules. It currently has no default permissions.
 
-## 6. Signing In
+## 7. Signing In
 
 Open http://localhost:8000/accounts/login/.
 
@@ -217,7 +282,7 @@ ChangeMe123!
 
 After login, wakiliDesk opens the current firm dashboard. If a user belongs to more than one firm, firm switching links appear on the dashboard.
 
-## 7. Creating a New Firm
+## 8. Creating a New Firm
 
 Use signup when testing a fresh firm onboarding journey.
 
@@ -235,7 +300,7 @@ Default firm values are optimized for Kenyan firms:
 - Currency: KES
 - Matter number pattern: `{PRACTICE_AREA}/{YEAR}/{SEQUENCE}`
 
-## 8. Dashboard
+## 9. Dashboard
 
 The dashboard gives an operational summary for the active firm. Metrics are filtered to records the current user can access.
 
@@ -257,7 +322,7 @@ Common actions provide shortcuts to:
 - Upload document.
 - Register file.
 
-## 9. Clients
+## 10. Clients
 
 Use **Clients** to maintain client records for the active firm.
 
@@ -296,7 +361,7 @@ wakiliDesk assigns a firm-scoped client number, for example `CL-00001`.
 
 Client records are tenant-scoped. A user from another firm cannot retrieve another firm's client.
 
-## 10. Matters
+## 11. Matters
 
 Matters are the main digital file containers.
 
@@ -354,7 +419,7 @@ LIT/2026/00001
 
 Matter party types include opposing party, interested party, witness, company director, and other.
 
-## 11. Confidentiality
+## 12. Confidentiality
 
 Confidentiality levels are:
 
@@ -375,7 +440,7 @@ Documents and physical files inherit access from their linked matter. If a user 
 
 A document cannot be saved with a confidentiality level lower than its linked matter. For example, a restricted matter cannot contain a standard document unless a future explicit override rule is added.
 
-## 12. Practice Areas
+## 13. Practice Areas
 
 Practice areas are firm-configurable.
 
@@ -394,7 +459,7 @@ Default practice areas include:
 
 Firm administrators can create and edit practice areas from the practice area screen. Practice area codes are used in generated matter numbers.
 
-## 13. Documents
+## 14. Documents
 
 Documents are matter-linked records with metadata and immutable file versions.
 
@@ -469,7 +534,7 @@ Use archive when a document should no longer appear as active. Archive does not 
 
 Users with restore permission can restore archived documents.
 
-## 14. Text Extraction and OCR Boundary
+## 15. Text Extraction and OCR Boundary
 
 The MVP includes the asynchronous processing boundary needed for OCR/text extraction.
 
@@ -488,7 +553,7 @@ docker compose up worker
 
 If Celery is not running, uploads still complete, but queued background extraction may not execute until a worker is available.
 
-## 15. Physical Files
+## 16. Physical Files
 
 Physical files represent paper files that coexist with digital records.
 
@@ -535,7 +600,7 @@ Digitisation statuses:
 
 Use edit to change file metadata, storage location, barcode/QR reference, notes, or digitisation state.
 
-## 16. Storage Locations
+## 17. Storage Locations
 
 Storage locations are hierarchical and firm-scoped.
 
@@ -550,7 +615,7 @@ Shelf 01
 
 Firm administrators or records users with the relevant permission can create and edit locations from the storage location screen.
 
-## 17. Checkout and Check-in
+## 18. Checkout and Check-in
 
 Checkout records who has a physical file and when it should be returned.
 
@@ -583,7 +648,7 @@ Once checked in, the physical file status returns to in storage.
 
 wakiliDesk prevents duplicate active checkouts for the same physical file.
 
-## 18. Digitisation Review
+## 19. Digitisation Review
 
 Digitisation review is used for historical paper-file conversion.
 
@@ -610,7 +675,7 @@ Review fields:
 
 If completion is confirmed, the linked physical file is marked completed. If there are quality issues, the file remains in quality review.
 
-## 19. Search
+## 20. Search
 
 Global search is tenant-scoped and confidentiality-aware.
 
@@ -633,7 +698,7 @@ Search can find:
 
 Search results only include records the current user has permission to view.
 
-## 20. Notifications
+## 21. Notifications
 
 Notifications are in-app, firm-scoped, and user-specific.
 
@@ -644,7 +709,7 @@ Current MVP notification examples:
 
 Users can open the notification list and mark notifications as read.
 
-## 21. Firm Administration
+## 22. Firm Administration
 
 Firm administration includes:
 
@@ -680,7 +745,7 @@ Permissions are grouped by module, including clients, matters, documents, physic
 
 Use **Firm Profile** to update firm details such as legal name, display name, email, phone, address, city, country, timezone, currency, logo, theme color, and matter numbering pattern.
 
-## 22. Audit Trail
+## 23. Audit Trail
 
 Audit logging records significant system actions.
 
@@ -704,7 +769,7 @@ Current audited examples include:
 
 Audit records are tenant-scoped and should not be edited through normal application interfaces.
 
-## 23. Data Protection Operating Notes
+## 24. Data Protection Operating Notes
 
 For pilot use:
 
@@ -718,7 +783,7 @@ For pilot use:
 - Do not use seeded passwords in production.
 - Do not commit `.env` files or secrets.
 
-## 24. Troubleshooting
+## 25. Troubleshooting
 
 ### Login page does not load
 
@@ -776,7 +841,7 @@ docker compose exec web pytest --create-db
 
 The current MVP uses Django templates and inline CSS in `src/templates/base.html`. It does not yet include a Tailwind build pipeline or separate frontend asset bundling.
 
-## 25. Developer and Admin Commands
+## 26. Developer and Admin Commands
 
 Apply migrations:
 
@@ -826,7 +891,7 @@ Check for missing migrations:
 docker compose exec web python manage.py makemigrations --check --dry-run
 ```
 
-## 26. Pilot Readiness Checklist
+## 27. Pilot Readiness Checklist
 
 Before a controlled pilot:
 
@@ -845,7 +910,7 @@ Before a controlled pilot:
 - Run the automated test suite.
 - Confirm backup and restore procedures in `docs/deployment-and-backup.md`.
 
-## 27. Known MVP Limitations
+## 28. Known MVP Limitations
 
 - OCR is a task boundary with plain-text extraction; scanned PDF/image OCR is future work.
 - Object storage is represented by private local storage in the current implementation.
@@ -855,7 +920,7 @@ Before a controlled pilot:
 - Advanced reporting is not implemented yet.
 - Client portal and external integrations are outside MVP scope.
 
-## 28. Recommended Next Improvements
+## 29. Recommended Next Improvements
 
 For the next post-MVP hardening pass:
 
