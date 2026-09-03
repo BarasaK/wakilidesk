@@ -1,0 +1,20 @@
+{% extends "app_base.html" %}
+
+{% block title %}Delete Diary Event | wakiliDesk{% endblock %}
+
+{% block app_content %}
+  <header class="page-header">
+    <div>
+      <h2>Delete Diary Event</h2>
+      <p class="lede">{{ event.title }}</p>
+    </div>
+  </header>
+
+  <section class="panel">
+    <p>This will remove the diary event and its pending reminders.</p>
+    <form method="post">
+      {% csrf_token %}
+      <button class="button" type="submit">Delete diary event</button>
+    </form>
+  </section>
+{% endblock %}

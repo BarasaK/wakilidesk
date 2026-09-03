@@ -68,6 +68,7 @@ CSRF_TRUSTED_ORIGINS=http://184.174.32.103
 POSTGRES_PASSWORD=<strong database password>
 WAKILIDESK_HOST_PORT=8085
 WAKILIDESK_HOST_BIND=127.0.0.1
+DEFAULT_FROM_EMAIL=wakilidesk@gmail.com
 ```
 
 Generate a Django secret locally or on the VPS:
@@ -129,6 +130,31 @@ Optional for staging:
 
 ```bash
 docker compose -f docker-compose.prod.yml exec web python manage.py seed_dev
+```
+
+Process due diary reminders manually:
+
+```bash
+docker compose --env-file .env.prod -f docker-compose.prod.yml exec web python manage.py send_diary_reminders
+```
+
+For offline or early staging tests, keep email on the console backend:
+
+```text
+EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend
+DEFAULT_FROM_EMAIL=wakilidesk@gmail.com
+```
+
+For Gmail SMTP testing, use a Gmail app password:
+
+```text
+EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_USER=wakilidesk@gmail.com
+EMAIL_PASSWORD=<gmail-app-password>
+EMAIL_USE_TLS=true
+DEFAULT_FROM_EMAIL=wakilidesk@gmail.com
 ```
 
 Do not seed production pilot data unless this is intentionally a demo/staging environment.

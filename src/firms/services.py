@@ -34,6 +34,13 @@ DEFAULT_PERMISSIONS = {
         "checkin_physical_file",
         "change_storage_location",
     ],
+    "Diary": [
+        "view_diaryevent",
+        "create_diaryevent",
+        "edit_diaryevent",
+        "delete_diaryevent",
+        "manage_diary_reminders",
+    ],
     "Administration": [
         "manage_users",
         "manage_roles",
@@ -56,6 +63,10 @@ DEFAULT_ROLES = {
         "download_document",
         "create_document_version",
         "view_physical_file",
+        "view_diaryevent",
+        "create_diaryevent",
+        "edit_diaryevent",
+        "manage_diary_reminders",
     ],
     "Advocate": [
         "view_client",
@@ -66,6 +77,9 @@ DEFAULT_ROLES = {
         "upload_document",
         "download_document",
         "create_document_version",
+        "view_diaryevent",
+        "create_diaryevent",
+        "edit_diaryevent",
     ],
     "Secretary": [
         "view_client",
@@ -77,6 +91,9 @@ DEFAULT_ROLES = {
         "upload_document",
         "edit_document_metadata",
         "view_physical_file",
+        "view_diaryevent",
+        "create_diaryevent",
+        "edit_diaryevent",
     ],
     "Clerk / Records Officer": [
         "view_client",
@@ -90,6 +107,7 @@ DEFAULT_ROLES = {
         "checkout_physical_file",
         "checkin_physical_file",
         "change_storage_location",
+        "view_diaryevent",
     ],
     "Auditor / Read-only": [
         "view_client",
@@ -97,9 +115,18 @@ DEFAULT_ROLES = {
         "view_document",
         "download_document",
         "view_physical_file",
+        "view_diaryevent",
         "view_audit_logs",
     ],
     "Finance": [],
+}
+
+PERMISSION_LABELS = {
+    "view_diaryevent": "View Diary Event",
+    "create_diaryevent": "Create Diary Event",
+    "edit_diaryevent": "Edit Diary Event",
+    "delete_diaryevent": "Delete Diary Event",
+    "manage_diary_reminders": "Manage Diary Reminders",
 }
 
 
@@ -111,7 +138,7 @@ def ensure_default_permissions() -> dict[str, Permission]:
                 codename=codename,
                 defaults={
                     "module": module,
-                    "name": codename.replace("_", " ").title(),
+                    "name": PERMISSION_LABELS.get(codename, codename.replace("_", " ").title()),
                 },
             )
             permissions[codename] = permission

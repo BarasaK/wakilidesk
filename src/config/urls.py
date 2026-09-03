@@ -14,6 +14,7 @@ urlpatterns = [
     path("matters/", include("matters.urls")),
     path("documents/", include("documents.urls")),
     path("physical-files/", include("physical_files.urls")),
+    path("diary/", include("diary.urls")),
     path("notifications/", include("notifications.urls")),
     path("search/", include("search.urls")),
     path("", firm_views.dashboard, name="dashboard"),

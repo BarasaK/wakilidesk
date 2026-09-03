@@ -1,0 +1,72 @@
+{% extends "app_base.html" %}
+
+{% block title %}{{ event.title }} | wakiliDesk{% endblock %}
+
+{% block app_content %}
+  <header class="page-header">
+    <div>
+      <h2>{{ event.title }}</h2>
+      <p class="lede">{{ event.get_event_type_display }} on {{ event.start_at|date:"d M Y H:i" }}</p>
+    </div>
+    <div class="actions">
+      <a class="button secondary" href="{% url 'diary_event_edit' event.id %}">Edit event</a>
+      <a class="button secondary" href="{% url 'diary_event_delete' event.id %}">Delete</a>
+    </div>
+  </header>
+
+  <section class="panel">
+    <h3>Event Details</h3>
+    <p>Status: {{ event.get_status_display }}</p>
+    <p>Starts: {{ event.start_at|date:"d M Y H:i" }}</p>
+    <p>Ends: {% if event.end_at %}{{ event.end_at|date:"d M Y H:i" }}{% else %}-{% endif %}</p>
+    <p>Matter: {% if event.matter %}<a href="{% url 'matter_detail' event.matter.id %}">{{ event.matter.matter_number }} {{ event.matter.title }}</a>{% else %}-{% endif %}</p>
+    <p>Court: {{ event.court_name|default:"-" }}</p>
+    <p>Location: {{ event.location|default:"-" }}</p>
+    <p>Assigned to: {{ event.assigned_to.email|default:"-" }}</p>
+    <p>Notes: {{ event.notes|default:"-" }}</p>
+  </section>
+
+  <section class="panel">
+    <h3>Reminder Status</h3>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>When</th>
+          <th>Channel</th>
+          <th>Status</th>
+          <th>Sent</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for reminder in event.reminders.all %}
+          <tr>
+            <td>{{ reminder.remind_at|date:"d M Y H:i" }}</td>
+            <td>{{ reminder.get_channel_display }}</td>
+            <td>{{ reminder.get_status_display }}</td>
+            <td>{% if reminder.sent_at %}{{ reminder.sent_at|date:"d M Y H:i" }}{% else %}-{% endif %}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="4">No reminders configured.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+
+  <section class="panel">
+    <h3>Update Status</h3>
+    <div class="actions">
+      <form method="post" action="{% url 'diary_event_status' event.id 'COMPLETED' %}">
+        {% csrf_token %}
+        <button class="button secondary" type="submit">Mark completed</button>
+      </form>
+      <form method="post" action="{% url 'diary_event_status' event.id 'ADJOURNED' %}">
+        {% csrf_token %}
+        <button class="button secondary" type="submit">Mark adjourned</button>
+      </form>
+      <form method="post" action="{% url 'diary_event_status' event.id 'CANCELLED' %}">
+        {% csrf_token %}
+        <button class="button secondary" type="submit">Cancel event</button>
+      </form>
+    </div>
+  </section>
+{% endblock %}

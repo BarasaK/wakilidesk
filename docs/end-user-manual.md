@@ -15,6 +15,7 @@ Use it to:
 - Track physical files.
 - Check files out and back in.
 - Monitor digitisation work.
+- Track court dates, filing deadlines, meetings, and reminders.
 - Search firm records.
 - Receive filing and processing notifications.
 - Control access to confidential matters.
@@ -29,6 +30,7 @@ After signing in, the left navigation gives access to:
 - **Documents**: uploaded document records and versions.
 - **Physical Files**: paper file register and movement tracking.
 - **Digitisation**: scanning and quality review tracking.
+- **Diary**: court dates, filing deadlines, meetings, and reminders.
 - **Search**: firm-wide search across permitted records.
 - **Notifications**: messages that need attention.
 - **Users, Roles, Firm Profile**: administration areas for authorised users.
@@ -42,6 +44,8 @@ flowchart TD
     C --> D[Create Matter]
     D --> E[Upload Documents]
     D --> F[Register Physical File]
+    D --> J[Add Diary Event]
+    J --> K[Receive Reminder]
     F --> G[Check file out or in]
     F --> H[Digitisation Review]
     E --> I[Searchable Digital Record]
@@ -70,10 +74,12 @@ You can see:
 - Physical files currently checked out.
 - Files awaiting return.
 - Files awaiting quality review.
+- Upcoming diary events.
+- Past scheduled diary events needing follow-up.
 - Unread notifications.
 - Digitisation progress.
 
-Use the quick action links to create a client, create a matter, upload a document, or register a physical file.
+Use the quick action links to create a client, create a matter, upload a document, register a physical file, or add a diary event.
 
 Dashboard numbers only include records you are allowed to view.
 
@@ -335,7 +341,41 @@ flowchart TD
 
 If completion is confirmed, wakiliDesk marks the physical file as completed. If quality problems are recorded, the file remains in quality review.
 
-## 13. Search
+## 13. Court Diary
+
+Use the diary to track court appearances, filing deadlines, meetings, and internal follow-up work.
+
+### Create a Diary Event
+
+```mermaid
+flowchart TD
+    A[Open Diary] --> B[Create diary event]
+    B --> C[Link matter if needed]
+    C --> D[Enter date, time, court, and location]
+    D --> E[Assign user]
+    E --> F[Choose reminders]
+    F --> G[Save]
+    G --> H[Reminder appears when due]
+```
+
+1. Open **Diary**.
+2. Select **Create diary event**.
+3. Link the event to a matter if it belongs to a case file.
+4. Choose the event type, such as mention, hearing, filing deadline, client meeting, or internal task.
+5. Enter the date, time, court, and location.
+6. Assign the event to the responsible user.
+7. Choose reminders, such as 1 day before or 3 days before.
+8. Save.
+
+### Use Reminders
+
+Reminders appear in **Notifications** when due. If email reminders are enabled by the firm administrator, assigned users may also receive an email.
+
+If a court date is completed, adjourned, or cancelled, open the diary event and update its status. This keeps the dashboard accurate.
+
+Diary items linked to confidential matters are only visible to users who can view those matters.
+
+## 14. Search
 
 Use **Search** to find permitted records across the firm.
 
@@ -358,18 +398,19 @@ You can search for:
 
 Search respects permissions and confidentiality. If you cannot access a matter, related documents and physical files do not appear in your results.
 
-## 14. Notifications
+## 15. Notifications
 
 Notifications show items needing attention.
 
 Examples:
 
 - A document processing issue.
+- A court diary reminder.
 - Seed/demo data notice during testing.
 
 Open **Notifications** to view messages. Mark a notification as read once it has been handled.
 
-## 15. Firm Administration
+## 16. Firm Administration
 
 Only authorised users can access administration screens.
 
@@ -416,7 +457,7 @@ Keep permissions limited to what each role needs.
 
 Use **Firm Profile** to update the firm's details, including display name, contact information, address, timezone, currency, logo, theme color, and matter numbering pattern.
 
-## 16. Good Practice for Law Firms
+## 17. Good Practice for Law Firms
 
 - Create the client before creating a matter.
 - Keep matter titles clear and consistent.
@@ -424,6 +465,8 @@ Use **Firm Profile** to update the firm's details, including display name, conta
 - Add matter parties early for easier search.
 - Upload documents to the correct matter.
 - Use document categories carefully.
+- Add court dates and filing deadlines as soon as they are known.
+- Update diary statuses after mentions, hearings, adjournments, and cancellations.
 - Avoid duplicate document records; use new versions for revised documents.
 - Keep physical file locations current.
 - Check files out whenever they leave storage.
@@ -433,9 +476,9 @@ Use **Firm Profile** to update the firm's details, including display name, conta
 - Use restricted confidentiality only where needed.
 - Do not share user accounts.
 
-## 17. What to Do When Something Is Missing
+## 18. What to Do When Something Is Missing
 
-If you cannot see a client, matter, document, or physical file:
+If you cannot see a client, matter, document, diary event, or physical file:
 
 1. Confirm you are in the correct firm.
 2. Try searching by a different reference or title.
@@ -449,11 +492,12 @@ If you cannot perform an action:
 2. Confirm the record is not restricted.
 3. Ask an administrator to check your role.
 
-## 18. End User Glossary
+## 19. End User Glossary
 
 - **Client**: the person or organisation represented by the firm.
 - **Matter**: the legal file, case, transaction, or assignment.
 - **Matter party**: another person or organisation connected to the matter.
+- **Diary event**: a dated court appearance, deadline, meeting, or task.
 - **Practice area**: the area of law, such as litigation or conveyancing.
 - **Document**: a file uploaded into wakiliDesk with metadata.
 - **Document version**: a saved revision of a document file.
@@ -467,7 +511,7 @@ If you cannot perform an action:
 - **Role**: a group of permissions assigned to a user.
 - **Permission**: approval to view or perform a specific action.
 
-## 19. Quick Reference
+## 20. Quick Reference
 
 Common tasks:
 
@@ -480,6 +524,7 @@ Common tasks:
 - Check out file: open physical file -> **Check out**.
 - Check in file: open physical file -> **Check in**.
 - Review digitisation: **Digitisation** -> open review form.
+- Add court date or deadline: **Diary** -> **Create diary event**.
 - Search records: **Search**.
 - Read notifications: **Notifications**.
 - Invite user: **Users** -> **Invite user**.
