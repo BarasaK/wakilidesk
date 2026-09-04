@@ -14,6 +14,7 @@ The MVP supports:
 - Law firm workspace creation.
 - Firm profile administration.
 - Firm branding with logo and theme color.
+- Firm logo upload during setup/profile, with image preview where a logo is configured.
 - Firm users, invitations, roles, and configurable permissions.
 - Client records.
 - Matter records and matter parties.
@@ -309,6 +310,8 @@ Default firm values are optimized for Kenyan firms:
 - Timezone: Africa/Nairobi
 - Currency: KES
 - Matter number pattern: `{PRACTICE_AREA}/{YEAR}/{SEQUENCE}`
+
+The setup form can capture a firm logo. Existing logos are rendered as an image preview in the firm profile form instead of only showing the uploaded file path.
 
 ## 9. Dashboard
 
@@ -884,7 +887,7 @@ Permissions are grouped by module, including clients, matters, documents, physic
 
 ### Manage firm profile
 
-Use **Firm Profile** to update firm details such as legal name, display name, email, phone, address, city, country, timezone, currency, logo, theme color, and matter numbering pattern.
+Use **Firm Profile** to update firm details such as legal name, display name, email, phone, address, city, country, timezone, currency, logo, theme color, and matter numbering pattern. When a logo has been uploaded, the current image is shown in the form before the file input.
 
 ## 25. Audit Trail
 

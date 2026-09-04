@@ -1,5 +1,7 @@
 from django.contrib import admin
+from django.conf import settings
 from django.urls import include, path
+from django.views.static import serve
 
 from common.views import health
 from firms import views as firm_views
@@ -27,4 +29,10 @@ urlpatterns = [
     path("app/administration/roles/new/", firm_views.role_create, name="role_create"),
     path("app/administration/roles/<uuid:role_id>/edit/", firm_views.role_edit, name="role_edit"),
     path("app/firms/<uuid:firm_id>/", firm_views.firm_detail, name="firm_detail"),
+    path(
+        "media/firm-logos/<path:path>",
+        serve,
+        {"document_root": settings.MEDIA_ROOT / "firm-logos"},
+        name="firm_logo_media",
+    ),
 ]

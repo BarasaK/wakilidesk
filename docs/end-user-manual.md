@@ -496,7 +496,7 @@ Keep permissions limited to what each role needs.
 
 ### Update Firm Profile
 
-Use **Firm Profile** to update the firm's details, including display name, contact information, address, timezone, currency, logo, theme color, and matter numbering pattern.
+Use **Firm Profile** to update the firm's details, including display name, contact information, address, timezone, currency, logo, theme color, and matter numbering pattern. If a logo has already been uploaded, the current image is shown before the logo upload field.
 
 ## 18. Good Practice for Law Firms
 
