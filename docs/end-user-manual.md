@@ -2,6 +2,8 @@
 
 This guide is for law firm staff using wakiliDesk in day-to-day work. It avoids technical setup details and focuses on how to use the system.
 
+The hosted version of this guide is available at `/documentation/` on the wakiliDesk site.
+
 ## 1. What wakiliDesk Does
 
 wakiliDesk helps a law firm manage digital and physical legal files in one place.

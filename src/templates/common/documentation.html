@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}Documentation | wakiliDesk{% endblock %}
+
+{% block content %}
+  <main class="documentation-shell">
+    <article class="documentation-content">
+      {{ manual_html|safe }}
+    </article>
+  </main>
+  <script type="module">
+    import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+    mermaid.initialize({ startOnLoad: true, securityLevel: "strict" });
+  </script>
+{% endblock %}

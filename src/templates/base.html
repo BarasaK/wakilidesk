@@ -624,6 +624,61 @@
       font-size: 0.78rem;
     }
 
+    .documentation-shell {
+      width: min(100%, 1040px);
+      margin: 0 auto;
+      padding: 32px 20px 56px;
+    }
+
+    .documentation-content {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 32px;
+      background: #fff;
+      box-shadow: 0 16px 45px rgba(16, 24, 40, 0.08);
+    }
+
+    .documentation-content h1 {
+      margin: 0 0 10px;
+      font-size: 2rem;
+      letter-spacing: 0;
+    }
+
+    .documentation-content h2 {
+      margin: 34px 0 12px;
+      padding-top: 18px;
+      border-top: 1px solid var(--line);
+      font-size: 1.35rem;
+      letter-spacing: 0;
+    }
+
+    .documentation-content h3 {
+      margin: 24px 0 10px;
+      font-size: 1.05rem;
+      letter-spacing: 0;
+    }
+
+    .documentation-content p,
+    .documentation-content li {
+      color: #344054;
+    }
+
+    .documentation-content code {
+      border-radius: 4px;
+      padding: 2px 5px;
+      background: #f2f4f7;
+      color: #101828;
+    }
+
+    .documentation-content pre,
+    .documentation-content .mermaid {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+      background: #f8fafc;
+    }
+
     @media (max-width: 760px) {
       .app-shell {
         grid-template-columns: 1fr;
@@ -733,6 +788,14 @@
       .calendar-toolbar {
         justify-content: flex-start;
         flex-wrap: wrap;
+      }
+
+      .documentation-shell {
+        padding: 18px 14px 40px;
+      }
+
+      .documentation-content {
+        padding: 20px 16px;
       }
     }
   </style>
