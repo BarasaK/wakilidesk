@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "physical_files",
     "diary",
     "notifications",
+    "reports",
     "search",
 ]
 

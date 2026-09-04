@@ -28,6 +28,8 @@ The MVP supports:
 - Digitisation quality review records.
 - Court diary events, visual calendar, and reminder schedules.
 - Tenant-scoped global search.
+- Entity reports for clients, matters, documents, physical files, and diary events.
+- CSV, Excel-compatible `.xlsx`, and PDF report exports.
 - In-app notifications.
 - Optional email reminders through configured SMTP.
 - Dashboard metrics.
@@ -95,6 +97,7 @@ docker compose up worker
 - Diary: http://localhost:8000/diary/
 - Diary calendar: http://localhost:8000/diary/calendar/
 - Search: http://localhost:8000/search/
+- Reports: http://localhost:8000/reports/
 - Notifications: http://localhost:8000/notifications/
 - Firm users: http://localhost:8000/app/administration/users/
 - Roles: http://localhost:8000/app/administration/roles/
@@ -809,7 +812,45 @@ Current MVP notification examples:
 
 Users can open the notification list and mark notifications as read.
 
-## 23. Firm Administration
+## 23. Reports
+
+Reports export firm records the current user is allowed to view. The report menu is hidden from roles that do not have any supported view permission.
+
+Available report entities:
+
+- Clients.
+- Matters.
+- Documents.
+- Physical files.
+- Diary events.
+
+Available formats:
+
+- CSV for simple spreadsheet import.
+- Excel-compatible `.xlsx` for spreadsheet users.
+- PDF for printable summaries.
+
+PDF exports include the firm display name. If the firm has a logo configured in **Firm Profile**, the logo is placed at the top of the PDF.
+
+Reports use the same access rules as the screens:
+
+- Client reports require `view_client`.
+- Matter reports require `view_matter`.
+- Document reports require `view_document`.
+- Physical file reports require `view_physical_file`.
+- Diary event reports require `view_diaryevent`.
+- Restricted matter-linked records are hidden unless the user can access the linked matter.
+
+### Export a report
+
+1. Open **Reports**.
+2. Select the report entity.
+3. Select CSV, Excel, or PDF.
+4. Select **Export report**.
+
+The file downloads immediately. If no report options appear, the current role does not have reportable view permissions.
+
+## 24. Firm Administration
 
 Firm administration includes:
 
@@ -845,7 +886,7 @@ Permissions are grouped by module, including clients, matters, documents, physic
 
 Use **Firm Profile** to update firm details such as legal name, display name, email, phone, address, city, country, timezone, currency, logo, theme color, and matter numbering pattern.
 
-## 24. Audit Trail
+## 25. Audit Trail
 
 Audit logging records significant system actions.
 
@@ -870,7 +911,7 @@ Current audited examples include:
 
 Audit records are tenant-scoped and should not be edited through normal application interfaces.
 
-## 25. Data Protection Operating Notes
+## 26. Data Protection Operating Notes
 
 For pilot use:
 
@@ -880,12 +921,13 @@ For pilot use:
 - Use document categories consistently.
 - Keep physical file checkout records current.
 - Keep court diary events current after adjournments, mentions, and hearings.
+- Export reports only to approved firm storage or recipients.
 - Review overdue files regularly.
 - Confirm digitisation quality before marking files completed.
 - Do not use seeded passwords in production.
 - Do not commit `.env` files or secrets.
 
-## 26. Troubleshooting
+## 27. Troubleshooting
 
 ### Login page does not load
 
@@ -941,6 +983,10 @@ docker compose exec web python manage.py send_diary_reminders
 
 Confirm the event has pending reminders and the reminder time is due. For email reminders, confirm `EMAIL_BACKEND`, `EMAIL_HOST`, `EMAIL_USER`, `EMAIL_PASSWORD`, and `DEFAULT_FROM_EMAIL` are set correctly.
 
+### A report is missing records
+
+Confirm the user has the relevant view permission. For matter-linked reports, also confirm the user can access restricted or partner-only matters where applicable.
+
 ### Test database already exists
 
 If pytest fails during test database creation after an interrupted or parallel run, recreate the test database:
@@ -953,7 +999,7 @@ docker compose exec web pytest --create-db
 
 The current MVP uses Django templates and inline CSS in `src/templates/base.html`. It does not yet include a Tailwind build pipeline or separate frontend asset bundling.
 
-## 27. Developer and Admin Commands
+## 28. Developer and Admin Commands
 
 Apply migrations:
 
@@ -1009,7 +1055,7 @@ Check for missing migrations:
 docker compose exec web python manage.py makemigrations --check --dry-run
 ```
 
-## 28. Pilot Readiness Checklist
+## 29. Pilot Readiness Checklist
 
 Before a controlled pilot:
 
@@ -1025,21 +1071,23 @@ Before a controlled pilot:
 - Test checkout and check-in.
 - Record at least one digitisation review.
 - Create sample court diary events and confirm in-app reminders.
+- Export sample CSV, Excel, and PDF reports.
+- Confirm the firm logo appears in PDF reports when configured.
 - Confirm confidential matters are hidden from unassigned users.
 - Run the automated test suite.
 - Confirm backup and restore procedures in `docs/deployment-and-backup.md`.
 
-## 29. Known MVP Limitations
+## 30. Known MVP Limitations
 
 - OCR is a task boundary with plain-text extraction; scanned PDF/image OCR is future work.
 - Object storage is represented by private local storage in the current implementation.
 - Search is simple database filtering, not PostgreSQL full-text ranking yet.
 - Explicit matter access lists are not implemented yet.
 - Email reminders use Django email settings, but production deliverability, bounce handling, and templates need hardening.
-- Advanced reporting is not implemented yet.
+- Reports do not yet include user-selected date filters, saved report templates, or scheduled delivery.
 - Client portal and external integrations are outside MVP scope.
 
-## 30. Recommended Next Improvements
+## 31. Recommended Next Improvements
 
 For the next post-MVP hardening pass:
 
@@ -1050,3 +1098,4 @@ For the next post-MVP hardening pass:
 - Add audit log review UI.
 - Add richer dashboard trends and recent activity.
 - Add recurring diary events and richer calendar export.
+- Add report filters, report templates, and scheduled report emails.

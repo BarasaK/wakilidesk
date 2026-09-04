@@ -41,6 +41,9 @@
         {% if "view_client" in firm_permissions or "view_matter" in firm_permissions or "view_document" in firm_permissions or "view_physical_file" in firm_permissions %}
           <a href="{% url 'global_search' %}">Search</a>
         {% endif %}
+        {% if "view_client" in firm_permissions or "view_matter" in firm_permissions or "view_document" in firm_permissions or "view_physical_file" in firm_permissions or "view_diaryevent" in firm_permissions %}
+          <a href="{% url 'report_index' %}">Reports</a>
+        {% endif %}
         <a href="{% url 'notification_list' %}">Notifications</a>
         {% if "manage_users" in firm_permissions %}
           <a href="{% url 'admin_users' %}">Users</a>
