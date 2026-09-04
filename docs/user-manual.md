@@ -90,6 +90,7 @@ docker compose up worker
 - App dashboard: http://localhost:8000/
 - Sign in: http://localhost:8000/accounts/login/
 - Sign up: http://localhost:8000/accounts/signup/
+- End-user documentation: http://localhost:8000/documentation/
 - Clients: http://localhost:8000/clients/
 - Matters: http://localhost:8000/matters/
 - Documents: http://localhost:8000/documents/

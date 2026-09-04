@@ -280,6 +280,7 @@ Confirm domain access:
 ```bash
 curl -I https://staging.wakilidesk.com/health/
 curl -I https://staging.wakilidesk.com/accounts/login/
+curl -I https://staging.wakilidesk.com/documentation/
 ```
 
 Expected health response:

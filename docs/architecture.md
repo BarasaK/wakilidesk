@@ -236,6 +236,7 @@ The MVP is primarily server-rendered HTML. It does not expose a public REST API 
 | Area | Routes |
 | --- | --- |
 | Health | `/health/` |
+| Documentation | `/documentation/` |
 | Auth | `/accounts/login/`, `/accounts/logout/`, `/accounts/signup/`, `/accounts/invitations/<token>/accept/`, `/accounts/switch-firm/<firm_id>/` |
 | Dashboard/Firm | `/`, `/onboarding/firm/`, `/app/firm/profile/`, `/app/firms/<firm_id>/` |
 | Administration | `/app/administration/users/`, `/app/administration/users/invite/`, `/app/administration/roles/` |

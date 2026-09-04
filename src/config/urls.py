@@ -3,13 +3,14 @@ from django.conf import settings
 from django.urls import include, path
 from django.views.static import serve
 
-from common.views import health
+from common.views import documentation, health
 from firms import views as firm_views
 
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("health/", health, name="health"),
+    path("documentation/", documentation, name="documentation"),
     path("accounts/", include("accounts.urls")),
     path("accounts/", include("django.contrib.auth.urls")),
     path("clients/", include("clients.urls")),
