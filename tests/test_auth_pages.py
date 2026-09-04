@@ -13,6 +13,9 @@ def test_login_page_loads(client):
     assert response.status_code == 200
     assert b"wakiliDesk" in response.content
     assert b"Sign in" in response.content
+    assert b"Open user documentation" in response.content
+    assert reverse("documentation").encode() in response.content
+    assert b"development accounts from the README" not in response.content
 
 
 @pytest.mark.django_db
