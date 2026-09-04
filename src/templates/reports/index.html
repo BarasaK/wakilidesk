@@ -1,0 +1,71 @@
+{% extends "app_base.html" %}
+
+{% block title %}Reports | wakiliDesk{% endblock %}
+
+{% block app_content %}
+  <header class="page-header">
+    <div>
+      <h2>Reports</h2>
+      <p class="lede">Export accessible firm records for review, filing, and operations.</p>
+    </div>
+  </header>
+
+  <section class="panel">
+    {% if form.fields.entity.choices %}
+      <form method="get" action="{% url 'report_export' %}">
+        <div class="form-grid">
+          {% for field in form %}
+            <div class="field">
+              <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+              {{ field }}
+              {{ field.errors }}
+            </div>
+          {% endfor %}
+        </div>
+        <button class="button" type="submit">Export report</button>
+      </form>
+    {% else %}
+      <p>No reports are available for your current role.</p>
+    {% endif %}
+  </section>
+
+  <section class="panel">
+    <h3>Available Reports</h3>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Report</th>
+          <th>Included records</th>
+          <th>Formats</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Clients</td>
+          <td>Client number, name, type, contact details, and status.</td>
+          <td>CSV, Excel, PDF</td>
+        </tr>
+        <tr>
+          <td>Matters</td>
+          <td>Matter number, title, client, practice area, status, confidentiality, and assignees.</td>
+          <td>CSV, Excel, PDF</td>
+        </tr>
+        <tr>
+          <td>Documents</td>
+          <td>Document title, matter, category, reference, source, confidentiality, version, and status.</td>
+          <td>CSV, Excel, PDF</td>
+        </tr>
+        <tr>
+          <td>Physical files</td>
+          <td>File number, volume, matter, location, file status, digitisation status, and barcode.</td>
+          <td>CSV, Excel, PDF</td>
+        </tr>
+        <tr>
+          <td>Diary events</td>
+          <td>Event title, type, date, matter, court, location, assignee, and status.</td>
+          <td>CSV, Excel, PDF</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+{% endblock %}

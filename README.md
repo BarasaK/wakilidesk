@@ -2,7 +2,7 @@
 
 wakiliDesk is a multi-tenant records and digital file management system for Kenyan law firms.
 
-This repository contains the current wakiliDesk MVP through Milestone 8, plus Docker-based local development and VPS staging deployment automation.
+This repository contains the current wakiliDesk MVP through Milestone 9, plus Docker-based local development and VPS staging deployment automation.
 
 ## Milestone 0 contents
 
@@ -91,6 +91,15 @@ This repository contains the current wakiliDesk MVP through Milestone 8, plus Do
 - Celery task and management command for due reminders
 - Tenant-scoped and confidentiality-aware diary access
 
+## Milestone 9 contents
+
+- Entity reports for clients, matters, documents, physical files, and diary events
+- CSV exports for spreadsheet import and quick sharing
+- Excel-compatible `.xlsx` exports without an extra reporting dependency
+- PDF report exports with firm name and logo where a firm logo is configured
+- Permission-aware report navigation and direct export authorization
+- Confidentiality-aware report rows for matter-linked entities
+
 ## Local setup
 
 Create a local environment file:
@@ -142,6 +151,7 @@ docker compose up worker
 - Diary: http://localhost:8000/diary/
 - Diary calendar: http://localhost:8000/diary/calendar/
 - Search: http://localhost:8000/search/
+- Reports: http://localhost:8000/reports/
 - Notifications: http://localhost:8000/notifications/
 - Health: http://localhost:8000/health/
 - Django admin: http://localhost:8000/admin/
@@ -191,7 +201,7 @@ secretary@kosmaslaw.test
 clerk@kosmaslaw.test
 ```
 
-The seed command also creates default practice areas, document categories, storage locations, clients, matters, matter parties, documents, physical files, and notifications for each seeded firm.
+The seed command also creates default practice areas, document categories, storage locations, clients, matters, matter parties, documents, physical files, diary events, reminders, and notifications for each seeded firm.
 
 ## Manuals
 
@@ -211,4 +221,4 @@ The seed command also creates default practice areas, document categories, stora
 
 ## Next milestone
 
-Next work should add explicit matter access lists, deepen search with PostgreSQL full-text indexes, add a real PDF/OCR engine, harden document storage against production S3/MinIO, and add richer reporting.
+Next work should add explicit matter access lists, deepen search with PostgreSQL full-text indexes, add a real PDF/OCR engine, harden document storage against production S3/MinIO, and expand reporting with filters and scheduled delivery.

@@ -17,6 +17,7 @@ Use it to:
 - Monitor digitisation work.
 - Track court dates, filing deadlines, meetings, and reminders.
 - Search firm records.
+- Export reports.
 - Receive filing and processing notifications.
 - Control access to confidential matters.
 
@@ -32,6 +33,7 @@ After signing in, the left navigation gives access to:
 - **Digitisation**: scanning and quality review tracking.
 - **Diary**: court dates, filing deadlines, meetings, reminders, and a month calendar.
 - **Search**: firm-wide search across permitted records.
+- **Reports**: export clients, matters, documents, physical files, and diary events.
 - **Notifications**: messages that need attention.
 - **Users, Roles, Firm Profile**: administration areas for authorised users.
 
@@ -46,6 +48,7 @@ flowchart TD
     D --> F[Register Physical File]
     D --> J[Add Diary Event]
     J --> K[Receive Reminder]
+    B --> L[Export Reports]
     F --> G[Check file out or in]
     F --> H[Digitisation Review]
     E --> I[Searchable Digital Record]
@@ -383,7 +386,37 @@ Diary items linked to confidential matters are only visible to users who can vie
 4. Open an event from the calendar to view details.
 5. Use **Add** on a date to create a diary event for that day.
 
-## 14. Search
+## 14. Reports
+
+Use **Reports** to download summaries of the records you are allowed to view.
+
+Available reports:
+
+- Clients.
+- Matters.
+- Documents.
+- Physical files.
+- Diary events.
+
+Available formats:
+
+- **CSV**: useful for simple spreadsheet import.
+- **Excel**: useful for spreadsheet review.
+- **PDF**: useful for printing or sharing as a fixed summary.
+
+```mermaid
+flowchart LR
+    A[Open Reports] --> B[Choose record type]
+    B --> C[Choose CSV, Excel, or PDF]
+    C --> D[Export]
+    D --> E[Downloaded report]
+```
+
+PDF reports show the firm name and include the firm logo when the administrator has added one to the firm profile.
+
+Reports respect your role and matter confidentiality. If you cannot view a matter, its linked documents, physical files, and diary events are not included in your reports.
+
+## 15. Search
 
 Use **Search** to find permitted records across the firm.
 
@@ -406,7 +439,7 @@ You can search for:
 
 Search respects permissions and confidentiality. If you cannot access a matter, related documents and physical files do not appear in your results.
 
-## 15. Notifications
+## 16. Notifications
 
 Notifications show items needing attention.
 
@@ -418,7 +451,7 @@ Examples:
 
 Open **Notifications** to view messages. Mark a notification as read once it has been handled.
 
-## 16. Firm Administration
+## 17. Firm Administration
 
 Only authorised users can access administration screens.
 
@@ -465,7 +498,7 @@ Keep permissions limited to what each role needs.
 
 Use **Firm Profile** to update the firm's details, including display name, contact information, address, timezone, currency, logo, theme color, and matter numbering pattern.
 
-## 17. Good Practice for Law Firms
+## 18. Good Practice for Law Firms
 
 - Create the client before creating a matter.
 - Keep matter titles clear and consistent.
@@ -479,12 +512,13 @@ Use **Firm Profile** to update the firm's details, including display name, conta
 - Keep physical file locations current.
 - Check files out whenever they leave storage.
 - Check files in as soon as they return.
+- Export reports only when needed and store downloaded files securely.
 - Review overdue physical files regularly.
 - Do not mark digitisation complete until quality review is done.
 - Use restricted confidentiality only where needed.
 - Do not share user accounts.
 
-## 18. What to Do When Something Is Missing
+## 19. What to Do When Something Is Missing
 
 If you cannot see a client, matter, document, diary event, or physical file:
 
@@ -500,7 +534,7 @@ If you cannot perform an action:
 2. Confirm the record is not restricted.
 3. Ask an administrator to check your role.
 
-## 19. End User Glossary
+## 20. End User Glossary
 
 - **Client**: the person or organisation represented by the firm.
 - **Matter**: the legal file, case, transaction, or assignment.
@@ -515,11 +549,12 @@ If you cannot perform an action:
 - **Check-in**: recording that a physical file has been returned.
 - **Digitisation**: converting paper files into digital records.
 - **Quality review**: checking scanned records for completeness and readability.
+- **Report**: an exported summary of permitted firm records.
 - **Confidentiality**: access control for sensitive matters and linked records.
 - **Role**: a group of permissions assigned to a user.
 - **Permission**: approval to view or perform a specific action.
 
-## 20. Quick Reference
+## 21. Quick Reference
 
 Common tasks:
 
@@ -534,6 +569,7 @@ Common tasks:
 - Review digitisation: **Digitisation** -> open review form.
 - Add court date or deadline: **Diary** -> **Create diary event**.
 - Search records: **Search**.
+- Export report: **Reports** -> choose type and format -> **Export report**.
 - Read notifications: **Notifications**.
 - Invite user: **Users** -> **Invite user**.
 - Edit role permissions: **Roles** -> edit role.

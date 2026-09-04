@@ -46,6 +46,7 @@ flowchart LR
     Firms --> Documents[documents]
     Firms --> Physical[physical_files]
     Firms --> Diary[diary]
+    Firms --> Reports[reports]
     Firms --> Notifications[notifications]
     Firms --> Audit[audit]
     Clients --> Matters
@@ -55,6 +56,11 @@ flowchart LR
     Documents --> Search[search]
     Matters --> Search
     Physical --> Search
+    Clients --> Reports
+    Matters --> Reports
+    Documents --> Reports
+    Physical --> Reports
+    Diary --> Reports
 ```
 
 | App | Responsibility |
@@ -66,6 +72,7 @@ flowchart LR
 | `documents` | Document metadata, document versions, private file storage, archive/restore, download, OCR task boundary. |
 | `physical_files` | Paper file registry, storage locations, checkout/check-in, digitisation review. |
 | `diary` | Court diary events, month calendar, reminder records, reminder task/command. |
+| `reports` | Permission-aware entity exports for clients, matters, documents, physical files, and diary events. |
 | `notifications` | In-app notifications and read/unread state. |
 | `search` | Tenant-scoped global search across permitted records. |
 | `audit` | Tenant-scoped audit event records for important actions. |
@@ -207,6 +214,21 @@ flowchart TD
     H --> J[Mark failed if email errors]
 ```
 
+### Reports Flow
+
+```mermaid
+flowchart TD
+    A[Open Reports] --> B[Choose entity]
+    B --> C[Choose CSV, Excel, or PDF]
+    C --> D[Check firm permission]
+    D --> E[Build tenant-scoped queryset]
+    E --> F[Apply confidentiality-aware visibility helpers]
+    F --> G{Format}
+    G -->|CSV| H[Return CSV response]
+    G -->|Excel| I[Return XLSX response]
+    G -->|PDF| J[Return PDF with firm logo where available]
+```
+
 ## 8. HTTP Route Surface
 
 The MVP is primarily server-rendered HTML. It does not expose a public REST API yet.
@@ -226,6 +248,7 @@ The MVP is primarily server-rendered HTML. It does not expose a public REST API 
 | Digitisation | `/physical-files/digitisation/`, `/physical-files/<physical_file_id>/digitisation/review/` |
 | Storage Locations | `/physical-files/locations/`, `/physical-files/locations/new/`, `/physical-files/locations/<location_id>/edit/` |
 | Diary | `/diary/`, `/diary/calendar/`, `/diary/new/`, `/diary/<event_id>/`, `/diary/<event_id>/edit/`, `/diary/<event_id>/delete/` |
+| Reports | `/reports/`, `/reports/export/` |
 | Notifications | `/notifications/`, `/notifications/<notification_id>/read/` |
 | Search | `/search/` |
 
@@ -233,6 +256,7 @@ API-like behavior:
 
 - `/health/` returns JSON for uptime checks.
 - `/app/firms/<firm_id>/` returns JSON for a firm detail lookup after membership authorization.
+- `/reports/export/` returns CSV, Excel-compatible `.xlsx`, or PDF file responses after permission checks.
 
 Future API direction:
 
@@ -248,6 +272,8 @@ Celery currently handles task boundaries that should not block web requests.
 | --- | --- | --- |
 | Document text extraction | `documents.tasks.extract_text_for_version` | Extract plain text and mark PDFs/images for future OCR expansion. |
 | Diary reminders | `diary.tasks.send_diary_reminders` | Send due in-app and email reminders. |
+
+Reports are generated synchronously in the web request for the MVP. This is acceptable for small pilot datasets. Large exports should move to background jobs with downloadable report artifacts.
 
 Manual commands:
 
@@ -388,9 +414,9 @@ Priority candidates:
 
 1. E-filing/Judiciary integration after API access is confirmed.
 2. Calendar export or sync once diary workflows stabilize.
-3. S3-compatible storage and signed downloads.
-4. Full OCR for PDFs/images.
-5. PostgreSQL full-text search.
-6. Client portal.
-7. Billing, trust accounting, M-Pesa, and eTIMS.
-
+3. Report filters, saved report templates, and scheduled report delivery.
+4. S3-compatible storage and signed downloads.
+5. Full OCR for PDFs/images.
+6. PostgreSQL full-text search.
+7. Client portal.
+8. Billing, trust accounting, M-Pesa, and eTIMS.
