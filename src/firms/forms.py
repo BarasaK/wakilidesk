@@ -1,9 +1,26 @@
 from django import forms
+from django.utils.html import format_html
 
 from firms.models import Firm, Permission, Role, UserInvitation
 
 
 DEFAULT_ACCENT_COLOR = "#0f766e"
+
+
+class LogoPreviewWidget(forms.ClearableFileInput):
+    def render(self, name, value, attrs=None, renderer=None):
+        field_html = super().render(name, value, attrs, renderer)
+        if not value:
+            return field_html
+        try:
+            url = value.url
+        except ValueError:
+            return field_html
+        return format_html(
+            '<div class="logo-preview"><img src="{}" alt="Current firm logo"></div>{}',
+            url,
+            field_html,
+        )
 
 
 class FirmThemeFormMixin:
@@ -25,6 +42,7 @@ class FirmOnboardingForm(FirmThemeFormMixin, forms.ModelForm):
             "email",
             "phone",
             "address",
+            "logo",
             "city",
             "country",
             "timezone",
@@ -32,7 +50,10 @@ class FirmOnboardingForm(FirmThemeFormMixin, forms.ModelForm):
             "file_number_pattern",
             "accent_color",
         )
-        widgets = {"accent_color": forms.TextInput(attrs={"type": "color"})}
+        widgets = {
+            "accent_color": forms.TextInput(attrs={"type": "color"}),
+            "logo": LogoPreviewWidget,
+        }
         labels = {"accent_color": "Theme color"}
 
 
@@ -52,7 +73,10 @@ class FirmProfileForm(FirmThemeFormMixin, forms.ModelForm):
             "file_number_pattern",
             "accent_color",
         )
-        widgets = {"accent_color": forms.TextInput(attrs={"type": "color"})}
+        widgets = {
+            "accent_color": forms.TextInput(attrs={"type": "color"}),
+            "logo": LogoPreviewWidget,
+        }
         labels = {"accent_color": "Theme color"}
 
 

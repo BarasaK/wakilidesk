@@ -152,7 +152,7 @@ Important model decisions:
 
 - `Firm.slug` identifies demo/test firm domains and human-friendly references.
 - `Firm.file_number_pattern` controls matter number formatting.
-- `Firm.accent_color` and `Firm.logo` support white labeling.
+- `Firm.accent_color` and `Firm.logo` support white labeling. Firm logos are served from the public `firm-logos` media path; private legal documents remain behind permission-checked download views.
 - `Matter.confidentiality_level` controls access inheritance for documents, physical files, diary events, search, and dashboard metrics.
 - `DocumentVersion` is immutable from a versioning perspective; new uploads create new versions.
 - `DiaryReminder` has `PENDING`, `SENT`, and `FAILED` states to keep reminder processing idempotent.

@@ -1,4 +1,5 @@
 import pytest
+from django.core.files.base import ContentFile
 from django.urls import reverse
 
 from accounts.models import User
@@ -73,6 +74,23 @@ def test_firm_admin_can_update_theme_color(client):
 
     assert response.status_code == 302
     assert firm.accent_color == "#7c2d12"
+
+
+@pytest.mark.django_db
+def test_firm_profile_renders_current_logo_preview(client, tmp_path, settings):
+    settings.MEDIA_ROOT = tmp_path
+    firm, admin = _firm_with_user("admin@logo.test", "Firm Administrator")
+    firm.logo.save("lawlogo.png", ContentFile(b"logo image bytes"), save=True)
+
+    client.force_login(admin)
+    response = client.get(reverse("firm_profile"))
+
+    assert response.status_code == 200
+    assert b'alt="Current firm logo"' in response.content
+    assert firm.logo.url.encode() in response.content
+    logo_response = client.get(firm.logo.url)
+    assert logo_response.status_code == 200
+    assert logo_response["Content-Type"] in {"image/png", "application/octet-stream"}
 
 
 @pytest.mark.django_db
