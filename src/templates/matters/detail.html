@@ -48,4 +48,41 @@
       </tbody>
     </table>
   </section>
+
+  {% if "view_document" in firm_permissions %}
+    <section class="panel">
+      <div class="section-heading compact">
+        <h3>Documents</h3>
+        {% if "upload_document" in firm_permissions %}
+          <a class="button secondary" href="{% url 'document_upload' %}?matter={{ matter.id }}">Upload document</a>
+        {% endif %}
+      </div>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Category</th>
+            <th>Reference</th>
+            <th>Date</th>
+            <th>Version</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for document in documents %}
+            <tr>
+              <td><a href="{% url 'document_detail' document.id %}">{{ document.title }}</a></td>
+              <td>{{ document.document_type.name }}</td>
+              <td>{{ document.reference_number|default:"-" }}</td>
+              <td>{{ document.document_date|default:"-" }}</td>
+              <td>{% if document.current_version %}{{ document.current_version.version_number }}{% else %}-{% endif %}</td>
+              <td>{% if document.archived_at %}Archived{% else %}Active{% endif %}</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="6">No documents found for this matter.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+  {% endif %}
 {% endblock %}

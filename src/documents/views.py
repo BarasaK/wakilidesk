@@ -55,7 +55,11 @@ def document_upload(request):
             except ValueError as exc:
                 form.add_error(None, str(exc))
     else:
-        form = DocumentUploadForm(firm=firm, user=request.user)
+        form = DocumentUploadForm(
+            firm=firm,
+            user=request.user,
+            initial={"matter": request.GET.get("matter")} if request.GET.get("matter") else None,
+        )
     return render(request, "documents/upload.html", {"firm": firm, "form": form})
 
 
