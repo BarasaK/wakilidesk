@@ -6,6 +6,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
 from audit.services import record_audit_event
+from clients.models import Client
 from diary.models import DiaryEvent
 from diary.services import diary_events_visible_to_user
 from documents.services import documents_visible_to_user
@@ -16,6 +17,7 @@ from firms.services import (
     get_active_memberships_for_user,
     get_firm_for_user_or_404,
     require_firm_permission,
+    user_has_firm_permission,
 )
 from notifications.services import unread_count_for_user
 from physical_files.models import PhysicalFile
@@ -44,6 +46,11 @@ def dashboard(request):
         else 0
     )
     metrics = {
+        "clients_total": (
+            Client.objects.filter(firm=firm).count()
+            if user_has_firm_permission(request.user, firm, "view_client")
+            else 0
+        ),
         "active_matters": visible_matters.filter(status__in=["OPEN", "ACTIVE"]).count(),
         "documents_total": visible_documents.count(),
         "physical_files_checked_out": visible_physical_files.filter(status=PhysicalFile.Status.CHECKED_OUT).count(),
