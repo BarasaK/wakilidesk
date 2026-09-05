@@ -158,6 +158,12 @@ Matter parties are people or organisations connected to a matter, such as opposi
 4. Enter the name and contact details.
 5. Save.
 
+### Review Documents on a Matter
+
+Open a matter to see documents already linked to that file. If you have document access, the matter page shows the document title, category, reference, date, current version, and status.
+
+If you have upload access, use **Upload document** on the matter page to add another document with that matter already selected.
+
 ## 8. Confidentiality
 
 Confidentiality controls who can see sensitive matters and linked records.
@@ -209,7 +215,7 @@ flowchart LR
 
 1. Open **Documents**.
 2. Select **Upload document**.
-3. Choose the matter.
+3. Choose the matter. If you started from a matter page, the matter is already selected.
 4. Enter the title, category, date, reference number, and description.
 5. Choose the document source.
 6. Choose the confidentiality level.

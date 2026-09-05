@@ -436,6 +436,12 @@ LIT/2026/00001
 
 Matter party types include opposing party, interested party, witness, company director, and other.
 
+### View matter documents
+
+Open a matter to see documents linked to that file. The matter detail screen shows document title, category, reference, date, current version, and archive status for users with document view permission.
+
+Users with upload permission can select **Upload document** from the matter page. The upload form opens with that matter preselected.
+
 ## 12. Confidentiality
 
 Confidentiality levels are:
@@ -515,7 +521,7 @@ Supported MVP file types:
 
 1. Open **Documents**.
 2. Select **Upload document**.
-3. Choose an accessible matter.
+3. Choose an accessible matter. If you started from a matter page, the matter is preselected.
 4. Enter document metadata.
 5. Select the file.
 6. Save.

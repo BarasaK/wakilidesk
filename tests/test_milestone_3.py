@@ -6,7 +6,7 @@ from accounts.models import User
 from audit.models import AuditEvent
 from clients.models import Client
 from documents.models import Document, DocumentCategory
-from firms.models import Firm, FirmMembership
+from firms.models import Firm, FirmMembership, Permission, Role
 from firms.services import ensure_default_roles_for_firm
 from matters.models import Matter, PracticeArea
 
@@ -95,6 +95,49 @@ def test_archive_and_restore_document(client):
 
     assert restore_response.status_code == 302
     assert document.archived_at is None
+
+
+@pytest.mark.django_db
+def test_matter_detail_lists_linked_documents(client):
+    firm, admin, matter, category = _matter_setup("admin@matterdocs.test", "Firm Administrator")
+    document = _create_document(firm, admin, matter, category)
+
+    client.force_login(admin)
+    response = client.get(reverse("matter_detail", args=[matter.id]))
+
+    assert response.status_code == 200
+    assert b"<h3>Documents</h3>" in response.content
+    assert document.title.encode() in response.content
+    assert reverse("document_detail", args=[document.id]).encode() in response.content
+    assert f'{reverse("document_upload")}?matter={matter.id}'.encode() in response.content
+
+
+@pytest.mark.django_db
+def test_document_upload_from_matter_prefills_matter(client):
+    _firm, admin, matter, _category = _matter_setup("admin@prefill.test", "Firm Administrator")
+
+    client.force_login(admin)
+    response = client.get(reverse("document_upload"), {"matter": matter.id})
+
+    assert response.status_code == 200
+    assert f'<option value="{matter.id}" selected>'.encode() in response.content
+
+
+@pytest.mark.django_db
+def test_matter_detail_hides_documents_for_role_without_document_permission(client):
+    firm, admin, matter, category = _matter_setup("admin@matteronly.test", "Firm Administrator")
+    document = _create_document(firm, admin, matter, category)
+    role = Role.objects.create(firm=firm, name="Matter only")
+    role.permissions.set([Permission.objects.get(codename="view_matter")])
+    matter_only_user = User.objects.create_user("matteronly@matteronly.test", "StrongPass123!")
+    FirmMembership.objects.create(user=matter_only_user, firm=firm, role=role)
+
+    client.force_login(matter_only_user)
+    response = client.get(reverse("matter_detail", args=[matter.id]))
+
+    assert response.status_code == 200
+    assert document.title.encode() not in response.content
+    assert b"<h3>Documents</h3>" not in response.content
 
 
 def _matter_setup(email: str, role_name: str):

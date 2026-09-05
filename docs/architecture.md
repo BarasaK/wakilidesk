@@ -176,6 +176,7 @@ flowchart TD
 flowchart TD
     A[Create client] --> B[Create matter]
     B --> C[Add parties]
+    B --> J[Review linked documents on matter detail]
     B --> D[Upload document]
     D --> E[Create document metadata]
     E --> F[Create version and private storage key]

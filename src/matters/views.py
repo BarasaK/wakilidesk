@@ -2,7 +2,8 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 
-from firms.services import require_firm_permission
+from documents.services import documents_visible_to_user
+from firms.services import require_firm_permission, user_has_firm_permission
 from matters.forms import MatterForm, MatterPartyForm, PracticeAreaForm
 from matters.models import PracticeArea
 from matters.services import (
@@ -53,7 +54,16 @@ def matter_detail(request, matter_id):
         return redirect("firm_onboarding")
     require_firm_permission(request.user, firm, "view_matter")
     matter = get_matter_for_user_or_404(firm=firm, user=request.user, matter_id=matter_id)
-    return render(request, "matters/detail.html", {"firm": firm, "matter": matter})
+    documents = (
+        documents_visible_to_user(firm=firm, user=request.user).filter(matter=matter)
+        if user_has_firm_permission(request.user, firm, "view_document")
+        else []
+    )
+    return render(
+        request,
+        "matters/detail.html",
+        {"firm": firm, "matter": matter, "documents": documents},
+    )
 
 
 @login_required
