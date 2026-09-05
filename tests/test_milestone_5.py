@@ -140,6 +140,8 @@ def test_dashboard_metrics_render(client):
 
     assert response.status_code == 200
     assert b"Filing Metrics" in response.content
+    assert b"Clients" in response.content
+    assert b">1</strong>" in response.content
     assert b"Files awaiting return" in response.content
 
 
