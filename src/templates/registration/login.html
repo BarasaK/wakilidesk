@@ -1,11 +1,13 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Sign in | wakiliDesk{% endblock %}
 
 {% block content %}
   <main class="auth-shell">
     <section class="auth-panel" aria-labelledby="login-title">
-      <h1 id="login-title" class="brand">wakiliDesk</h1>
+      <img class="login-logo" src="{% static 'common/wakilidesk-logo.png' %}" alt="wakiliDesk">
+      <h1 id="login-title" class="sr-only">wakiliDesk sign in</h1>
       <p class="lede">Sign in to your firm workspace.</p>
 
       {% if form.non_field_errors %}
