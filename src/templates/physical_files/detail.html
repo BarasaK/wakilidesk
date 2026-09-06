@@ -31,7 +31,7 @@
 
   <section class="panel">
     <h3>Check-out History</h3>
-    <table class="table">
+    <table class="table responsive-table">
       <thead>
         <tr>
           <th>Out</th>
@@ -43,10 +43,10 @@
       <tbody>
         {% for checkout in physical_file.checkouts.all %}
           <tr>
-            <td>{{ checkout.checked_out_at }}</td>
-            <td>{{ checkout.checked_out_to.email|default:checkout.checked_out_to_name }}</td>
-            <td>{{ checkout.expected_return_at|default:"-" }}</td>
-            <td>{{ checkout.returned_at|default:"-" }}</td>
+            <td data-label="Out">{{ checkout.checked_out_at }}</td>
+            <td data-label="To">{{ checkout.checked_out_to.email|default:checkout.checked_out_to_name }}</td>
+            <td data-label="Expected">{{ checkout.expected_return_at|default:"-" }}</td>
+            <td data-label="Returned">{{ checkout.returned_at|default:"-" }}</td>
           </tr>
         {% empty %}
           <tr><td colspan="4">No check-out history.</td></tr>

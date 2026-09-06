@@ -11,15 +11,15 @@
   </header>
 
   <section class="panel">
-    <table class="table">
+    <table class="table responsive-table">
       <thead><tr><th>Title</th><th>Message</th><th>Status</th><th></th></tr></thead>
       <tbody>
         {% for notification in notifications %}
           <tr>
-            <td>{{ notification.title }}</td>
-            <td>{{ notification.message }}</td>
-            <td>{{ notification.get_status_display }}</td>
-            <td>
+            <td data-label="Title">{{ notification.title }}</td>
+            <td data-label="Message">{{ notification.message }}</td>
+            <td data-label="Status">{{ notification.get_status_display }}</td>
+            <td data-label="Actions">
               {% if notification.status == "UNREAD" %}
                 <form method="post" action="{% url 'notification_mark_read' notification.id %}">
                   {% csrf_token %}

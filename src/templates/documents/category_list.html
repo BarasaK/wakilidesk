@@ -14,7 +14,7 @@
   </header>
 
   <section class="panel">
-    <table class="table">
+    <table class="table responsive-table">
       <thead>
         <tr>
           <th>Name</th>
@@ -25,9 +25,9 @@
       <tbody>
         {% for category in categories %}
           <tr>
-            <td>{{ category.name }}</td>
-            <td>{% if category.is_active %}Active{% else %}Inactive{% endif %}</td>
-            <td>
+            <td data-label="Name">{{ category.name }}</td>
+            <td data-label="Status">{% if category.is_active %}Active{% else %}Inactive{% endif %}</td>
+            <td data-label="Actions">
               {% if "manage_firm_settings" in firm_permissions %}
                 <a href="{% url 'document_category_edit' category.id %}">Edit</a>
               {% endif %}

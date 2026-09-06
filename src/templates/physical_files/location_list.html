@@ -14,15 +14,15 @@
   </header>
 
   <section class="panel">
-    <table class="table">
+    <table class="table responsive-table">
       <thead><tr><th>Name</th><th>Parent</th><th>Status</th><th></th></tr></thead>
       <tbody>
         {% for location in locations %}
           <tr>
-            <td>{{ location.name }}</td>
-            <td>{{ location.parent|default:"-" }}</td>
-            <td>{% if location.is_active %}Active{% else %}Inactive{% endif %}</td>
-            <td>
+            <td data-label="Name">{{ location.name }}</td>
+            <td data-label="Parent">{{ location.parent|default:"-" }}</td>
+            <td data-label="Status">{% if location.is_active %}Active{% else %}Inactive{% endif %}</td>
+            <td data-label="Actions">
               {% if "change_storage_location" in firm_permissions %}
                 <a href="{% url 'storage_location_edit' location.id %}">Edit</a>
               {% endif %}

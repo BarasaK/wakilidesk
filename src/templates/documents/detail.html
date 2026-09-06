@@ -61,7 +61,7 @@
 
   <section class="panel">
     <h3>Versions</h3>
-    <table class="table">
+    <table class="table responsive-table">
       <thead>
         <tr>
           <th>Version</th>
@@ -73,10 +73,10 @@
       <tbody>
         {% for version in document.versions.all %}
           <tr>
-            <td>{{ version.version_number }}</td>
-            <td>{{ version.original_filename }}</td>
-            <td>{{ version.file_size }}</td>
-            <td>{{ version.get_ocr_status_display }}</td>
+            <td data-label="Version">{{ version.version_number }}</td>
+            <td data-label="Filename">{{ version.original_filename }}</td>
+            <td data-label="Size">{{ version.file_size }}</td>
+            <td data-label="OCR">{{ version.get_ocr_status_display }}</td>
           </tr>
         {% empty %}
           <tr><td colspan="4">No versions found.</td></tr>

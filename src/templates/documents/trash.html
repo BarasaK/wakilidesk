@@ -14,7 +14,7 @@
   </header>
 
   <section class="panel">
-    <table class="table">
+    <table class="table responsive-table">
       <thead>
         <tr>
           <th>Title</th>
@@ -27,11 +27,11 @@
       <tbody>
         {% for document in documents %}
           <tr>
-            <td>{{ document.title }}</td>
-            <td>{{ document.matter.matter_number }}</td>
-            <td>{{ document.document_type.name }}</td>
-            <td>{{ document.deleted_at|date:"d M Y H:i" }}</td>
-            <td>
+            <td data-label="Title">{{ document.title }}</td>
+            <td data-label="Matter">{{ document.matter.matter_number }}</td>
+            <td data-label="Category">{{ document.document_type.name }}</td>
+            <td data-label="Deleted">{{ document.deleted_at|date:"d M Y H:i" }}</td>
+            <td data-label="Actions">
               <div class="actions">
                 {% if "restore_document" in firm_permissions %}
                   <form method="post" action="{% url 'document_trash_restore' document.id %}">

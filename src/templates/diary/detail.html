@@ -32,7 +32,7 @@
 
   <section class="panel">
     <h3>Reminder Status</h3>
-    <table class="table">
+    <table class="table responsive-table">
       <thead>
         <tr>
           <th>When</th>
@@ -44,10 +44,10 @@
       <tbody>
         {% for reminder in event.reminders.all %}
           <tr>
-            <td>{{ reminder.remind_at|date:"d M Y H:i" }}</td>
-            <td>{{ reminder.get_channel_display }}</td>
-            <td>{{ reminder.get_status_display }}</td>
-            <td>{% if reminder.sent_at %}{{ reminder.sent_at|date:"d M Y H:i" }}{% else %}-{% endif %}</td>
+            <td data-label="When">{{ reminder.remind_at|date:"d M Y H:i" }}</td>
+            <td data-label="Channel">{{ reminder.get_channel_display }}</td>
+            <td data-label="Status">{{ reminder.get_status_display }}</td>
+            <td data-label="Sent">{% if reminder.sent_at %}{{ reminder.sent_at|date:"d M Y H:i" }}{% else %}-{% endif %}</td>
           </tr>
         {% empty %}
           <tr><td colspan="4">No reminders configured.</td></tr>
