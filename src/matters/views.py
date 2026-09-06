@@ -10,7 +10,12 @@ from matters.services import (
     create_matter,
     create_matter_party,
     get_matter_for_user_or_404,
+    get_trashed_matter_for_firm_or_404,
     matters_visible_to_user,
+    permanently_delete_matter,
+    restore_trashed_matter,
+    trash_matter,
+    trashed_matters_for_firm,
     update_matter,
 )
 
@@ -23,6 +28,16 @@ def matter_list(request):
     require_firm_permission(request.user, firm, "view_matter")
     matters = matters_visible_to_user(firm=firm, user=request.user)
     return render(request, "matters/list.html", {"firm": firm, "matters": matters})
+
+
+@login_required
+def matter_trash(request):
+    firm = _require_current_firm(request)
+    if firm is None:
+        return redirect("firm_onboarding")
+    require_firm_permission(request.user, firm, "delete_matter")
+    matters = trashed_matters_for_firm(firm)
+    return render(request, "matters/trash.html", {"firm": firm, "matters": matters})
 
 
 @login_required
@@ -82,6 +97,53 @@ def matter_edit(request, matter_id):
     else:
         form = MatterForm(firm=firm, instance=matter)
     return render(request, "matters/form.html", {"firm": firm, "matter": matter, "form": form})
+
+
+@login_required
+def matter_trash_move(request, matter_id):
+    firm = _require_current_firm(request)
+    if firm is None:
+        return redirect("firm_onboarding")
+    require_firm_permission(request.user, firm, "delete_matter")
+    matter = get_matter_for_user_or_404(firm=firm, user=request.user, matter_id=matter_id)
+    if request.method == "POST":
+        trash_matter(matter=matter, request=request)
+        messages.success(request, "Matter moved to trash.")
+    return redirect("matter_list")
+
+
+@login_required
+def matter_trash_restore(request, matter_id):
+    firm = _require_current_firm(request)
+    if firm is None:
+        return redirect("firm_onboarding")
+    require_firm_permission(request.user, firm, "restore_matter")
+    matter = get_trashed_matter_for_firm_or_404(firm, matter_id)
+    if request.method == "POST":
+        try:
+            restore_trashed_matter(matter=matter, request=request)
+            messages.success(request, "Matter restored from trash.")
+        except ValueError as exc:
+            messages.error(request, str(exc))
+    return redirect("matter_trash")
+
+
+@login_required
+def matter_permanent_delete(request, matter_id):
+    firm = _require_current_firm(request)
+    if firm is None:
+        return redirect("firm_onboarding")
+    require_firm_permission(request.user, firm, "delete_matter")
+    if not user_has_firm_permission(request.user, firm, "manage_firm_settings"):
+        return redirect("matter_trash")
+    matter = get_trashed_matter_for_firm_or_404(firm, matter_id)
+    if request.method == "POST":
+        try:
+            permanently_delete_matter(matter=matter, request=request)
+            messages.success(request, "Matter permanently deleted.")
+        except ValueError as exc:
+            messages.error(request, str(exc))
+    return redirect("matter_trash")
 
 
 @login_required

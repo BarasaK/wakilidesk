@@ -35,7 +35,7 @@ class PhysicalFileForm(forms.ModelForm):
         matters = (
             matters_visible_to_user(firm=firm, user=user)
             if user is not None
-            else Matter.objects.filter(firm=firm)
+            else Matter.objects.filter(firm=firm, deleted_at__isnull=True)
         )
         self.fields["matter"].queryset = matters.order_by("matter_number")
         self.fields["storage_location"].queryset = StorageLocation.objects.filter(

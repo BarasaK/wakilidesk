@@ -86,6 +86,7 @@ class Matter(models.Model):
     )
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
+    deleted_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         constraints = [
@@ -95,6 +96,7 @@ class Matter(models.Model):
             models.Index(fields=["firm", "matter_number"], name="matters_matter_firm_number_idx"),
             models.Index(fields=["firm", "status"], name="matters_matter_firm_status_idx"),
             models.Index(fields=["firm", "title"], name="matters_matter_firm_title_idx"),
+            models.Index(fields=["firm", "deleted_at"], name="matters_matter_firm_del_idx"),
         ]
         ordering = ("-opened_date", "matter_number")
 

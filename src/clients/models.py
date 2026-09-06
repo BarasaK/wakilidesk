@@ -39,6 +39,7 @@ class Client(models.Model):
     )
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
+    deleted_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         constraints = [
@@ -49,6 +50,7 @@ class Client(models.Model):
         indexes = [
             models.Index(fields=["firm", "name"], name="clients_client_firm_name_idx"),
             models.Index(fields=["firm", "status"], name="clients_client_firm_status_idx"),
+            models.Index(fields=["firm", "deleted_at"], name="clients_client_firm_del_idx"),
         ]
         ordering = ("name",)
 

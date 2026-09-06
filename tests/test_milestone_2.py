@@ -1,10 +1,11 @@
 import pytest
 from django.urls import reverse
+from django.utils import timezone
 
 from accounts.models import User
 from audit.models import AuditEvent
 from clients.models import Client
-from firms.models import Firm, FirmMembership
+from firms.models import Firm, FirmMembership, Role
 from firms.services import ensure_default_roles_for_firm
 from matters.models import Matter, MatterParty, PracticeArea
 
@@ -131,6 +132,109 @@ def test_matter_party_is_created_with_current_firm(client):
     assert party.matter == matter
 
 
+@pytest.mark.django_db
+def test_admin_can_move_client_to_trash_and_restore_it(client):
+    firm, user = _firm_with_user("admin@client-trash.test", "Firm Administrator")
+    client_record = Client.objects.create(
+        firm=firm,
+        client_number="CL-00001",
+        client_type="INDIVIDUAL",
+        name="Trash Client",
+        created_by=user,
+    )
+
+    client.force_login(user)
+    trash_response = client.post(reverse("client_trash_move", args=[client_record.id]))
+    client_record.refresh_from_db()
+
+    assert trash_response.status_code == 302
+    assert client_record.deleted_at is not None
+    assert b"Trash Client" not in client.get(reverse("client_list")).content
+    assert b"Trash Client" in client.get(reverse("client_trash")).content
+    assert AuditEvent.objects.filter(action="client_moved_to_trash", firm=firm).exists()
+
+    restore_response = client.post(reverse("client_trash_restore", args=[client_record.id]))
+    client_record.refresh_from_db()
+
+    assert restore_response.status_code == 302
+    assert client_record.deleted_at is None
+    assert b"Trash Client" in client.get(reverse("client_list")).content
+    assert AuditEvent.objects.filter(action="client_restored_from_trash", firm=firm).exists()
+
+
+@pytest.mark.django_db
+def test_admin_can_move_matter_to_trash_and_restore_it(client):
+    firm, user, matter = _matter_for_trash("admin@matter-trash.test")
+
+    client.force_login(user)
+    trash_response = client.post(reverse("matter_trash_move", args=[matter.id]))
+    matter.refresh_from_db()
+
+    assert trash_response.status_code == 302
+    assert matter.deleted_at is not None
+    assert matter.title.encode() not in client.get(reverse("matter_list")).content
+    assert matter.title.encode() in client.get(reverse("matter_trash")).content
+    assert AuditEvent.objects.filter(action="matter_moved_to_trash", firm=firm).exists()
+
+    restore_response = client.post(reverse("matter_trash_restore", args=[matter.id]))
+    matter.refresh_from_db()
+
+    assert restore_response.status_code == 302
+    assert matter.deleted_at is None
+    assert matter.title.encode() in client.get(reverse("matter_list")).content
+    assert AuditEvent.objects.filter(action="matter_restored_from_trash", firm=firm).exists()
+
+
+@pytest.mark.django_db
+def test_client_trash_hides_linked_matters_from_active_workflows(client):
+    _firm, user, matter = _matter_for_trash("admin@linked-trash.test")
+    client_record = matter.client
+
+    client.force_login(user)
+    client.post(reverse("client_trash_move", args=[client_record.id]))
+
+    assert client_record.name.encode() not in client.get(reverse("client_list")).content
+    assert matter.title.encode() not in client.get(reverse("matter_list")).content
+
+
+@pytest.mark.django_db
+def test_only_admin_can_permanently_delete_trashed_client_or_matter(client):
+    firm, admin, matter = _matter_for_trash("admin@permanent-trash.test")
+    client_record = Client.objects.create(
+        firm=firm,
+        client_number="CL-00002",
+        client_type="INDIVIDUAL",
+        name="Unlinked Trash Client",
+        created_by=admin,
+    )
+    limited = User.objects.create_user("limited@permanent-trash.test", "StrongPass123!")
+    limited_role = Role.objects.create(firm=firm, name="Delete without settings")
+    limited_role.permissions.set(
+        [
+            firm.roles.get(name="Firm Administrator").permissions.get(codename="delete_client"),
+            firm.roles.get(name="Firm Administrator").permissions.get(codename="delete_matter"),
+        ]
+    )
+    FirmMembership.objects.create(user=limited, firm=firm, role=limited_role)
+    client_record.deleted_at = matter.deleted_at = timezone.now()
+    client_record.save(update_fields=["deleted_at", "updated_at"])
+    matter.save(update_fields=["deleted_at", "updated_at"])
+
+    client.force_login(limited)
+    assert client.post(reverse("client_permanent_delete", args=[client_record.id])).status_code == 302
+    assert client.post(reverse("matter_permanent_delete", args=[matter.id])).status_code == 302
+    assert Client.objects.filter(id=client_record.id).exists()
+    assert Matter.objects.filter(id=matter.id).exists()
+
+    client.force_login(admin)
+    assert client.post(reverse("client_permanent_delete", args=[client_record.id])).status_code == 302
+    assert client.post(reverse("matter_permanent_delete", args=[matter.id])).status_code == 302
+    assert not Client.objects.filter(id=client_record.id).exists()
+    assert not Matter.objects.filter(id=matter.id).exists()
+    assert AuditEvent.objects.filter(action="client_permanently_deleted", firm=firm).exists()
+    assert AuditEvent.objects.filter(action="matter_permanently_deleted", firm=firm).exists()
+
+
 def _firm_with_user(email: str, role_name: str):
     slug = email.replace("@", "-").replace(".", "-")
     firm = Firm.objects.create(
@@ -143,3 +247,22 @@ def _firm_with_user(email: str, role_name: str):
     user = User.objects.create_user(email, "StrongPass123!")
     FirmMembership.objects.create(user=user, firm=firm, role=roles[role_name])
     return firm, user
+
+
+def _matter_for_trash(email: str):
+    firm, user = _firm_with_user(email, "Firm Administrator")
+    client_record = Client.objects.create(
+        firm=firm,
+        client_number="CL-00001",
+        client_type="INDIVIDUAL",
+        name=f"{email} Client",
+        created_by=user,
+    )
+    matter = Matter.objects.create(
+        firm=firm,
+        client=client_record,
+        matter_number="GEN/2026/00001",
+        title=f"{email} Matter",
+        created_by=user,
+    )
+    return firm, user, matter

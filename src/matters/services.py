@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import ProtectedError, Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
@@ -12,7 +12,19 @@ from matters.models import Matter, MatterParty, PracticeArea
 
 
 def matters_for_firm(firm):
-    return Matter.objects.filter(firm=firm).select_related("client", "practice_area")
+    return Matter.objects.filter(
+        firm=firm,
+        client__deleted_at__isnull=True,
+        deleted_at__isnull=True,
+    ).select_related("client", "practice_area")
+
+
+def trashed_matters_for_firm(firm):
+    return (
+        Matter.objects.filter(firm=firm, deleted_at__isnull=False)
+        .select_related("client", "practice_area")
+        .order_by("-deleted_at", "matter_number")
+    )
 
 
 def matters_visible_to_user(*, firm, user):
@@ -33,11 +45,15 @@ def user_can_access_matter(*, matter: Matter, firm, user) -> bool:
 
 
 def get_matter_for_firm_or_404(firm, matter_id):
-    return get_object_or_404(Matter, id=matter_id, firm=firm)
+    return get_object_or_404(matters_for_firm(firm), id=matter_id)
 
 
 def get_matter_for_user_or_404(*, firm, user, matter_id):
     return get_object_or_404(matters_visible_to_user(firm=firm, user=user), id=matter_id)
+
+
+def get_trashed_matter_for_firm_or_404(firm, matter_id):
+    return get_object_or_404(trashed_matters_for_firm(firm), id=matter_id)
 
 
 def require_matter_access(*, matter: Matter, firm, user) -> None:
@@ -48,7 +64,7 @@ def require_matter_access(*, matter: Matter, firm, user) -> None:
 @transaction.atomic
 def create_matter(*, firm, user, data, request=None) -> Matter:
     client = data["client"]
-    if client.firm_id != firm.id:
+    if client.firm_id != firm.id or client.deleted_at is not None:
         raise ValueError("Client does not belong to the current firm.")
     practice_area = data.get("practice_area")
     if practice_area is not None and practice_area.firm_id != firm.id:
@@ -78,7 +94,7 @@ def create_matter(*, firm, user, data, request=None) -> Matter:
 @transaction.atomic
 def update_matter(*, matter: Matter, data, request=None) -> Matter:
     client = data["client"]
-    if client.firm_id != matter.firm_id:
+    if client.firm_id != matter.firm_id or client.deleted_at is not None:
         raise ValueError("Client does not belong to the current firm.")
     practice_area = data.get("practice_area")
     if practice_area is not None and practice_area.firm_id != matter.firm_id:
@@ -114,6 +130,53 @@ def create_matter_party(*, firm, matter: Matter, data, request=None) -> MatterPa
         object_id=party.id,
     )
     return party
+
+
+@transaction.atomic
+def trash_matter(*, matter: Matter, request=None) -> Matter:
+    matter.deleted_at = timezone.now()
+    matter.save(update_fields=["deleted_at", "updated_at"])
+    record_audit_event(
+        request=request,
+        firm=matter.firm,
+        action="matter_moved_to_trash",
+        object_type="Matter",
+        object_id=matter.id,
+    )
+    return matter
+
+
+@transaction.atomic
+def restore_trashed_matter(*, matter: Matter, request=None) -> Matter:
+    if matter.client.deleted_at is not None:
+        raise ValueError("Matter cannot be restored while its client is still in trash.")
+    matter.deleted_at = None
+    matter.save(update_fields=["deleted_at", "updated_at"])
+    record_audit_event(
+        request=request,
+        firm=matter.firm,
+        action="matter_restored_from_trash",
+        object_type="Matter",
+        object_id=matter.id,
+    )
+    return matter
+
+
+@transaction.atomic
+def permanently_delete_matter(*, matter: Matter, request=None) -> None:
+    firm = matter.firm
+    matter_id = matter.id
+    try:
+        matter.delete()
+    except ProtectedError as exc:
+        raise ValueError("Matter cannot be permanently deleted while linked physical files exist.") from exc
+    record_audit_event(
+        request=request,
+        firm=firm,
+        action="matter_permanently_deleted",
+        object_type="Matter",
+        object_id=matter_id,
+    )
 
 
 def require_confidentiality_permission(*, firm, user, confidentiality_level: str) -> None:

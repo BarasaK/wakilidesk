@@ -1,0 +1,57 @@
+{% extends "app_base.html" %}
+
+{% block title %}Client Trash | wakiliDesk{% endblock %}
+
+{% block app_content %}
+  <header class="page-header">
+    <div>
+      <h2>Client Trash</h2>
+      <p class="lede">Clients moved out of active working views.</p>
+    </div>
+    <div class="actions">
+      <a class="button secondary" href="{% url 'client_list' %}">Active clients</a>
+    </div>
+  </header>
+
+  <section class="panel">
+    <table class="table responsive-table">
+      <thead>
+        <tr>
+          <th>Number</th>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Deleted</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for client in clients %}
+          <tr>
+            <td data-label="Number">{{ client.client_number }}</td>
+            <td data-label="Name">{{ client.name }}</td>
+            <td data-label="Type">{{ client.get_client_type_display }}</td>
+            <td data-label="Deleted">{{ client.deleted_at|date:"d M Y H:i" }}</td>
+            <td data-label="Actions">
+              <div class="actions">
+                {% if "restore_client" in firm_permissions %}
+                  <form method="post" action="{% url 'client_trash_restore' client.id %}">
+                    {% csrf_token %}
+                    <button class="button secondary" type="submit">Restore</button>
+                  </form>
+                {% endif %}
+                {% if "manage_firm_settings" in firm_permissions and "delete_client" in firm_permissions %}
+                  <form method="post" action="{% url 'client_permanent_delete' client.id %}">
+                    {% csrf_token %}
+                    <button class="button secondary danger" type="submit">Delete permanently</button>
+                  </form>
+                {% endif %}
+              </div>
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="5">No clients in trash.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+{% endblock %}

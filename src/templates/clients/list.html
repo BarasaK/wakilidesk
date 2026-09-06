@@ -8,9 +8,14 @@
       <h2>Clients</h2>
       <p class="lede">Firm-scoped client records.</p>
     </div>
-    {% if "create_client" in firm_permissions %}
-      <a class="button secondary" href="{% url 'client_create' %}">Create client</a>
-    {% endif %}
+    <div class="actions">
+      {% if "create_client" in firm_permissions %}
+        <a class="button secondary" href="{% url 'client_create' %}">Create client</a>
+      {% endif %}
+      {% if "delete_client" in firm_permissions %}
+        <a class="button secondary" href="{% url 'client_trash' %}">Trash</a>
+      {% endif %}
+    </div>
   </header>
 
   <section class="panel">
