@@ -242,11 +242,15 @@ Older versions are preserved.
 
 You must have permission to download documents and access the linked matter.
 
-### Archive or Restore a Document
+### Archive, Trash, Restore, or Delete a Document
 
 Archive a document when it should no longer appear as an active document. Restoring makes it active again.
 
 Archiving does not delete the version history.
+
+Move a document to trash when it should be removed from normal working views. Trashed documents are kept in **Documents** -> **Trash** and can be restored by authorised users.
+
+Only firm administrators can permanently delete documents from trash. Permanent deletion should be used carefully because it removes the document record and stored file versions.
 
 ## 10. Physical Files
 
@@ -517,6 +521,7 @@ Use **Firm Profile** to update the firm's details, including display name, conta
 - Add court dates and filing deadlines as soon as they are known.
 - Update diary statuses after mentions, hearings, adjournments, and cancellations.
 - Avoid duplicate document records; use new versions for revised documents.
+- Use trash instead of permanent delete unless the firm has confirmed the record no longer needs to be retained.
 - Keep physical file locations current.
 - Check files out whenever they leave storage.
 - Check files in as soon as they return.

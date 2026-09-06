@@ -24,6 +24,12 @@
           <button class="button secondary" type="submit">Reprocess text</button>
         </form>
       {% endif %}
+      {% if "delete_document" in firm_permissions %}
+        <form method="post" action="{% url 'document_trash_move' document.id %}">
+          {% csrf_token %}
+          <button class="button secondary danger" type="submit">Move to trash</button>
+        </form>
+      {% endif %}
     </div>
   </header>
 

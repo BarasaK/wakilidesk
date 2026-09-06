@@ -155,6 +155,7 @@ Important model decisions:
 - `Firm.accent_color` and `Firm.logo` support white labeling. Firm logos are served from the public `firm-logos` media path; private legal documents remain behind permission-checked download views.
 - `Matter.confidentiality_level` controls access inheritance for documents, physical files, diary events, search, and dashboard metrics.
 - `DocumentVersion` is immutable from a versioning perspective; new uploads create new versions.
+- `Document.deleted_at` powers the document trash workflow. Active screens exclude trashed documents, while permanent delete is restricted to firm administrators.
 - `DiaryReminder` has `PENDING`, `SENT`, and `FAILED` states to keep reminder processing idempotent.
 
 ## 7. Main User Workflows
@@ -244,7 +245,7 @@ The MVP is primarily server-rendered HTML. It does not expose a public REST API 
 | Clients | `/clients/`, `/clients/new/`, `/clients/<client_id>/`, `/clients/<client_id>/edit/` |
 | Matters | `/matters/`, `/matters/new/`, `/matters/<matter_id>/`, `/matters/<matter_id>/edit/`, `/matters/<matter_id>/parties/new/` |
 | Practice Areas | `/matters/practice-areas/`, `/matters/practice-areas/new/`, `/matters/practice-areas/<area_id>/edit/` |
-| Documents | `/documents/`, `/documents/upload/`, `/documents/<document_id>/`, `/documents/<document_id>/edit/`, `/documents/<document_id>/download/`, `/documents/<document_id>/reprocess-ocr/` |
+| Documents | `/documents/`, `/documents/upload/`, `/documents/trash/`, `/documents/<document_id>/`, `/documents/<document_id>/edit/`, `/documents/<document_id>/download/`, `/documents/<document_id>/archive/`, `/documents/<document_id>/restore/`, `/documents/<document_id>/trash/`, `/documents/<document_id>/trash/restore/`, `/documents/<document_id>/trash/delete/`, `/documents/<document_id>/reprocess-ocr/` |
 | Document Categories | `/documents/categories/`, `/documents/categories/new/`, `/documents/categories/<category_id>/edit/` |
 | Physical Files | `/physical-files/`, `/physical-files/new/`, `/physical-files/<physical_file_id>/`, `/physical-files/<physical_file_id>/checkout/`, `/physical-files/<physical_file_id>/checkin/` |
 | Digitisation | `/physical-files/digitisation/`, `/physical-files/<physical_file_id>/digitisation/review/` |

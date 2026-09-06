@@ -1,11 +1,13 @@
 import pytest
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
+from django.utils import timezone
 
 from accounts.models import User
 from audit.models import AuditEvent
 from clients.models import Client
-from documents.models import Document, DocumentCategory
+from documents.models import Document, DocumentCategory, DocumentVersion
+from documents.storage import private_storage_path
 from firms.models import Firm, FirmMembership, Permission, Role
 from firms.services import ensure_default_roles_for_firm
 from matters.models import Matter, PracticeArea
@@ -98,6 +100,66 @@ def test_archive_and_restore_document(client):
 
 
 @pytest.mark.django_db
+def test_admin_can_move_document_to_trash_and_restore_it(client, tmp_path, settings):
+    settings.MEDIA_ROOT = tmp_path
+    firm, admin, matter, category = _matter_setup("admin@trash.test", "Firm Administrator")
+    document = _create_document(firm, admin, matter, category)
+
+    client.force_login(admin)
+    trash_response = client.post(reverse("document_trash_move", args=[document.id]))
+    document.refresh_from_db()
+
+    assert trash_response.status_code == 302
+    assert document.deleted_at is not None
+    assert document.title.encode() not in client.get(reverse("document_list")).content
+    assert document.title.encode() not in client.get(reverse("matter_detail", args=[matter.id])).content
+    trash_page = client.get(reverse("document_trash"))
+    assert trash_page.status_code == 200
+    assert document.title.encode() in trash_page.content
+    assert AuditEvent.objects.filter(action="document_moved_to_trash", firm=firm).exists()
+
+    restore_response = client.post(reverse("document_trash_restore", args=[document.id]))
+    document.refresh_from_db()
+
+    assert restore_response.status_code == 302
+    assert document.deleted_at is None
+    assert document.title.encode() in client.get(reverse("document_list")).content
+    assert AuditEvent.objects.filter(action="document_restored_from_trash", firm=firm).exists()
+
+
+@pytest.mark.django_db
+def test_only_admin_can_permanently_delete_trashed_document(client, tmp_path, settings):
+    settings.MEDIA_ROOT = tmp_path
+    firm, admin, matter, category = _matter_setup("admin@permanent.test", "Firm Administrator")
+    document = _create_document(firm, admin, matter, category)
+    version_id = document.current_version_id
+    stored_file = private_storage_path(document.current_version.storage_key)
+    limited_delete_user = _user_with_permissions(
+        firm,
+        "limited-delete@permanent.test",
+        ["view_matter", "view_document", "delete_document"],
+    )
+    document.deleted_at = timezone.now()
+    document.save(update_fields=["deleted_at", "updated_at"])
+
+    client.force_login(limited_delete_user)
+    denied_response = client.post(reverse("document_permanent_delete", args=[document.id]))
+
+    assert denied_response.status_code == 403
+    assert Document.objects.filter(id=document.id).exists()
+    assert stored_file.exists()
+
+    client.force_login(admin)
+    delete_response = client.post(reverse("document_permanent_delete", args=[document.id]))
+
+    assert delete_response.status_code == 302
+    assert not Document.objects.filter(id=document.id).exists()
+    assert not DocumentVersion.objects.filter(id=version_id).exists()
+    assert not stored_file.exists()
+    assert AuditEvent.objects.filter(action="document_permanently_deleted", firm=firm).exists()
+
+
+@pytest.mark.django_db
 def test_matter_detail_lists_linked_documents(client):
     firm, admin, matter, category = _matter_setup("admin@matterdocs.test", "Firm Administrator")
     document = _create_document(firm, admin, matter, category)
@@ -169,6 +231,14 @@ def _matter_setup(email: str, role_name: str):
     )
     category = DocumentCategory.objects.create(firm=firm, name="Pleadings")
     return firm, user, matter, category
+
+
+def _user_with_permissions(firm, email: str, codenames: list[str]):
+    role = Role.objects.create(firm=firm, name=email)
+    role.permissions.set([Permission.objects.get(codename=codename) for codename in codenames])
+    user = User.objects.create_user(email, "StrongPass123!")
+    FirmMembership.objects.create(user=user, firm=firm, role=role)
+    return user
 
 
 def _create_document(firm, user, matter, category):
