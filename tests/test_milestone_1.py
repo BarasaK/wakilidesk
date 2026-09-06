@@ -153,6 +153,20 @@ def test_navigation_hides_inaccessible_admin_links(client):
 
 
 @pytest.mark.django_db
+def test_app_shell_includes_mobile_navigation_drawer_controls(client):
+    _firm, admin = _firm_with_user("admin@mobile.test", "Firm Administrator")
+
+    client.force_login(admin)
+    response = client.get(reverse("dashboard"))
+
+    assert response.status_code == 200
+    assert b'id="mobile-nav-toggle"' in response.content
+    assert b'class="mobile-app-bar"' in response.content
+    assert b'class="mobile-menu-button"' in response.content
+    assert b'class="mobile-nav-backdrop"' in response.content
+
+
+@pytest.mark.django_db
 def test_module_actions_hide_inaccessible_links(client):
     firm, clerk = _firm_with_user("clerk@amani.test", "Clerk / Records Officer")
 

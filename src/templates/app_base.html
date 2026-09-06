@@ -11,6 +11,21 @@
   {% endif %}
   <div class="app-shell">
     <a class="skip-link" href="#main-content">Skip to content</a>
+    <input class="mobile-nav-toggle" type="checkbox" id="mobile-nav-toggle" aria-label="Toggle navigation">
+    <header class="mobile-app-bar">
+      <div>
+        <strong>wakiliDesk</strong>
+        {% if request.current_firm %}
+          <span>{{ request.current_firm.display_name }}</span>
+        {% endif %}
+      </div>
+      <label class="mobile-menu-button" for="mobile-nav-toggle" aria-hidden="true">
+        <span></span>
+        <span></span>
+        <span></span>
+      </label>
+    </header>
+    <label class="mobile-nav-backdrop" for="mobile-nav-toggle" aria-hidden="true"></label>
     <aside class="sidebar">
       <div class="sidebar-branding">
         <h1 class="brand">wakiliDesk</h1>

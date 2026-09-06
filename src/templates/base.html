@@ -173,6 +173,12 @@
       grid-template-columns: 240px 1fr;
     }
 
+    .mobile-app-bar,
+    .mobile-nav-toggle,
+    .mobile-nav-backdrop {
+      display: none;
+    }
+
     .skip-link {
       position: fixed;
       top: 10px;
@@ -707,65 +713,136 @@
 
     @media (max-width: 760px) {
       .app-shell {
+        position: relative;
         grid-template-columns: 1fr;
+        padding-top: 62px;
       }
 
-      .sidebar {
-        position: sticky;
+      .mobile-nav-toggle {
+        position: fixed;
+        width: 1px;
+        height: 1px;
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .mobile-app-bar {
+        position: fixed;
         top: 0;
-        z-index: 30;
-        padding: 12px 14px 10px;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-        box-shadow: 0 8px 24px rgba(16, 24, 40, 0.14);
-      }
-
-      .sidebar-branding {
+        left: 0;
+        z-index: 50;
         display: flex;
-        align-items: baseline;
+        width: 100%;
+        min-height: 62px;
+        align-items: center;
         justify-content: space-between;
-        gap: 12px;
-        margin-bottom: 8px;
+        gap: 14px;
+        padding: 10px 14px;
+        background: #16202a;
+        color: #fff;
+        box-shadow: 0 8px 24px rgba(16, 24, 40, 0.16);
       }
 
-      .sidebar .brand {
-        flex: 0 0 auto;
-        margin: 0;
-        font-size: 1.2rem;
-      }
-
-      .sidebar .lede {
+      .mobile-app-bar strong,
+      .mobile-app-bar span {
+        display: block;
         overflow: hidden;
-        margin: 0;
-        color: #bdd7d4;
-        font-size: 0.82rem;
-        text-align: right;
         text-overflow: ellipsis;
         white-space: nowrap;
       }
 
+      .mobile-app-bar strong {
+        font-size: 1.15rem;
+        line-height: 1.2;
+      }
+
+      .mobile-app-bar span {
+        max-width: 70vw;
+        color: #bdd7d4;
+        font-size: 0.82rem;
+      }
+
+      .mobile-menu-button {
+        display: inline-grid;
+        flex: 0 0 auto;
+        width: 42px;
+        height: 42px;
+        place-items: center;
+        gap: 0;
+        border: 1px solid rgba(217, 242, 239, 0.24);
+        border-radius: 6px;
+        background: rgba(255, 255, 255, 0.08);
+        cursor: pointer;
+      }
+
+      .mobile-menu-button span {
+        display: block;
+        width: 20px;
+        height: 2px;
+        border-radius: 999px;
+        background: #d9f2ef;
+      }
+
+      .mobile-nav-backdrop {
+        position: fixed;
+        inset: 62px 0 0;
+        z-index: 35;
+        background: rgba(16, 24, 40, 0.48);
+      }
+
+      .mobile-nav-toggle:checked ~ .mobile-nav-backdrop {
+        display: block;
+      }
+
+      .sidebar {
+        position: fixed;
+        top: 62px;
+        bottom: 0;
+        left: 0;
+        z-index: 40;
+        width: min(84vw, 320px);
+        overflow-y: auto;
+        padding: 18px;
+        transform: translateX(-100%);
+        transition: transform 0.18s ease;
+        box-shadow: 18px 0 32px rgba(16, 24, 40, 0.2);
+      }
+
+      .mobile-nav-toggle:checked ~ .sidebar {
+        transform: translateX(0);
+      }
+
+      .sidebar-branding {
+        margin-bottom: 16px;
+      }
+
+      .sidebar .brand {
+        margin: 0;
+        font-size: 1.35rem;
+      }
+
+      .sidebar .lede {
+        margin: 2px 0 0;
+        color: #bdd7d4;
+        font-size: 0.82rem;
+      }
+
       .sidebar nav {
-        display: flex;
+        display: grid;
         gap: 8px;
-        overflow-x: auto;
-        padding: 2px 0 4px;
-        scrollbar-width: thin;
-        scroll-snap-type: x proximity;
-        -webkit-overflow-scrolling: touch;
       }
 
       .sidebar a,
       .sidebar button.link-button {
-        display: inline-flex;
-        flex: 0 0 auto;
+        display: flex;
+        width: 100%;
         align-items: center;
-        min-height: 38px;
+        min-height: 42px;
         border: 1px solid rgba(217, 242, 239, 0.2);
         border-radius: 6px;
-        padding: 8px 11px;
+        padding: 10px 11px;
         background: rgba(255, 255, 255, 0.06);
         line-height: 1;
-        scroll-snap-align: start;
-        white-space: nowrap;
       }
 
       .sidebar a:hover,
@@ -778,7 +855,7 @@
       }
 
       .sidebar form {
-        flex: 0 0 auto;
+        width: 100%;
       }
 
       .main {
