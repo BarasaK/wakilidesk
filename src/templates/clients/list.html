@@ -14,7 +14,7 @@
   </header>
 
   <section class="panel">
-    <table class="table">
+    <table class="table responsive-table">
       <thead>
         <tr>
           <th>Number</th>
@@ -26,10 +26,10 @@
       <tbody>
         {% for client in clients %}
           <tr>
-            <td>{{ client.client_number }}</td>
-            <td><a href="{% url 'client_detail' client.id %}">{{ client.name }}</a></td>
-            <td>{{ client.get_client_type_display }}</td>
-            <td>{{ client.get_status_display }}</td>
+            <td data-label="Number">{{ client.client_number }}</td>
+            <td data-label="Name"><a href="{% url 'client_detail' client.id %}">{{ client.name }}</a></td>
+            <td data-label="Type">{{ client.get_client_type_display }}</td>
+            <td data-label="Status">{{ client.get_status_display }}</td>
           </tr>
         {% empty %}
           <tr><td colspan="4">No clients found.</td></tr>

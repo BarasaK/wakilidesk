@@ -4,6 +4,7 @@ from django.urls import reverse
 
 from accounts.models import User
 from audit.models import AuditEvent
+from clients.models import Client
 from firms.models import Firm, FirmMembership, Role, UserInvitation
 from firms.services import ensure_default_roles_for_firm
 
@@ -164,6 +165,30 @@ def test_app_shell_includes_mobile_navigation_drawer_controls(client):
     assert b'class="mobile-app-bar"' in response.content
     assert b'class="mobile-menu-button"' in response.content
     assert b'class="mobile-nav-backdrop"' in response.content
+
+
+@pytest.mark.django_db
+def test_app_tables_include_mobile_card_layout_hooks(client):
+    firm, admin = _firm_with_user("admin@mobile-tables.test", "Firm Administrator")
+    Client.objects.create(
+        firm=firm,
+        client_number="CL-00001",
+        client_type=Client.ClientType.INDIVIDUAL,
+        name="Mobile Client",
+        created_by=admin,
+    )
+
+    client.force_login(admin)
+    dashboard_response = client.get(reverse("dashboard"))
+    clients_response = client.get(reverse("client_list"))
+
+    assert dashboard_response.status_code == 200
+    assert clients_response.status_code == 200
+    assert b".responsive-table td::before" in dashboard_response.content
+    assert b'class="table responsive-table"' in dashboard_response.content
+    assert b'class="table responsive-table"' in clients_response.content
+    assert b'data-label="Number"' in clients_response.content
+    assert b'data-label="Name"' in clients_response.content
 
 
 @pytest.mark.django_db

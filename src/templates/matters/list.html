@@ -19,7 +19,7 @@
   </header>
 
   <section class="panel">
-    <table class="table">
+    <table class="table responsive-table">
       <thead>
         <tr>
           <th>Number</th>
@@ -32,11 +32,11 @@
       <tbody>
         {% for matter in matters %}
           <tr>
-            <td>{{ matter.matter_number }}</td>
-            <td><a href="{% url 'matter_detail' matter.id %}">{{ matter.title }}</a></td>
-            <td>{{ matter.client.name }}</td>
-            <td>{{ matter.get_status_display }}</td>
-            <td>{{ matter.get_confidentiality_level_display }}</td>
+            <td data-label="Number">{{ matter.matter_number }}</td>
+            <td data-label="Title"><a href="{% url 'matter_detail' matter.id %}">{{ matter.title }}</a></td>
+            <td data-label="Client">{{ matter.client.name }}</td>
+            <td data-label="Status">{{ matter.get_status_display }}</td>
+            <td data-label="Confidentiality">{{ matter.get_confidentiality_level_display }}</td>
           </tr>
         {% empty %}
           <tr><td colspan="5">No matters found.</td></tr>

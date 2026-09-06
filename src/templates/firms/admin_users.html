@@ -15,7 +15,7 @@
 
   <section class="panel">
     <h3>Members</h3>
-    <table class="table">
+    <table class="table responsive-table">
       <thead>
         <tr>
           <th>Email</th>
@@ -26,9 +26,9 @@
       <tbody>
         {% for membership in memberships %}
           <tr>
-            <td>{{ membership.user.email }}</td>
-            <td>{{ membership.role.name }}</td>
-            <td>{{ membership.status }}</td>
+            <td data-label="Email">{{ membership.user.email }}</td>
+            <td data-label="Role">{{ membership.role.name }}</td>
+            <td data-label="Status">{{ membership.status }}</td>
           </tr>
         {% empty %}
           <tr><td colspan="3">No members found.</td></tr>
@@ -39,7 +39,7 @@
 
   <section class="panel">
     <h3>Invitations</h3>
-    <table class="table">
+    <table class="table responsive-table">
       <thead>
         <tr>
           <th>Email</th>
@@ -51,10 +51,10 @@
       <tbody>
         {% for invitation in invitations %}
           <tr>
-            <td>{{ invitation.email }}</td>
-            <td>{{ invitation.role.name }}</td>
-            <td>{{ invitation.status }}</td>
-            <td><code>{% url 'accept_invitation' invitation.token %}</code></td>
+            <td data-label="Email">{{ invitation.email }}</td>
+            <td data-label="Role">{{ invitation.role.name }}</td>
+            <td data-label="Status">{{ invitation.status }}</td>
+            <td data-label="Accept URL"><code>{% url 'accept_invitation' invitation.token %}</code></td>
           </tr>
         {% empty %}
           <tr><td colspan="4">No invitations found.</td></tr>

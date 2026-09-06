@@ -14,7 +14,7 @@
   </header>
 
   <section class="panel">
-    <table class="table">
+    <table class="table responsive-table">
       <thead>
         <tr>
           <th>Name</th>
@@ -26,10 +26,10 @@
       <tbody>
         {% for area in areas %}
           <tr>
-            <td>{{ area.name }}</td>
-            <td>{{ area.code }}</td>
-            <td>{% if area.is_active %}Active{% else %}Inactive{% endif %}</td>
-            <td>
+            <td data-label="Name">{{ area.name }}</td>
+            <td data-label="Code">{{ area.code }}</td>
+            <td data-label="Status">{% if area.is_active %}Active{% else %}Inactive{% endif %}</td>
+            <td data-label="Actions">
               {% if "manage_firm_settings" in firm_permissions %}
                 <a href="{% url 'practice_area_edit' area.id %}">Edit</a>
               {% endif %}

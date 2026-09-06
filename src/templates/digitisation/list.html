@@ -11,16 +11,16 @@
   </header>
 
   <section class="panel">
-    <table class="table">
+    <table class="table responsive-table">
       <thead><tr><th>File</th><th>Matter</th><th>Status</th><th>Reviews</th><th></th></tr></thead>
       <tbody>
         {% for file in files %}
           <tr>
-            <td>{{ file.physical_file_number }}</td>
-            <td>{{ file.matter.matter_number }}</td>
-            <td>{{ file.get_digitisation_status_display }}</td>
-            <td>{{ file.digitisation_reviews.count }}</td>
-            <td>
+            <td data-label="File">{{ file.physical_file_number }}</td>
+            <td data-label="Matter">{{ file.matter.matter_number }}</td>
+            <td data-label="Status">{{ file.get_digitisation_status_display }}</td>
+            <td data-label="Reviews">{{ file.digitisation_reviews.count }}</td>
+            <td data-label="Actions">
               {% if "change_storage_location" in firm_permissions %}
                 <a href="{% url 'digitisation_review_create' file.id %}">Review</a>
               {% endif %}

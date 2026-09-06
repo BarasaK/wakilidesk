@@ -27,7 +27,7 @@
 
   <section class="panel">
     <h3>Parties</h3>
-    <table class="table">
+    <table class="table responsive-table">
       <thead>
         <tr>
           <th>Type</th>
@@ -38,9 +38,9 @@
       <tbody>
         {% for party in matter.parties.all %}
           <tr>
-            <td>{{ party.get_party_type_display }}</td>
-            <td>{{ party.name }}</td>
-            <td>{{ party.email }} {{ party.phone }}</td>
+            <td data-label="Type">{{ party.get_party_type_display }}</td>
+            <td data-label="Name">{{ party.name }}</td>
+            <td data-label="Contact">{{ party.email }} {{ party.phone }}</td>
           </tr>
         {% empty %}
           <tr><td colspan="3">No parties found.</td></tr>
@@ -57,7 +57,7 @@
           <a class="button secondary" href="{% url 'document_upload' %}?matter={{ matter.id }}">Upload document</a>
         {% endif %}
       </div>
-      <table class="table">
+      <table class="table responsive-table">
         <thead>
           <tr>
             <th>Title</th>
@@ -71,12 +71,12 @@
         <tbody>
           {% for document in documents %}
             <tr>
-              <td><a href="{% url 'document_detail' document.id %}">{{ document.title }}</a></td>
-              <td>{{ document.document_type.name }}</td>
-              <td>{{ document.reference_number|default:"-" }}</td>
-              <td>{{ document.document_date|default:"-" }}</td>
-              <td>{% if document.current_version %}{{ document.current_version.version_number }}{% else %}-{% endif %}</td>
-              <td>{% if document.archived_at %}Archived{% else %}Active{% endif %}</td>
+              <td data-label="Title"><a href="{% url 'document_detail' document.id %}">{{ document.title }}</a></td>
+              <td data-label="Category">{{ document.document_type.name }}</td>
+              <td data-label="Reference">{{ document.reference_number|default:"-" }}</td>
+              <td data-label="Date">{{ document.document_date|default:"-" }}</td>
+              <td data-label="Version">{% if document.current_version %}{{ document.current_version.version_number }}{% else %}-{% endif %}</td>
+              <td data-label="Status">{% if document.archived_at %}Archived{% else %}Active{% endif %}</td>
             </tr>
           {% empty %}
             <tr><td colspan="6">No documents found for this matter.</td></tr>
