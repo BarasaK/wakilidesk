@@ -319,6 +319,8 @@ The setup form can capture a firm logo. Existing logos are rendered as an image 
 
 The dashboard gives an operational summary for the active firm. Metrics are filtered to records the current user can access.
 
+On mobile, the application shell uses a top bar and collapsible navigation drawer instead of a horizontally scrolling menu. This keeps the current view immediately below the top bar and avoids sideways navigation scrolling.
+
 Dashboard cards show:
 
 - Active matters.

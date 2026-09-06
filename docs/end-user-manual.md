@@ -68,6 +68,8 @@ After signing in, you will see the dashboard for your current firm.
 
 If your account belongs to more than one firm, use the firm switch option on the dashboard to move between firms.
 
+On mobile, use the menu button in the top bar to open the navigation drawer. Select a menu item to move to that area, or tap outside the drawer to close it.
+
 ## 5. Dashboard
 
 The dashboard gives a quick picture of current filing activity.
