@@ -21,12 +21,24 @@ def documents_visible_to_user(*, firm, user):
     return documents_for_firm(firm).filter(matter__in=matters_visible_to_user(firm=firm, user=user))
 
 
+def trashed_documents_visible_to_user(*, firm, user):
+    return Document.objects.filter(
+        firm=firm,
+        deleted_at__isnull=False,
+        matter__in=matters_visible_to_user(firm=firm, user=user),
+    ).select_related("matter", "document_type", "current_version")
+
+
 def get_document_for_firm_or_404(firm, document_id):
     return get_object_or_404(Document, id=document_id, firm=firm, deleted_at__isnull=True)
 
 
 def get_document_for_user_or_404(*, firm, user, document_id):
     return get_object_or_404(documents_visible_to_user(firm=firm, user=user), id=document_id)
+
+
+def get_trashed_document_for_user_or_404(*, firm, user, document_id):
+    return get_object_or_404(trashed_documents_visible_to_user(firm=firm, user=user), id=document_id)
 
 
 @transaction.atomic
@@ -142,6 +154,47 @@ def restore_document(*, document, firm, request=None):
         action="document_restored",
         object_type="Document",
         object_id=document.id,
+    )
+
+
+def trash_document(*, document, firm, request=None):
+    document.deleted_at = timezone.now()
+    document.save(update_fields=["deleted_at", "updated_at"])
+    record_audit_event(
+        request=request,
+        firm=firm,
+        action="document_moved_to_trash",
+        object_type="Document",
+        object_id=document.id,
+    )
+
+
+def restore_trashed_document(*, document, firm, request=None):
+    document.deleted_at = None
+    document.save(update_fields=["deleted_at", "updated_at"])
+    record_audit_event(
+        request=request,
+        firm=firm,
+        action="document_restored_from_trash",
+        object_type="Document",
+        object_id=document.id,
+    )
+
+
+def permanently_delete_document(*, document, firm, request=None):
+    document_id = document.id
+    for version in document.versions.all():
+        try:
+            private_storage_path(version.storage_key).unlink(missing_ok=True)
+        except OSError:
+            pass
+    document.delete()
+    record_audit_event(
+        request=request,
+        firm=firm,
+        action="document_permanently_deleted",
+        object_type="Document",
+        object_id=document_id,
     )
 
 

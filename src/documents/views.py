@@ -16,8 +16,13 @@ from documents.services import (
     document_file_response,
     documents_visible_to_user,
     get_document_for_user_or_404,
+    get_trashed_document_for_user_or_404,
+    permanently_delete_document,
     restore_document,
+    restore_trashed_document,
     schedule_text_extraction,
+    trash_document,
+    trashed_documents_visible_to_user,
     update_document_metadata,
 )
 from firms.services import require_firm_permission
@@ -31,6 +36,16 @@ def document_list(request):
     require_firm_permission(request.user, firm, "view_document")
     documents = documents_visible_to_user(firm=firm, user=request.user)
     return render(request, "documents/list.html", {"firm": firm, "documents": documents})
+
+
+@login_required
+def document_trash(request):
+    firm = _require_current_firm(request)
+    if firm is None:
+        return redirect("firm_onboarding")
+    require_firm_permission(request.user, firm, "delete_document")
+    documents = trashed_documents_visible_to_user(firm=firm, user=request.user)
+    return render(request, "documents/trash.html", {"firm": firm, "documents": documents})
 
 
 @login_required
@@ -152,6 +167,47 @@ def document_restore(request, document_id):
         restore_document(document=document, firm=firm, request=request)
         messages.success(request, "Document restored.")
     return redirect("document_detail", document_id=document.id)
+
+
+@login_required
+def document_trash_move(request, document_id):
+    firm = _require_current_firm(request)
+    if firm is None:
+        return redirect("firm_onboarding")
+    require_firm_permission(request.user, firm, "delete_document")
+    document = get_document_for_user_or_404(firm=firm, user=request.user, document_id=document_id)
+    if request.method == "POST":
+        trash_document(document=document, firm=firm, request=request)
+        messages.success(request, "Document moved to trash.")
+        return redirect("document_list")
+    return redirect("document_detail", document_id=document.id)
+
+
+@login_required
+def document_trash_restore(request, document_id):
+    firm = _require_current_firm(request)
+    if firm is None:
+        return redirect("firm_onboarding")
+    require_firm_permission(request.user, firm, "restore_document")
+    document = get_trashed_document_for_user_or_404(firm=firm, user=request.user, document_id=document_id)
+    if request.method == "POST":
+        restore_trashed_document(document=document, firm=firm, request=request)
+        messages.success(request, "Document restored from trash.")
+    return redirect("document_trash")
+
+
+@login_required
+def document_permanent_delete(request, document_id):
+    firm = _require_current_firm(request)
+    if firm is None:
+        return redirect("firm_onboarding")
+    require_firm_permission(request.user, firm, "delete_document")
+    require_firm_permission(request.user, firm, "manage_firm_settings")
+    document = get_trashed_document_for_user_or_404(firm=firm, user=request.user, document_id=document_id)
+    if request.method == "POST":
+        permanently_delete_document(document=document, firm=firm, request=request)
+        messages.success(request, "Document permanently deleted.")
+    return redirect("document_trash")
 
 
 @login_required

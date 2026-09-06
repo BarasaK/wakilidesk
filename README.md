@@ -48,6 +48,7 @@ This repository contains the current wakiliDesk MVP through Milestone 9, plus Do
 - Private tenant-aware storage keys
 - Upload and download flows
 - Archive and restore
+- Trash, restore from trash, and admin-only permanent delete
 - Audit events for document activity
 
 ## Milestone 4 contents

@@ -12,6 +12,9 @@
       {% if "upload_document" in firm_permissions %}
         <a class="button secondary" href="{% url 'document_upload' %}">Upload document</a>
       {% endif %}
+      {% if "delete_document" in firm_permissions %}
+        <a class="button secondary" href="{% url 'document_trash' %}">Trash</a>
+      {% endif %}
       {% if "manage_firm_settings" in firm_permissions %}
         <a class="button secondary" href="{% url 'document_category_list' %}">Categories</a>
       {% endif %}

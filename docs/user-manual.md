@@ -20,6 +20,7 @@ The MVP supports:
 - Matter records and matter parties.
 - Practice areas and matter numbering.
 - Document upload, metadata, versioning, archive, restore, and download.
+- Document trash, recovery, and admin-only permanent deletion.
 - Private local document storage under tenant-aware paths.
 - Background text extraction task boundary.
 - OCR reprocessing action for document versions.
@@ -557,6 +558,18 @@ Use archive when a document should no longer appear as active. Archive does not 
 
 Users with restore permission can restore archived documents.
 
+### Move to trash and restore
+
+Use **Move to trash** when a document should be removed from active working views. Trashed documents do not appear in the normal document list, matter document panel, search, or reports.
+
+Users with `delete_document` can open **Documents** -> **Trash** to review trashed documents. Users with `restore_document` can restore documents from trash.
+
+### Permanent delete
+
+Permanent delete is available only from **Document Trash** and only to firm administrators with both `delete_document` and `manage_firm_settings`.
+
+Permanent delete removes the document metadata and its document version records. The MVP also attempts to remove the stored private files for those versions. Use this only when the firm has confirmed the document no longer needs to be retained.
+
 ## 15. Text Extraction and OCR Boundary
 
 The MVP includes the asynchronous processing boundary needed for OCR/text extraction.
@@ -914,6 +927,7 @@ Current audited examples include:
 - Document metadata update.
 - Document download.
 - Document archive and restore.
+- Document trash, trash restore, and permanent delete.
 - Physical file creation and updates.
 - Physical file checkout and check-in.
 - Digitisation review creation.
@@ -1076,6 +1090,7 @@ Before a controlled pilot:
 - Confirm document categories and practice areas.
 - Confirm storage locations.
 - Upload sample documents and verify download behavior.
+- Move a sample document to trash, restore it, and confirm admin-only permanent delete behavior.
 - Start Celery worker and verify text extraction.
 - Register several physical files.
 - Test checkout and check-in.
