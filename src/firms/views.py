@@ -47,7 +47,7 @@ def dashboard(request):
     )
     metrics = {
         "clients_total": (
-            Client.objects.filter(firm=firm).count()
+            Client.objects.filter(firm=firm, deleted_at__isnull=True).count()
             if user_has_firm_permission(request.user, firm, "view_client")
             else 0
         ),

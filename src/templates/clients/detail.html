@@ -15,6 +15,12 @@
       {% if "create_matter" in firm_permissions %}
         <a class="button secondary" href="{% url 'matter_create' %}">Create matter</a>
       {% endif %}
+      {% if "delete_client" in firm_permissions %}
+        <form method="post" action="{% url 'client_trash_move' client.id %}">
+          {% csrf_token %}
+          <button class="button secondary danger" type="submit">Move to trash</button>
+        </form>
+      {% endif %}
     </div>
   </header>
 

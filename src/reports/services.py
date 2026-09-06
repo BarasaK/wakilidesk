@@ -102,7 +102,7 @@ def _client_report(*, firm, user) -> ReportData:
             client.get_status_display(),
             _format_datetime(client.created_at),
         ]
-        for client in Client.objects.filter(firm=firm).order_by("name")
+        for client in Client.objects.filter(firm=firm, deleted_at__isnull=True).order_by("name")
     ]
     return ReportData(
         title="Clients Report",

@@ -12,6 +12,9 @@
       {% if "create_matter" in firm_permissions %}
         <a class="button secondary" href="{% url 'matter_create' %}">Create matter</a>
       {% endif %}
+      {% if "delete_matter" in firm_permissions %}
+        <a class="button secondary" href="{% url 'matter_trash' %}">Trash</a>
+      {% endif %}
       {% if "manage_firm_settings" in firm_permissions %}
         <a class="button secondary" href="{% url 'practice_area_list' %}">Practice areas</a>
       {% endif %}

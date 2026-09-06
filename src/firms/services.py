@@ -7,12 +7,21 @@ from firms.models import Firm, FirmMembership, Permission, Role
 
 
 DEFAULT_PERMISSIONS = {
-    "Clients": ["view_client", "create_client", "edit_client", "archive_client"],
+    "Clients": [
+        "view_client",
+        "create_client",
+        "edit_client",
+        "archive_client",
+        "delete_client",
+        "restore_client",
+    ],
     "Matters": [
         "view_matter",
         "create_matter",
         "edit_matter",
         "close_matter",
+        "delete_matter",
+        "restore_matter",
         "view_all_matters",
         "manage_confidential_matter",
     ],

@@ -26,7 +26,7 @@ class DocumentUploadForm(forms.ModelForm):
         matters = (
             matters_visible_to_user(firm=firm, user=user)
             if user is not None
-            else Matter.objects.filter(firm=firm)
+            else Matter.objects.filter(firm=firm, deleted_at__isnull=True)
         )
         self.fields["matter"].queryset = matters.order_by("-opened_date", "matter_number")
         self.fields["document_type"].queryset = DocumentCategory.objects.filter(

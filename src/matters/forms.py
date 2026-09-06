@@ -30,7 +30,10 @@ class MatterForm(forms.ModelForm):
 
     def __init__(self, *args, firm, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["client"].queryset = Client.objects.filter(firm=firm).order_by("name")
+        self.fields["client"].queryset = Client.objects.filter(
+            firm=firm,
+            deleted_at__isnull=True,
+        ).order_by("name")
         self.fields["practice_area"].queryset = PracticeArea.objects.filter(
             firm=firm, is_active=True
         ).order_by("name")

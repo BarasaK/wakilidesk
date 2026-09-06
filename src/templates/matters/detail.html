@@ -13,6 +13,12 @@
         <a class="button secondary" href="{% url 'matter_edit' matter.id %}">Edit matter</a>
         <a class="button secondary" href="{% url 'matter_party_create' matter.id %}">Add party</a>
       {% endif %}
+      {% if "delete_matter" in firm_permissions %}
+        <form method="post" action="{% url 'matter_trash_move' matter.id %}">
+          {% csrf_token %}
+          <button class="button secondary danger" type="submit">Move to trash</button>
+        </form>
+      {% endif %}
     </div>
   </header>
 

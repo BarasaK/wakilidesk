@@ -19,7 +19,7 @@ def global_search(*, firm, user, query: str) -> dict[str, list]:
 
     if user_has_firm_permission(user, firm, "view_client"):
         results["clients"] = list(
-            Client.objects.filter(firm=firm).filter(
+            Client.objects.filter(firm=firm, deleted_at__isnull=True).filter(
                 Q(name__icontains=query)
                 | Q(client_number__icontains=query)
                 | Q(email__icontains=query)
