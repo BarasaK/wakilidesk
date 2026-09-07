@@ -6,6 +6,8 @@
       .app-shell {
         --accent: {{ request.current_firm.accent_color }};
         --accent-dark: {{ request.current_firm.accent_color }};
+        --app-font-family: {{ request.current_firm.app_font_stack|safe }};
+        --app-font-size: {{ request.current_firm.app_font_size }}px;
       }
     </style>
   {% endif %}

@@ -39,6 +39,8 @@ def test_signup_then_firm_onboarding_creates_admin_membership(client):
             "currency": "KES",
             "file_number_pattern": "{PRACTICE_AREA}/{YEAR}/{SEQUENCE}",
             "accent_color": "#1d4ed8",
+            "app_font_family": "GEORGIA",
+            "app_font_size": "17",
         },
     )
 
@@ -46,6 +48,8 @@ def test_signup_then_firm_onboarding_creates_admin_membership(client):
     assert onboarding_response["Location"] == reverse("dashboard")
     firm = Firm.objects.get(slug="new-firm")
     assert firm.accent_color == "#1d4ed8"
+    assert firm.app_font_family == Firm.AppFontFamily.GEORGIA
+    assert firm.app_font_size == 17
     membership = FirmMembership.objects.get(user__email="newadmin@example.test", firm=firm)
     assert membership.role.name == "Firm Administrator"
     assert AuditEvent.objects.filter(action="firm_created", firm=firm).exists()
@@ -69,12 +73,16 @@ def test_firm_admin_can_update_theme_color(client):
             "currency": firm.currency,
             "file_number_pattern": firm.file_number_pattern,
             "accent_color": "#7c2d12",
+            "app_font_family": "VERDANA",
+            "app_font_size": "18",
         },
     )
     firm.refresh_from_db()
 
     assert response.status_code == 302
     assert firm.accent_color == "#7c2d12"
+    assert firm.app_font_family == Firm.AppFontFamily.VERDANA
+    assert firm.app_font_size == 18
 
 
 @pytest.mark.django_db
@@ -98,13 +106,30 @@ def test_firm_profile_renders_current_logo_preview(client, tmp_path, settings):
 def test_dashboard_uses_firm_theme_color(client):
     firm, admin = _firm_with_user("admin@theme.test", "Firm Administrator")
     firm.accent_color = "#1d4ed8"
-    firm.save(update_fields=["accent_color"])
+    firm.app_font_family = Firm.AppFontFamily.GEORGIA
+    firm.app_font_size = 17
+    firm.save(update_fields=["accent_color", "app_font_family", "app_font_size"])
 
     client.force_login(admin)
     response = client.get(reverse("dashboard"))
 
     assert response.status_code == 200
     assert b"--accent: #1d4ed8" in response.content
+    assert b"--app-font-family: Georgia, 'Times New Roman', serif" in response.content
+    assert b"--app-font-size: 17px" in response.content
+
+
+@pytest.mark.django_db
+def test_firm_profile_renders_live_theme_preview(client):
+    _firm, admin = _firm_with_user("admin@preview.test", "Firm Administrator")
+
+    client.force_login(admin)
+    response = client.get(reverse("firm_profile"))
+
+    assert response.status_code == 200
+    assert b'data-theme-preview' in response.content
+    assert b'id="id_app_font_family"' in response.content
+    assert b'id="id_app_font_size"' in response.content
 
 
 @pytest.mark.django_db

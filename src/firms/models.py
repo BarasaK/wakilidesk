@@ -3,7 +3,7 @@ from __future__ import annotations
 import uuid
 
 from django.conf import settings
-from django.core.validators import RegexValidator
+from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator
 from django.core.signing import TimestampSigner
 from django.db import models
 from django.utils.text import slugify
@@ -19,6 +19,13 @@ class TimeStampedModel(models.Model):
 
 
 class Firm(TimeStampedModel):
+    class AppFontFamily(models.TextChoices):
+        SYSTEM = "SYSTEM", "System default"
+        ARIAL = "ARIAL", "Arial"
+        GEORGIA = "GEORGIA", "Georgia"
+        VERDANA = "VERDANA", "Verdana"
+        TAHOMA = "TAHOMA", "Tahoma"
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255)
     display_name = models.CharField(max_length=255)
@@ -44,6 +51,15 @@ class Firm(TimeStampedModel):
             )
         ],
     )
+    app_font_family = models.CharField(
+        max_length=20,
+        choices=AppFontFamily.choices,
+        default=AppFontFamily.SYSTEM,
+    )
+    app_font_size = models.PositiveSmallIntegerField(
+        default=16,
+        validators=[MinValueValidator(14), MaxValueValidator(18)],
+    )
     is_active = models.BooleanField(default=True)
 
     class Meta:
@@ -56,6 +72,17 @@ class Firm(TimeStampedModel):
         if not self.slug:
             self.slug = slugify(self.display_name or self.name)
         super().save(*args, **kwargs)
+
+    @property
+    def app_font_stack(self) -> str:
+        stacks = {
+            self.AppFontFamily.SYSTEM: "Arial, Helvetica, sans-serif",
+            self.AppFontFamily.ARIAL: "Arial, Helvetica, sans-serif",
+            self.AppFontFamily.GEORGIA: "Georgia, 'Times New Roman', serif",
+            self.AppFontFamily.VERDANA: "Verdana, Geneva, sans-serif",
+            self.AppFontFamily.TAHOMA: "Tahoma, Geneva, sans-serif",
+        }
+        return stacks.get(self.app_font_family, stacks[self.AppFontFamily.SYSTEM])
 
     def __str__(self) -> str:
         return self.display_name
