@@ -25,6 +25,9 @@ class Firm(TimeStampedModel):
         GEORGIA = "GEORGIA", "Georgia"
         VERDANA = "VERDANA", "Verdana"
         TAHOMA = "TAHOMA", "Tahoma"
+        TREBUCHET = "TREBUCHET", "Trebuchet MS"
+        TIMES = "TIMES", "Times New Roman"
+        COURIER = "COURIER", "Courier New"
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255)
@@ -81,6 +84,9 @@ class Firm(TimeStampedModel):
             self.AppFontFamily.GEORGIA: "Georgia, 'Times New Roman', serif",
             self.AppFontFamily.VERDANA: "Verdana, Geneva, sans-serif",
             self.AppFontFamily.TAHOMA: "Tahoma, Geneva, sans-serif",
+            self.AppFontFamily.TREBUCHET: "'Trebuchet MS', Arial, sans-serif",
+            self.AppFontFamily.TIMES: "'Times New Roman', Times, serif",
+            self.AppFontFamily.COURIER: "'Courier New', Courier, monospace",
         }
         return stacks.get(self.app_font_family, stacks[self.AppFontFamily.SYSTEM])
 
