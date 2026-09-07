@@ -26,7 +26,8 @@
       min-height: 100vh;
       background: var(--bg);
       color: var(--ink);
-      font-family: Arial, Helvetica, sans-serif;
+      font-family: var(--app-font-family, Arial, Helvetica, sans-serif);
+      font-size: var(--app-font-size, 16px);
       line-height: 1.5;
     }
 
@@ -171,6 +172,8 @@
       min-height: 100vh;
       display: grid;
       grid-template-columns: 240px 1fr;
+      font-family: var(--app-font-family, Arial, Helvetica, sans-serif);
+      font-size: var(--app-font-size, 16px);
     }
 
     .mobile-app-bar,
@@ -332,6 +335,44 @@
       border: 1px solid #a7f3d0;
       border-radius: 6px;
       background: #ecfdf3;
+    }
+
+    .theme-preview {
+      display: grid;
+      gap: 12px;
+      margin: 4px 0 18px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+      background: #f8fafc;
+    }
+
+    .theme-preview-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border-radius: 6px;
+      padding: 10px 12px;
+      background: var(--preview-accent, var(--accent));
+      color: #fff;
+      font-weight: 700;
+    }
+
+    .theme-preview-body {
+      font-family: var(--preview-font-family, var(--app-font-family, Arial, Helvetica, sans-serif));
+      font-size: var(--preview-font-size, var(--app-font-size, 16px));
+    }
+
+    .theme-preview-body h3 {
+      margin: 0 0 6px;
+      font-size: 1.2em;
+      letter-spacing: 0;
+    }
+
+    .theme-preview-body p {
+      margin: 0;
+      color: #344054;
     }
 
     .dashboard-band {

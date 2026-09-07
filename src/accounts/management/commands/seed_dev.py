@@ -29,6 +29,8 @@ FIRM_SPECS = [
         "slug": "amani-advocates",
         "email": "admin@amani.test",
         "accent_color": "#0f766e",
+        "app_font_family": Firm.AppFontFamily.SYSTEM,
+        "app_font_size": 16,
     },
     {
         "name": "Baraka Legal Partners",
@@ -36,6 +38,8 @@ FIRM_SPECS = [
         "slug": "baraka-legal",
         "email": "admin@baraka.test",
         "accent_color": "#1d4ed8",
+        "app_font_family": Firm.AppFontFamily.VERDANA,
+        "app_font_size": 17,
     },
     {
         "name": "Kosmas Law Advocates LLP",
@@ -43,6 +47,8 @@ FIRM_SPECS = [
         "slug": "kosmaslaw",
         "email": "admin@kosmaslaw.test",
         "accent_color": "#7c2d12",
+        "app_font_family": Firm.AppFontFamily.GEORGIA,
+        "app_font_size": 16,
     },
 ]
 
@@ -160,6 +166,8 @@ class Command(BaseCommand):
                 "timezone": "Africa/Nairobi",
                 "currency": "KES",
                 "accent_color": spec["accent_color"],
+                "app_font_family": spec["app_font_family"],
+                "app_font_size": spec["app_font_size"],
                 "is_active": True,
             },
         )

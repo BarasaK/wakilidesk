@@ -1,0 +1,53 @@
+<section
+  class="theme-preview"
+  data-theme-preview
+  aria-label="Theme preview"
+>
+  <div class="theme-preview-bar">
+    <span>wakiliDesk</span>
+    <span>Preview</span>
+  </div>
+  <div class="theme-preview-body">
+    <h3>Client Intake Review</h3>
+    <p>Jane Wanjiku - Employment Claim - Hearing scheduled for 9:00 AM.</p>
+  </div>
+</section>
+
+<script>
+  (function () {
+    var preview = document.querySelector("[data-theme-preview]");
+    if (!preview) {
+      return;
+    }
+    var colorInput = document.getElementById("id_accent_color");
+    var familyInput = document.getElementById("id_app_font_family");
+    var sizeInput = document.getElementById("id_app_font_size");
+    var stacks = {
+      SYSTEM: "Arial, Helvetica, sans-serif",
+      ARIAL: "Arial, Helvetica, sans-serif",
+      GEORGIA: "Georgia, 'Times New Roman', serif",
+      VERDANA: "Verdana, Geneva, sans-serif",
+      TAHOMA: "Tahoma, Geneva, sans-serif"
+    };
+
+    function renderPreview() {
+      if (colorInput && colorInput.value) {
+        preview.style.setProperty("--preview-accent", colorInput.value);
+      }
+      if (familyInput && familyInput.value) {
+        preview.style.setProperty("--preview-font-family", stacks[familyInput.value] || stacks.SYSTEM);
+      }
+      if (sizeInput && sizeInput.value) {
+        preview.style.setProperty("--preview-font-size", sizeInput.value + "px");
+      }
+    }
+
+    [colorInput, familyInput, sizeInput].forEach(function (input) {
+      if (input) {
+        input.addEventListener("input", renderPreview);
+        input.addEventListener("change", renderPreview);
+      }
+    });
+    renderPreview();
+  })();
+</script>
