@@ -27,6 +27,7 @@
     <p>Court: {{ event.court_name|default:"-" }}</p>
     <p>Location: {{ event.location|default:"-" }}</p>
     <p>Assigned to: {{ event.assigned_to.email|default:"-" }}</p>
+    <p>Additional reminder emails: {% if event.additional_reminder_emails %}{{ event.additional_reminder_emails|linebreaksbr }}{% else %}-{% endif %}</p>
     <p>Notes: {{ event.notes|default:"-" }}</p>
   </section>
 

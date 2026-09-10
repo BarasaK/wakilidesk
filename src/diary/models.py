@@ -44,6 +44,7 @@ class DiaryEvent(models.Model):
         null=True,
         blank=True,
     )
+    additional_reminder_emails = models.TextField(blank=True)
     notes = models.TextField(blank=True)
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.SCHEDULED)
     created_by = models.ForeignKey(

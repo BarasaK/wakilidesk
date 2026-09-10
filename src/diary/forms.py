@@ -3,6 +3,8 @@ from __future__ import annotations
 from datetime import timedelta
 
 from django import forms
+from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
 from django.utils import timezone
 
 from diary.models import DiaryEvent, DiaryReminder
@@ -51,12 +53,20 @@ class DiaryEventForm(forms.ModelForm):
             "court_name",
             "location",
             "assigned_to",
+            "additional_reminder_emails",
             "status",
             "notes",
         )
         widgets = {
             "start_at": DateTimeLocalInput(),
             "end_at": DateTimeLocalInput(),
+            "additional_reminder_emails": forms.Textarea(attrs={"rows": 3}),
+        }
+        labels = {
+            "additional_reminder_emails": "Additional reminder emails",
+        }
+        help_texts = {
+            "additional_reminder_emails": "Optional. Add comma-separated or line-separated email addresses to copy on email reminders.",
         }
 
     def __init__(self, *args, firm, user, **kwargs):
@@ -95,6 +105,22 @@ class DiaryEventForm(forms.ModelForm):
         if cleaned_data.get("reminder_offsets") and not cleaned_data.get("reminder_channels"):
             self.add_error("reminder_channels", "Select at least one reminder channel.")
         return cleaned_data
+
+    def clean_additional_reminder_emails(self):
+        value = self.cleaned_data.get("additional_reminder_emails", "")
+        emails = []
+        seen = set()
+        for raw_email in value.replace(",", "\n").splitlines():
+            email = raw_email.strip().lower()
+            if not email or email in seen:
+                continue
+            try:
+                validate_email(email)
+            except ValidationError:
+                raise forms.ValidationError(f"Enter a valid email address: {raw_email.strip()}")
+            seen.add(email)
+            emails.append(email)
+        return "\n".join(emails)
 
 
 class DiaryEventFilterForm(forms.Form):

@@ -33,6 +33,7 @@ def test_diary_event_create_adds_reminders(client):
             "court_name": "Milimani High Court",
             "location": "Court 3",
             "assigned_to": admin.id,
+            "additional_reminder_emails": "courtclerk@example.com, partner@example.com",
             "status": DiaryEvent.Status.SCHEDULED,
             "notes": "Prepare bundle.",
             "reminder_offsets": ["1", "3"],
@@ -43,6 +44,36 @@ def test_diary_event_create_adds_reminders(client):
     assert response.status_code == 302
     event = DiaryEvent.objects.get(firm=firm, title="High Court mention")
     assert event.reminders.count() == 4
+    assert event.additional_reminder_emails == "courtclerk@example.com\npartner@example.com"
+
+
+@pytest.mark.django_db
+def test_diary_event_rejects_invalid_additional_reminder_email(client):
+    _firm, admin, matter, _assigned, _unassigned = _setup()
+    client.force_login(admin)
+
+    response = client.post(
+        reverse("diary_event_create"),
+        {
+            "matter": matter.id,
+            "title": "Invalid reminder email",
+            "event_type": DiaryEvent.EventType.MENTION,
+            "start_at": (timezone.now() + timedelta(days=5)).strftime("%Y-%m-%dT%H:%M"),
+            "end_at": "",
+            "court_name": "",
+            "location": "",
+            "assigned_to": admin.id,
+            "additional_reminder_emails": "not-an-email",
+            "status": DiaryEvent.Status.SCHEDULED,
+            "notes": "",
+            "reminder_offsets": ["1"],
+            "reminder_channels": [DiaryReminder.Channel.EMAIL],
+        },
+    )
+
+    assert response.status_code == 200
+    assert b"Enter a valid email address" in response.content
+    assert not DiaryEvent.objects.filter(title="Invalid reminder email").exists()
 
 
 @pytest.mark.django_db
@@ -196,6 +227,37 @@ def test_due_diary_reminders_create_notification_and_email_once():
     assert Notification.objects.filter(recipient=admin, title__icontains="Due hearing").count() == 1
     assert len(mail.outbox) == 1
     assert "Due hearing" in mail.outbox[0].subject
+
+
+@pytest.mark.django_db
+@override_settings(EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
+def test_email_reminder_copies_additional_recipients_once():
+    _firm, admin, matter, _assigned, _unassigned = _setup()
+    event = DiaryEvent.objects.create(
+        firm=matter.firm,
+        matter=matter,
+        title="Copied email reminder",
+        event_type=DiaryEvent.EventType.HEARING,
+        start_at=timezone.now() + timedelta(hours=1),
+        assigned_to=admin,
+        created_by=admin,
+        additional_reminder_emails="client@example.com\nADMIN@DIARY.TEST\npartner@example.com",
+    )
+    DiaryReminder.objects.create(
+        event=event,
+        remind_at=timezone.now() - timedelta(minutes=1),
+        channel=DiaryReminder.Channel.EMAIL,
+    )
+
+    result = send_due_diary_reminders()
+
+    assert result == {"sent": 1, "failed": 0}
+    assert len(mail.outbox) == 1
+    assert mail.outbox[0].to == [
+        "admin@diary.test",
+        "client@example.com",
+        "partner@example.com",
+    ]
 
 
 @pytest.mark.django_db

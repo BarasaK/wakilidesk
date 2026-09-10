@@ -170,7 +170,7 @@ def send_diary_reminder(reminder):
         "created_by",
     ).get(id=reminder.event_id)
     recipient = event.assigned_to or event.created_by
-    if recipient is None:
+    if recipient is None and not event.additional_reminder_emails.strip():
         reminder.status = DiaryReminder.Status.FAILED
         reminder.failure_reason = "No reminder recipient is available."
         reminder.save(update_fields=["status", "failure_reason"])
@@ -179,6 +179,11 @@ def send_diary_reminder(reminder):
     title = f"Diary reminder: {event.title}"
     message = diary_reminder_message(event)
     if reminder.channel == DiaryReminder.Channel.IN_APP:
+        if recipient is None:
+            reminder.status = DiaryReminder.Status.FAILED
+            reminder.failure_reason = "No in-app reminder recipient is available."
+            reminder.save(update_fields=["status", "failure_reason"])
+            return reminder
         notify_user(
             firm=event.firm,
             recipient=recipient,
@@ -188,13 +193,14 @@ def send_diary_reminder(reminder):
             object_id=event.id,
         )
     elif reminder.channel == DiaryReminder.Channel.EMAIL:
-        if not recipient.email:
-            raise ValueError("Reminder recipient has no email address.")
+        recipient_list = diary_reminder_email_recipients(event)
+        if not recipient_list:
+            raise ValueError("No email reminder recipient is available.")
         send_mail(
             subject=title,
             message=message,
             from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[recipient.email],
+            recipient_list=recipient_list,
             fail_silently=False,
         )
 
@@ -211,3 +217,19 @@ def diary_reminder_message(event):
     court = f"\nCourt: {event.court_name}" if event.court_name else ""
     location = f"\nLocation: {event.location}" if event.location else ""
     return f"{event.get_event_type_display()} scheduled for {start_at}.{matter}{court}{location}"
+
+
+def diary_reminder_email_recipients(event):
+    recipients = []
+    seen = set()
+    primary = event.assigned_to or event.created_by
+    if primary and primary.email:
+        email = primary.email.strip().lower()
+        recipients.append(email)
+        seen.add(email)
+    for raw_email in event.additional_reminder_emails.replace(",", "\n").splitlines():
+        email = raw_email.strip().lower()
+        if email and email not in seen:
+            recipients.append(email)
+            seen.add(email)
+    return recipients
