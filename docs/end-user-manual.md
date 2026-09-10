@@ -68,6 +68,8 @@ After signing in, you will see the dashboard for your current firm.
 
 If your account belongs to more than one firm, use the firm switch option on the dashboard to move between firms.
 
+If you forget your password, select **Forgot password?** on the sign-in page and enter your account email address. If the email belongs to an active account, wakiliDesk sends a password reset link to that mailbox.
+
 On mobile, use the menu button in the top bar to open the navigation drawer. Select a menu item to move to that area, or tap outside the drawer to close it.
 
 ## 5. Dashboard
@@ -497,7 +499,7 @@ flowchart LR
 4. Choose the role.
 5. Save.
 
-The invited user accepts the invitation and sets their password.
+wakiliDesk emails the invitation link to the invited user. The **Users** page also keeps the accept URL visible as a fallback. The invited user opens the link, accepts the invitation, and sets their password.
 
 ### Manage Roles
 

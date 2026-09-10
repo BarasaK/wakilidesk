@@ -77,7 +77,7 @@ CSRF_TRUSTED_ORIGINS=https://staging.wakilidesk.com,https://wakilidesk.com
 POSTGRES_PASSWORD=<strong database password>
 WAKILIDESK_HOST_PORT=8085
 WAKILIDESK_HOST_BIND=127.0.0.1
-DEFAULT_FROM_EMAIL=wakilidesk@gmail.com
+DEFAULT_FROM_EMAIL=noreply@wakilidesk.com
 ```
 
 Generate a Django secret locally or on the VPS:
@@ -157,20 +157,35 @@ For offline or early staging tests, keep email on the console backend:
 
 ```text
 EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend
-DEFAULT_FROM_EMAIL=wakilidesk@gmail.com
+DEFAULT_FROM_EMAIL=noreply@wakilidesk.com
 ```
 
-For Gmail SMTP testing, use a Gmail app password:
+For production SMTP with the Plesk mailbox on `wakilidesk.com`, set:
 
 ```text
 EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
-EMAIL_HOST=smtp.gmail.com
+EMAIL_HOST=mail.wakilidesk.com
 EMAIL_PORT=587
-EMAIL_USER=wakilidesk@gmail.com
-EMAIL_PASSWORD=<gmail-app-password>
+EMAIL_USER=noreply@wakilidesk.com
+EMAIL_PASSWORD=<noreply-mailbox-password>
 EMAIL_USE_TLS=true
-DEFAULT_FROM_EMAIL=wakilidesk@gmail.com
+DEFAULT_FROM_EMAIL=noreply@wakilidesk.com
+SERVER_EMAIL=noreply@wakilidesk.com
 ```
+
+Confirm SMTP from the VPS after updating `.env.prod`:
+
+```bash
+docker compose --env-file .env.prod -f docker-compose.prod.yml exec web python manage.py shell -c "from django.core.mail import send_mail; print(send_mail('wakiliDesk SMTP test','SMTP is working.','noreply@wakilidesk.com',['hello@wakilidesk.com'], fail_silently=False))"
+```
+
+Expected output:
+
+```text
+1
+```
+
+With SMTP enabled, firm invitations are emailed automatically to the invited address and password reset emails are sent from the login screen.
 
 Do not seed production pilot data unless this is intentionally a demo/staging environment.
 
