@@ -60,7 +60,7 @@
       <div class="section-heading compact">
         <h3>Documents</h3>
         {% if "upload_document" in firm_permissions %}
-          <a class="button secondary" href="{% url 'document_upload' %}?matter={{ matter.id }}">Upload document</a>
+          <a class="button secondary" href="{% url 'document_upload' %}?matter={{ matter.id }}&return_to=matter">Upload document</a>
         {% endif %}
       </div>
       <table class="table responsive-table">
