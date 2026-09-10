@@ -1,5 +1,7 @@
 import pytest
+from django.core import mail
 from django.core.files.base import ContentFile
+from django.test import override_settings
 from django.urls import reverse
 
 from accounts.models import User
@@ -133,6 +135,10 @@ def test_firm_profile_renders_live_theme_preview(client):
 
 
 @pytest.mark.django_db
+@override_settings(
+    EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+    DEFAULT_FROM_EMAIL="noreply@wakilidesk.com",
+)
 def test_firm_admin_can_create_invitation(client):
     firm, admin = _firm_with_user("admin@amani.test", "Firm Administrator")
     role = firm.roles.get(name="Advocate")
@@ -147,7 +153,31 @@ def test_firm_admin_can_create_invitation(client):
     invitation = UserInvitation.objects.get(email="advocate@amani.test")
     assert invitation.firm == firm
     assert invitation.role == role
+    assert len(mail.outbox) == 1
+    assert mail.outbox[0].to == ["advocate@amani.test"]
+    assert "Invitation to join" in mail.outbox[0].subject
+    assert reverse("accept_invitation", args=[invitation.token]) in mail.outbox[0].body
     assert AuditEvent.objects.filter(action="user_invited", firm=firm).exists()
+
+
+@pytest.mark.django_db
+def test_invitation_is_created_when_email_delivery_fails(client, monkeypatch):
+    firm, admin = _firm_with_user("admin@email-fail.test", "Firm Administrator")
+    role = firm.roles.get(name="Advocate")
+
+    def fail_delivery(*args, **kwargs):
+        raise RuntimeError("SMTP unavailable")
+
+    monkeypatch.setattr("firms.views.send_user_invitation_email", fail_delivery)
+
+    client.force_login(admin)
+    response = client.post(
+        reverse("invite_user"),
+        {"email": "advocate@email-fail.test", "role": role.id},
+    )
+
+    assert response.status_code == 302
+    assert UserInvitation.objects.filter(email="advocate@email-fail.test").exists()
 
 
 @pytest.mark.django_db

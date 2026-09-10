@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<body style="margin:0;padding:24px;background:#f5f7f8;font-family:Arial,Helvetica,sans-serif;color:#17202a;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:620px;margin:0 auto;background:#ffffff;border:1px solid #d8dee4;border-radius:8px;">
+    <tr>
+      <td style="padding:24px;">
+        <h1 style="margin:0 0 12px;font-size:22px;">wakiliDesk Invitation</h1>
+        <p style="margin:0 0 16px;">You have been invited to join <strong>{{ firm.display_name }}</strong> as <strong>{{ invitation.role.name }}</strong>.</p>
+        <p style="margin:0 0 22px;">Use the button below to accept the invitation and set up your account.</p>
+        <p style="margin:0 0 22px;">
+          <a href="{{ accept_url }}" style="display:inline-block;padding:12px 16px;border-radius:6px;background:#0f766e;color:#ffffff;font-weight:700;text-decoration:none;">Accept invitation</a>
+        </p>
+        <p style="margin:0 0 8px;color:#667085;font-size:14px;">This invitation expires in 14 days.</p>
+        <p style="margin:0;color:#667085;font-size:14px;">If the button does not work, copy this link into your browser:<br>{{ accept_url }}</p>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

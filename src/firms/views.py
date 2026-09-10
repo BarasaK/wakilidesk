@@ -10,6 +10,7 @@ from clients.models import Client
 from diary.models import DiaryEvent
 from diary.services import diary_events_visible_to_user
 from documents.services import documents_visible_to_user
+from firms.emails import send_user_invitation_email
 from firms.forms import FirmOnboardingForm, FirmProfileForm, RoleForm, UserInvitationForm
 from firms.models import Firm, FirmMembership, Role, UserInvitation
 from firms.services import (
@@ -201,7 +202,14 @@ def invite_user(request):
                 object_id=invitation.id,
                 metadata={"email": invitation.email, "role": invitation.role.name},
             )
-            messages.success(request, "Invitation created.")
+            try:
+                send_user_invitation_email(invitation=invitation, request=request)
+                messages.success(request, "Invitation created and emailed.")
+            except Exception:
+                messages.warning(
+                    request,
+                    "Invitation created, but email delivery failed. Use the accept URL below.",
+                )
             return redirect("admin_users")
     else:
         form = UserInvitationForm(firm=firm)

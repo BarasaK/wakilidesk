@@ -1,4 +1,6 @@
 import pytest
+from django.core import mail
+from django.test import override_settings
 from django.urls import reverse
 
 from accounts.models import User
@@ -15,7 +17,9 @@ def test_login_page_loads(client):
     assert b"common/wakilidesk-logo.png" in response.content
     assert b"Sign in" in response.content
     assert b"Open user documentation" in response.content
+    assert b"Forgot password?" in response.content
     assert reverse("documentation").encode() in response.content
+    assert reverse("password_reset").encode() in response.content
     assert b"development accounts from the README" not in response.content
 
 
@@ -38,3 +42,21 @@ def test_seeded_style_user_can_login(client):
 
     assert response.status_code == 302
     assert response["Location"] == reverse("dashboard")
+
+
+@pytest.mark.django_db
+@override_settings(
+    EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+    DEFAULT_FROM_EMAIL="noreply@wakilidesk.com",
+)
+def test_password_reset_sends_email_to_active_user(client):
+    User.objects.create_user("admin@wakilidesk.com", "ChangeMe123!")
+
+    response = client.post(reverse("password_reset"), {"email": "admin@wakilidesk.com"})
+
+    assert response.status_code == 302
+    assert response["Location"] == reverse("password_reset_done")
+    assert len(mail.outbox) == 1
+    assert mail.outbox[0].to == ["admin@wakilidesk.com"]
+    assert "Reset your wakiliDesk password" in mail.outbox[0].subject
+    assert "/accounts/reset/" in mail.outbox[0].body
