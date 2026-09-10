@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.urls import reverse
 from django.shortcuts import get_object_or_404, redirect, render
 
 from documents.forms import (
@@ -54,6 +55,7 @@ def document_upload(request):
     if firm is None:
         return redirect("firm_onboarding")
     require_firm_permission(request.user, firm, "upload_document")
+    navigation = _document_upload_navigation(request)
     if request.method == "POST":
         form = DocumentUploadForm(request.POST, request.FILES, firm=firm, user=request.user)
         if form.is_valid():
@@ -66,6 +68,8 @@ def document_upload(request):
                     request=request,
                 )
                 messages.success(request, "Document uploaded.")
+                if navigation["return_to"] == "matter":
+                    return redirect("matter_detail", matter_id=document.matter_id)
                 return redirect("document_detail", document_id=document.id)
             except ValueError as exc:
                 form.add_error(None, str(exc))
@@ -73,9 +77,13 @@ def document_upload(request):
         form = DocumentUploadForm(
             firm=firm,
             user=request.user,
-            initial={"matter": request.GET.get("matter")} if request.GET.get("matter") else None,
+            initial={"matter": navigation["matter_id"]} if navigation["matter_id"] else None,
         )
-    return render(request, "documents/upload.html", {"firm": firm, "form": form})
+    return render(
+        request,
+        "documents/upload.html",
+        {"firm": firm, "form": form, **navigation},
+    )
 
 
 @login_required
@@ -272,3 +280,21 @@ def category_edit(request, category_id):
 
 def _require_current_firm(request):
     return request.current_firm
+
+
+def _document_upload_navigation(request):
+    matter_id = request.POST.get("matter") or request.GET.get("matter")
+    return_to = request.POST.get("return_to") or request.GET.get("return_to")
+    if return_to == "matter" and matter_id:
+        return {
+            "return_to": "matter",
+            "matter_id": matter_id,
+            "back_url": reverse("matter_detail", args=[matter_id]),
+            "back_label": "Back to matter",
+        }
+    return {
+        "return_to": "documents",
+        "matter_id": matter_id,
+        "back_url": reverse("document_list"),
+        "back_label": "Back to documents",
+    }

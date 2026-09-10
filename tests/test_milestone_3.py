@@ -171,7 +171,7 @@ def test_matter_detail_lists_linked_documents(client):
     assert b"<h3>Documents</h3>" in response.content
     assert document.title.encode() in response.content
     assert reverse("document_detail", args=[document.id]).encode() in response.content
-    assert f'{reverse("document_upload")}?matter={matter.id}'.encode() in response.content
+    assert f'{reverse("document_upload")}?matter={matter.id}&return_to=matter'.encode() in response.content
 
 
 @pytest.mark.django_db
@@ -179,10 +179,37 @@ def test_document_upload_from_matter_prefills_matter(client):
     _firm, admin, matter, _category = _matter_setup("admin@prefill.test", "Firm Administrator")
 
     client.force_login(admin)
-    response = client.get(reverse("document_upload"), {"matter": matter.id})
+    response = client.get(reverse("document_upload"), {"matter": matter.id, "return_to": "matter"})
 
     assert response.status_code == 200
     assert f'<option value="{matter.id}" selected>'.encode() in response.content
+    assert b'Back to matter' in response.content
+    assert f'value="matter"'.encode() in response.content
+
+
+@pytest.mark.django_db
+def test_document_upload_from_matter_returns_to_matter_detail(client):
+    _firm, admin, matter, category = _matter_setup("admin@return.test", "Firm Administrator")
+
+    client.force_login(admin)
+    response = client.post(
+        reverse("document_upload"),
+        {
+            "matter": matter.id,
+            "return_to": "matter",
+            "title": "Matter Upload",
+            "document_type": category.id,
+            "document_date": "2026-08-31",
+            "reference_number": "REF-RETURN",
+            "description": "Return to originating matter.",
+            "source": "INTERNAL_UPLOAD",
+            "confidentiality_level": "STANDARD",
+            "file": SimpleUploadedFile("return.txt", b"content", content_type="text/plain"),
+        },
+    )
+
+    assert response.status_code == 302
+    assert response["Location"] == reverse("matter_detail", args=[matter.id])
 
 
 @pytest.mark.django_db
