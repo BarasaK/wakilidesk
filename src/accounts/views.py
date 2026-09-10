@@ -1,7 +1,11 @@
 from __future__ import annotations
 
+from urllib.parse import urlparse
+
+from django.conf import settings
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.views import PasswordResetView
 from django.core.signing import BadSignature, SignatureExpired, TimestampSigner
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -10,6 +14,27 @@ from accounts.forms import InvitationAcceptForm, SignupForm
 from accounts.models import User
 from audit.services import record_audit_event
 from firms.models import FirmMembership, UserInvitation
+
+
+class PublicPasswordResetView(PasswordResetView):
+    def form_valid(self, form):
+        opts = {
+            "use_https": self.request.is_secure(),
+            "token_generator": self.token_generator,
+            "from_email": self.from_email,
+            "email_template_name": self.email_template_name,
+            "subject_template_name": self.subject_template_name,
+            "request": self.request,
+            "html_email_template_name": self.html_email_template_name,
+            "extra_email_context": self.extra_email_context,
+        }
+        public_base_url = settings.PUBLIC_BASE_URL
+        if public_base_url:
+            parsed = urlparse(public_base_url)
+            opts["domain_override"] = parsed.netloc
+            opts["use_https"] = parsed.scheme == "https"
+        form.save(**opts)
+        return super(PasswordResetView, self).form_valid(form)
 
 
 def signup(request):

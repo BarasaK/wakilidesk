@@ -74,6 +74,7 @@ DJANGO_DEBUG=false
 DJANGO_SECURE_PROXY_SSL_HEADER=true
 ALLOWED_HOSTS=staging.wakilidesk.com,wakilidesk.com,184.174.32.103,localhost,127.0.0.1
 CSRF_TRUSTED_ORIGINS=https://staging.wakilidesk.com,https://wakilidesk.com
+PUBLIC_BASE_URL=https://staging.wakilidesk.com
 POSTGRES_PASSWORD=<strong database password>
 WAKILIDESK_HOST_PORT=8085
 WAKILIDESK_HOST_BIND=127.0.0.1
@@ -173,6 +174,18 @@ DEFAULT_FROM_EMAIL=noreply@wakilidesk.com
 SERVER_EMAIL=noreply@wakilidesk.com
 ```
 
+Set the public base URL so password reset and invitation emails use the public domain instead of the internal proxy address:
+
+```text
+PUBLIC_BASE_URL=https://staging.wakilidesk.com
+```
+
+When production moves from staging to the root/app hostname, update it, for example:
+
+```text
+PUBLIC_BASE_URL=https://wakilidesk.com
+```
+
 Confirm SMTP from the VPS after updating `.env.prod`:
 
 ```bash
@@ -186,6 +199,18 @@ Expected output:
 ```
 
 With SMTP enabled, firm invitations are emailed automatically to the invited address and password reset emails are sent from the login screen.
+
+If messages arrive in spam, confirm Cloudflare has the mail DNS records as DNS-only:
+
+```text
+MX @ -> mail.wakilidesk.com
+A mail -> 184.174.32.103
+TXT @ -> SPF record authorizing the VPS
+TXT default._domainkey -> DKIM record from Plesk
+TXT _dmarc -> DMARC policy
+```
+
+For early testing, use `p=none` in DMARC, then tighten later after delivery is stable.
 
 Do not seed production pilot data unless this is intentionally a demo/staging environment.
 
