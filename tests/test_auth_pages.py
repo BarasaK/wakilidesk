@@ -48,6 +48,7 @@ def test_seeded_style_user_can_login(client):
 @override_settings(
     EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
     DEFAULT_FROM_EMAIL="noreply@wakilidesk.com",
+    PUBLIC_BASE_URL="https://staging.wakilidesk.com",
 )
 def test_password_reset_sends_email_to_active_user(client):
     User.objects.create_user("admin@wakilidesk.com", "ChangeMe123!")
@@ -59,4 +60,5 @@ def test_password_reset_sends_email_to_active_user(client):
     assert len(mail.outbox) == 1
     assert mail.outbox[0].to == ["admin@wakilidesk.com"]
     assert "Reset your wakiliDesk password" in mail.outbox[0].subject
-    assert "/accounts/reset/" in mail.outbox[0].body
+    assert "https://staging.wakilidesk.com/accounts/reset/" in mail.outbox[0].body
+    assert "127.0.0.1" not in mail.outbox[0].body

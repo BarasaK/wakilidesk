@@ -5,12 +5,14 @@ from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.urls import reverse
 
+from common.urls import public_absolute_url
 from firms.models import UserInvitation
 
 
 def send_user_invitation_email(*, invitation: UserInvitation, request) -> None:
-    accept_url = request.build_absolute_uri(
-        reverse("accept_invitation", args=[invitation.token])
+    accept_url = public_absolute_url(
+        reverse("accept_invitation", args=[invitation.token]),
+        request=request,
     )
     context = {
         "accept_url": accept_url,

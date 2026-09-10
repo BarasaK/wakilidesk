@@ -138,6 +138,7 @@ def test_firm_profile_renders_live_theme_preview(client):
 @override_settings(
     EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
     DEFAULT_FROM_EMAIL="noreply@wakilidesk.com",
+    PUBLIC_BASE_URL="https://staging.wakilidesk.com",
 )
 def test_firm_admin_can_create_invitation(client):
     firm, admin = _firm_with_user("admin@amani.test", "Firm Administrator")
@@ -156,7 +157,11 @@ def test_firm_admin_can_create_invitation(client):
     assert len(mail.outbox) == 1
     assert mail.outbox[0].to == ["advocate@amani.test"]
     assert "Invitation to join" in mail.outbox[0].subject
-    assert reverse("accept_invitation", args=[invitation.token]) in mail.outbox[0].body
+    assert (
+        f"https://staging.wakilidesk.com{reverse('accept_invitation', args=[invitation.token])}"
+        in mail.outbox[0].body
+    )
+    assert "127.0.0.1" not in mail.outbox[0].body
     assert AuditEvent.objects.filter(action="user_invited", firm=firm).exists()
 
 
