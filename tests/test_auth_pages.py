@@ -8,6 +8,16 @@ from firms.models import Firm, FirmMembership
 from firms.services import ensure_default_roles_for_firm
 
 
+def test_public_landing_page_loads_for_anonymous_user(client):
+    response = client.get(reverse("dashboard"))
+
+    assert response.status_code == 200
+    assert b"Legal workspace for Kenyan law firms" in response.content
+    assert b"Placeholder plans" in response.content
+    assert reverse("login").encode() in response.content
+    assert reverse("documentation").encode() in response.content
+
+
 @pytest.mark.django_db
 def test_login_page_loads(client):
     response = client.get(reverse("login"))
@@ -42,6 +52,26 @@ def test_seeded_style_user_can_login(client):
 
     assert response.status_code == 302
     assert response["Location"] == reverse("dashboard")
+
+
+@pytest.mark.django_db
+def test_dashboard_still_loads_for_authenticated_user(client):
+    firm = Firm.objects.create(
+        name="Amani & Co Advocates LLP",
+        display_name="Amani Advocates",
+        slug="amani-dashboard-test",
+        email="admin@amani.test",
+    )
+    role = ensure_default_roles_for_firm(firm)["Firm Administrator"]
+    user = User.objects.create_user("admin-dashboard@amaniadvocates.test", "ChangeMe123!")
+    FirmMembership.objects.create(user=user, firm=firm, role=role)
+    client.force_login(user)
+
+    response = client.get(reverse("dashboard"))
+
+    assert response.status_code == 200
+    assert b"Dashboard" in response.content
+    assert b"Legal workspace for Kenyan law firms" not in response.content
 
 
 @pytest.mark.django_db
