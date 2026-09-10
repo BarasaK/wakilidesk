@@ -78,6 +78,7 @@ PUBLIC_BASE_URL=https://staging.wakilidesk.com
 POSTGRES_PASSWORD=<strong database password>
 WAKILIDESK_HOST_PORT=8085
 WAKILIDESK_HOST_BIND=127.0.0.1
+DIARY_REMINDER_INTERVAL_SECONDS=300
 DEFAULT_FROM_EMAIL=noreply@wakilidesk.com
 ```
 
@@ -153,6 +154,14 @@ Process due diary reminders manually:
 ```bash
 docker compose --env-file .env.prod -f docker-compose.prod.yml exec web python manage.py send_diary_reminders
 ```
+
+Production compose also starts a `scheduler` container that runs the reminder command repeatedly. The interval is controlled by:
+
+```text
+DIARY_REMINDER_INTERVAL_SECONDS=300
+```
+
+The reminder sender is idempotent: reminders marked as sent are skipped on later scheduler runs.
 
 For offline or early staging tests, keep email on the console backend:
 
@@ -345,7 +354,7 @@ GitHub Actions will:
 5. Build Docker images.
 6. Run migrations.
 7. Collect static files.
-8. Restart web and worker.
+8. Restart web, worker, and scheduler.
 9. Run Django checks.
 
 ## 7. Rollback

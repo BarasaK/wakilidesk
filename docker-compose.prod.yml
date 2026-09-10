@@ -30,6 +30,20 @@ services:
       redis:
         condition: service_healthy
 
+  scheduler:
+    build: .
+    command: sh -c "while true; do python manage.py send_diary_reminders; sleep $${DIARY_REMINDER_INTERVAL_SECONDS:-300}; done"
+    restart: unless-stopped
+    env_file:
+      - ${WAKILIDESK_ENV_FILE:-.env.prod}
+    volumes:
+      - wakilidesk_media:/app/media
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
   db:
     image: postgres:16-alpine
     restart: unless-stopped

@@ -29,6 +29,7 @@ The MVP supports:
 - File checkout and check-in history.
 - Digitisation quality review records.
 - Court diary events, visual calendar, and reminder schedules.
+- Additional email recipients for diary reminder copies.
 - Tenant-scoped global search.
 - Entity reports for clients, matters, documents, physical files, and diary events.
 - CSV, Excel-compatible `.xlsx`, and PDF report exports.
@@ -738,6 +739,7 @@ Common diary fields:
 - Notes.
 - Reminder schedule.
 - Reminder channels.
+- Additional reminder emails, optional.
 
 Diary event statuses:
 
@@ -754,7 +756,8 @@ Diary event statuses:
 4. Enter the event title, type, start date and time, court, location, and assigned user.
 5. Choose reminder timing such as same day, 1 day before, 3 days before, or 7 days before.
 6. Choose reminder channels: in-app, email, or both.
-7. Save.
+7. Add optional extra email addresses if non-users should receive email reminder copies.
+8. Save.
 
 ### Use the calendar view
 
@@ -766,7 +769,7 @@ Diary event statuses:
 
 ### Reminder processing
 
-Due reminders are sent by the `send_diary_reminders` Celery task or by the management command:
+Due reminders are sent by the production scheduler, the `send_diary_reminders` Celery task, or by the management command:
 
 ```powershell
 docker compose exec web python manage.py send_diary_reminders
@@ -781,7 +784,9 @@ docker compose --env-file .env.prod -f docker-compose.prod.yml exec web python m
 
 In-app reminders create unread notifications for the assigned user. If no assigned user exists, the reminder goes to the event creator.
 
-Email reminders use Django's configured email backend. Offline and early staging environments can keep:
+Email reminders use Django's configured email backend. They go to the assigned user, or the event creator if no user is assigned. Optional additional reminder emails are copied on email reminders only.
+
+Offline and early staging environments can keep:
 
 ```text
 EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend

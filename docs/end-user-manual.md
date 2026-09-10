@@ -372,7 +372,7 @@ flowchart TD
     B --> C[Link matter if needed]
     C --> D[Enter date, time, court, and location]
     D --> E[Assign user]
-    E --> F[Choose reminders]
+    E --> F[Choose reminders and optional email copies]
     F --> G[Save]
     G --> H[Reminder appears when due]
 ```
@@ -384,11 +384,12 @@ flowchart TD
 5. Enter the date, time, court, and location.
 6. Assign the event to the responsible user.
 7. Choose reminders, such as 1 day before or 3 days before.
-8. Save.
+8. Add extra email addresses if another person should receive email reminder copies.
+9. Save.
 
 ### Use Reminders
 
-Reminders appear in **Notifications** when due. If email reminders are enabled by the firm administrator, assigned users may also receive an email.
+Reminders appear in **Notifications** when due. If email reminders are enabled by the firm administrator, assigned users may also receive an email. Extra email addresses added to the diary event receive email copies only; they do not receive in-app notifications or access to the matter.
 
 If a court date is completed, adjourned, or cancelled, open the diary event and update its status. This keeps the dashboard accurate.
 
