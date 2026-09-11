@@ -157,12 +157,38 @@ def test_firm_admin_can_create_invitation(client):
     assert len(mail.outbox) == 1
     assert mail.outbox[0].to == ["advocate@amani.test"]
     assert "Invitation to join" in mail.outbox[0].subject
-    assert (
-        f"https://staging.wakilidesk.com{reverse('accept_invitation', args=[invitation.token])}"
-        in mail.outbox[0].body
-    )
+    assert "https://staging.wakilidesk.com/accounts/invitations/" in mail.outbox[0].body
+    assert "/accept/" in mail.outbox[0].body
+    invitation_html = mail.outbox[0].alternatives[0][0]
+    assert "https://staging.wakilidesk.com/static/common/wakilidesk-logo.png" in invitation_html
+    assert 'alt="wakiliDesk"' in invitation_html
     assert "127.0.0.1" not in mail.outbox[0].body
     assert AuditEvent.objects.filter(action="user_invited", firm=firm).exists()
+
+
+@pytest.mark.django_db
+@override_settings(
+    EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+    DEFAULT_FROM_EMAIL="wakiliDesk <noreply@wakilidesk.com>",
+    PUBLIC_BASE_URL="https://staging.wakilidesk.com",
+)
+def test_invitation_email_subject_keeps_ampersand_unescaped(client):
+    firm, admin = _firm_with_user("admin@suits.test", "Firm Administrator")
+    firm.display_name = "Suits&Co."
+    firm.save(update_fields=["display_name"])
+    role = firm.roles.get(name="Advocate")
+
+    client.force_login(admin)
+    response = client.post(
+        reverse("invite_user"),
+        {"email": "advocate@suits.test", "role": role.id},
+    )
+
+    assert response.status_code == 302
+    assert mail.outbox[0].from_email == "wakiliDesk <noreply@wakilidesk.com>"
+    assert "Suits&Co." in mail.outbox[0].subject
+    assert "Suits&amp;Co." not in mail.outbox[0].subject
+    assert "Suits&Co." in mail.outbox[0].body
 
 
 @pytest.mark.django_db

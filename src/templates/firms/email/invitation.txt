@@ -1,3 +1,4 @@
+{% autoescape off %}
 Hello,
 
 You have been invited to join {{ firm.display_name }} on wakiliDesk as {{ invitation.role.name }}.
@@ -8,3 +9,4 @@ Accept the invitation using this link:
 This invitation expires in 14 days.
 
 If you were not expecting this invitation, you can ignore this email.
+{% endautoescape %}

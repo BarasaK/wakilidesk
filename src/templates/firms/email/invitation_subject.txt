@@ -1,1 +1,3 @@
+{% autoescape off %}
 Invitation to join {{ firm.display_name }} on wakiliDesk
+{% endautoescape %}
