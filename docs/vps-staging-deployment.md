@@ -79,7 +79,7 @@ POSTGRES_PASSWORD=<strong database password>
 WAKILIDESK_HOST_PORT=8085
 WAKILIDESK_HOST_BIND=127.0.0.1
 DIARY_REMINDER_INTERVAL_SECONDS=300
-DEFAULT_FROM_EMAIL=noreply@wakilidesk.com
+DEFAULT_FROM_EMAIL=wakiliDesk <noreply@wakilidesk.com>
 ```
 
 Generate a Django secret locally or on the VPS:
@@ -167,7 +167,7 @@ For offline or early staging tests, keep email on the console backend:
 
 ```text
 EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend
-DEFAULT_FROM_EMAIL=noreply@wakilidesk.com
+DEFAULT_FROM_EMAIL=wakiliDesk <noreply@wakilidesk.com>
 ```
 
 For production SMTP with the Plesk mailbox on `wakilidesk.com`, set:
@@ -179,8 +179,8 @@ EMAIL_PORT=587
 EMAIL_USER=noreply@wakilidesk.com
 EMAIL_PASSWORD=<noreply-mailbox-password>
 EMAIL_USE_TLS=true
-DEFAULT_FROM_EMAIL=noreply@wakilidesk.com
-SERVER_EMAIL=noreply@wakilidesk.com
+DEFAULT_FROM_EMAIL=wakiliDesk <noreply@wakilidesk.com>
+SERVER_EMAIL=wakiliDesk <noreply@wakilidesk.com>
 ```
 
 Set the public base URL so password reset and invitation emails use the public domain instead of the internal proxy address:

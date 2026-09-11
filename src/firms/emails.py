@@ -3,6 +3,7 @@ from __future__ import annotations
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
+from django.templatetags.static import static
 from django.urls import reverse
 
 from common.urls import public_absolute_url
@@ -14,11 +15,13 @@ def send_user_invitation_email(*, invitation: UserInvitation, request) -> None:
         reverse("accept_invitation", args=[invitation.token]),
         request=request,
     )
+    logo_url = public_absolute_url(static("common/wakilidesk-logo.png"), request=request)
     context = {
         "accept_url": accept_url,
         "firm": invitation.firm,
         "invitation": invitation,
         "invited_by": invitation.invited_by,
+        "logo_url": logo_url,
     }
     subject = render_to_string("firms/email/invitation_subject.txt", context).strip()
     text_body = render_to_string("firms/email/invitation.txt", context)
