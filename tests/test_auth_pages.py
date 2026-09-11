@@ -8,14 +8,11 @@ from firms.models import Firm, FirmMembership
 from firms.services import ensure_default_roles_for_firm
 
 
-def test_public_landing_page_loads_for_anonymous_user(client):
+def test_dashboard_redirects_anonymous_user_to_login(client):
     response = client.get(reverse("dashboard"))
 
-    assert response.status_code == 200
-    assert b"Legal workspace for Kenyan law firms" in response.content
-    assert b"Placeholder plans" in response.content
-    assert reverse("login").encode() in response.content
-    assert reverse("documentation").encode() in response.content
+    assert response.status_code == 302
+    assert response["Location"].startswith(reverse("login"))
 
 
 @pytest.mark.django_db
@@ -90,5 +87,23 @@ def test_password_reset_sends_email_to_active_user(client):
     assert len(mail.outbox) == 1
     assert mail.outbox[0].to == ["admin@wakilidesk.com"]
     assert "Reset your wakiliDesk password" in mail.outbox[0].subject
+    assert "https://staging.wakilidesk.com/accounts/reset/" in mail.outbox[0].body
+    assert "127.0.0.1" not in mail.outbox[0].body
+
+
+@pytest.mark.django_db
+@override_settings(
+    EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+    DEFAULT_FROM_EMAIL="noreply@wakilidesk.com",
+    PUBLIC_BASE_URL="",
+    CSRF_TRUSTED_ORIGINS=["https://staging.wakilidesk.com"],
+)
+def test_password_reset_uses_trusted_origin_when_public_base_url_is_missing(client):
+    User.objects.create_user("fallback@wakilidesk.com", "ChangeMe123!")
+
+    response = client.post(reverse("password_reset"), {"email": "fallback@wakilidesk.com"})
+
+    assert response.status_code == 302
+    assert len(mail.outbox) == 1
     assert "https://staging.wakilidesk.com/accounts/reset/" in mail.outbox[0].body
     assert "127.0.0.1" not in mail.outbox[0].body

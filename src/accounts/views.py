@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from urllib.parse import urlparse
 
-from django.conf import settings
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import PasswordResetView
@@ -13,6 +12,7 @@ from django.utils import timezone
 from accounts.forms import InvitationAcceptForm, SignupForm
 from accounts.models import User
 from audit.services import record_audit_event
+from common.urls import public_base_url
 from firms.models import FirmMembership, UserInvitation
 
 
@@ -28,9 +28,9 @@ class PublicPasswordResetView(PasswordResetView):
             "html_email_template_name": self.html_email_template_name,
             "extra_email_context": self.extra_email_context,
         }
-        public_base_url = settings.PUBLIC_BASE_URL
-        if public_base_url:
-            parsed = urlparse(public_base_url)
+        base_url = public_base_url()
+        if base_url:
+            parsed = urlparse(base_url)
             opts["domain_override"] = parsed.netloc
             opts["use_https"] = parsed.scheme == "https"
         form.save(**opts)

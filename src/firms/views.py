@@ -26,9 +26,8 @@ from physical_files.services import overdue_checkouts_visible_to_user, physical_
 from matters.services import matters_visible_to_user
 
 
+@login_required
 def dashboard(request):
-    if not request.user.is_authenticated:
-        return render(request, "public/landing.html")
     if request.current_firm is None:
         return redirect("firm_onboarding")
     memberships = get_active_memberships_for_user(request.user).select_related("firm", "role")
