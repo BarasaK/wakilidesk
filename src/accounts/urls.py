@@ -4,6 +4,7 @@ from accounts import views
 
 
 urlpatterns = [
+    path("login/", views.ThrottledLoginView.as_view(), name="login"),
     path("signup/", views.signup, name="signup"),
     path("password_reset/", views.PublicPasswordResetView.as_view(), name="password_reset"),
     path("invitations/<str:token>/accept/", views.accept_invitation, name="accept_invitation"),

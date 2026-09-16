@@ -1,5 +1,6 @@
 import pytest
 from django.core import mail
+from django.core.cache import cache
 from django.test import override_settings
 from django.urls import reverse
 
@@ -49,6 +50,56 @@ def test_seeded_style_user_can_login(client):
 
     assert response.status_code == 302
     assert response["Location"] == reverse("dashboard")
+
+
+@pytest.mark.django_db
+@override_settings(LOGIN_ATTEMPT_LIMIT=2, LOGIN_LOCKOUT_SECONDS=300)
+def test_login_throttles_repeated_failed_attempts(client):
+    cache.clear()
+    User.objects.create_user("blocked@example.test", "ChangeMe123!")
+
+    first_response = client.post(
+        reverse("login"),
+        {"username": "blocked@example.test", "password": "wrong-password"},
+    )
+    second_response = client.post(
+        reverse("login"),
+        {"username": "blocked@example.test", "password": "wrong-password"},
+    )
+    third_response = client.post(
+        reverse("login"),
+        {"username": "blocked@example.test", "password": "ChangeMe123!"},
+    )
+
+    assert first_response.status_code == 200
+    assert second_response.status_code == 429
+    assert third_response.status_code == 429
+    assert b"Too many failed sign-in attempts" in third_response.content
+
+
+@pytest.mark.django_db
+@override_settings(LOGIN_ATTEMPT_LIMIT=2, LOGIN_LOCKOUT_SECONDS=300)
+def test_successful_login_clears_failed_attempt_counter(client):
+    cache.clear()
+    User.objects.create_user("reset@example.test", "ChangeMe123!")
+
+    failed_response = client.post(
+        reverse("login"),
+        {"username": "reset@example.test", "password": "wrong-password"},
+    )
+    success_response = client.post(
+        reverse("login"),
+        {"username": "reset@example.test", "password": "ChangeMe123!"},
+    )
+    client.logout()
+    next_failed_response = client.post(
+        reverse("login"),
+        {"username": "reset@example.test", "password": "wrong-password"},
+    )
+
+    assert failed_response.status_code == 200
+    assert success_response.status_code == 302
+    assert next_failed_response.status_code == 200
 
 
 @pytest.mark.django_db
