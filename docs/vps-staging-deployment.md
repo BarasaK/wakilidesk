@@ -72,9 +72,17 @@ Set strong production-style values:
 DJANGO_SECRET_KEY=<long random value>
 DJANGO_DEBUG=false
 DJANGO_SECURE_PROXY_SSL_HEADER=true
+DJANGO_SECURE_SSL_REDIRECT=true
+DJANGO_SECURE_HSTS_SECONDS=31536000
+DJANGO_SECURE_HSTS_INCLUDE_SUBDOMAINS=true
+DJANGO_SECURE_HSTS_PRELOAD=false
+DJANGO_SESSION_COOKIE_SECURE=true
+DJANGO_CSRF_COOKIE_SECURE=true
 ALLOWED_HOSTS=staging.wakilidesk.com,wakilidesk.com,184.174.32.103,localhost,127.0.0.1
 CSRF_TRUSTED_ORIGINS=https://staging.wakilidesk.com,https://wakilidesk.com
 PUBLIC_BASE_URL=https://staging.wakilidesk.com
+LOGIN_ATTEMPT_LIMIT=5
+LOGIN_LOCKOUT_SECONDS=900
 POSTGRES_PASSWORD=<strong database password>
 WAKILIDESK_HOST_PORT=8085
 WAKILIDESK_HOST_BIND=127.0.0.1
@@ -117,6 +125,10 @@ Expected web binding when the staging domain is active:
 For temporary direct-IP staging access, update `.env.prod`:
 
 ```text
+DJANGO_SECURE_SSL_REDIRECT=false
+DJANGO_SECURE_HSTS_SECONDS=0
+DJANGO_SESSION_COOKIE_SECURE=false
+DJANGO_CSRF_COOKIE_SECURE=false
 WAKILIDESK_HOST_BIND=0.0.0.0
 WAKILIDESK_HOST_PORT=8085
 ALLOWED_HOSTS=184.174.32.103,localhost,127.0.0.1

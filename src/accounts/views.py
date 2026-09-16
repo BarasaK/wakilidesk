@@ -2,18 +2,53 @@ from __future__ import annotations
 
 from urllib.parse import urlparse
 
+from django.conf import settings
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.views import PasswordResetView
+from django.contrib.auth.views import LoginView, PasswordResetView
+from django.core.cache import cache
 from django.core.signing import BadSignature, SignatureExpired, TimestampSigner
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.utils.crypto import salted_hmac
 
 from accounts.forms import InvitationAcceptForm, SignupForm
 from accounts.models import User
 from audit.services import record_audit_event
 from common.urls import public_base_url
 from firms.models import FirmMembership, UserInvitation
+
+
+class ThrottledLoginView(LoginView):
+    def dispatch(self, request, *args, **kwargs):
+        self.throttle_key = _login_throttle_key(request)
+        return super().dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        cache.delete(self.throttle_key)
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        attempts = cache.get(self.throttle_key, 0) + 1
+        cache.set(self.throttle_key, attempts, settings.LOGIN_LOCKOUT_SECONDS)
+        if attempts >= settings.LOGIN_ATTEMPT_LIMIT:
+            form.add_error(
+                None,
+                "Too many failed sign-in attempts. Try again later or reset your password.",
+            )
+            return self.render_to_response(self.get_context_data(form=form), status=429)
+        return super().form_invalid(form)
+
+    def post(self, request, *args, **kwargs):
+        attempts = cache.get(self.throttle_key, 0)
+        if attempts >= settings.LOGIN_ATTEMPT_LIMIT:
+            form = self.get_form()
+            form.add_error(
+                None,
+                "Too many failed sign-in attempts. Try again later or reset your password.",
+            )
+            return self.render_to_response(self.get_context_data(form=form), status=429)
+        return super().post(request, *args, **kwargs)
 
 
 class PublicPasswordResetView(PasswordResetView):
@@ -152,3 +187,17 @@ def _invitation_from_token(token):
     except (BadSignature, SignatureExpired):
         return None
     return UserInvitation.objects.filter(id=invitation_id).select_related("firm", "role").first()
+
+
+def _login_throttle_key(request):
+    username = request.POST.get("username", "").strip().lower()
+    ip_address = _client_ip(request)
+    digest = salted_hmac("login-throttle", f"{username}:{ip_address}").hexdigest()
+    return f"login-throttle:{digest}"
+
+
+def _client_ip(request):
+    forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR", "")
+    if forwarded_for:
+        return forwarded_for.split(",")[0].strip()
+    return request.META.get("REMOTE_ADDR", "")
